@@ -51,7 +51,8 @@ if not os.path.isdir(path):
 # https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases
 # and unzip it in the root folder
 # (Recommentadion: if has CUDA then use GPU version, if not use CPU version)
-# Then uncomment this
+# then double click in "getBaseModels" in openpose/models and wait
+# Then uncomment and use the following code
 
 '''
 # Change relative path
