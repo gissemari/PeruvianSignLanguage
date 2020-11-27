@@ -35,6 +35,7 @@ args = parser.parse_args()
 ##############
 
 # Extract one frame each x frames
+# Change this value - TODO make it configurable from args
 one_frame_each = 1000
 
 # Video file names
