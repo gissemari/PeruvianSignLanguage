@@ -18,7 +18,23 @@ print("videoToFrame script - Finished!\n")
 
 #######################
 # CREATE MEDIAPIPE FOLDERS
+
 path = "./imgOut"
+if not os.path.isdir(path):
+    print("Directory %s has successfully created" % path)
+    os.mkdir(path)
+
+path = "./imgOut/mediapipe"
+if not os.path.isdir(path):
+    print("Directory %s has successfully created" % path)
+    os.mkdir(path)
+
+path = "./jsonOut"
+if not os.path.isdir(path):
+    print("Directory %s has successfully created" % path)
+    os.mkdir(path)
+
+path = "./jsonOut/mediapipe"
 if not os.path.isdir(path):
     print("Directory %s has successfully created" % path)
     os.mkdir(path)
@@ -53,23 +69,11 @@ if not os.path.isdir(path):
 # (Recommentadion: if has CUDA then use GPU version, if not use CPU version)
 # then double click in "getBaseModels" in openpose/models and wait
 # Then uncomment and use the following code
+# (REMEMBER: change the absolute path of OpenPoseDemo.exe in openposeLooper.py)
 
-'''
-# Change relative path
-os.chdir("./openpose")
 
-# use this if you want to suppress output to stdout from the subprocess
-path = 'D:/Documentos/Projects/PeruvianSignLanguaje/openpose/bin/'
-program = 'OpenPoseDemo.exe '
-direction = path + program
-
-imageDir = "--image_dir ../Data/Videos/OnlySquare/frames/germinados/ "
-models = "--face --hand "
-jsonOut = "--write_json ../jsonOut "
-options = "--display 0 "
-# netRes = "--net_resolution 320x320" or (320x176) but both have lower accuracy
-imageOut = "--write_images ../imgOut"
-arguments = direction + imageDir + models + jsonOut + options + imageOut
-
-os.system(direction + arguments)
-'''
+script_descriptor = open("./openPoseLooper.py")
+openPose_script = script_descriptor.read()
+print("\nRunning openPose models...")
+exec(openPose_script)
+print("openPose models - finished!")
