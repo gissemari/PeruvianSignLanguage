@@ -56,13 +56,18 @@ parser.add_argument('--img_input', type=str,
                     help='relative path of images input.' +
                     ' Default: ./Data/Videos/OnlySquare/frames/')
 
-parser.add_argument('--img_output', type=str, default="./imgOut/",
+parser.add_argument('--img_output', type=str, default="./imgOut/mediapipe/",
                     help='relative path of images output with landmarks.' +
-                    ' Default: ./imgOut/')
+                    ' Default: ./imgOut/mediapipe/')
 
 parser.add_argument('--pkl_output', type=str, default="./pklOut/",
                     help='relative path of scv output set of landmarks.' +
                     ' Default: ./pklOut/')
+
+parser.add_argument('--json_output', type=str, default="./jsonOut/mediapipe/",
+                    help='relative path of scv output set of landmarks.' +
+                    ' Default: ./jsonOut/mediapipe/')
+
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
 
@@ -125,7 +130,7 @@ for folder in folder_list:
     file_list = os.listdir(args.img_input + folder)
 
     # Loading
-    loading = "Loading: [          ]"
+    loading = "Loading:[          ]"
     timer = -1
 
     # Create Folders
@@ -133,6 +138,11 @@ for folder in folder_list:
     createFolder(args.pkl_output + folder + "/face")
     createFolder(args.pkl_output + folder + "/hands")
     createFolder(args.pkl_output + folder + "/pose")
+
+    createFolder(args.json_output + folder)
+    createFolder(args.json_output + folder + "/face")
+    createFolder(args.json_output + folder + "/hands")
+    createFolder(args.json_output + folder + "/pose")
 
     createFolder(args.img_output + folder)
 
@@ -236,9 +246,13 @@ for folder in folder_list:
                         'y': list_Y,
                         'z': list_Z})
 
-            df.to_pickle("%sface/%s_pickle_%d%s.pkl" %
+            df.to_pickle("%sface/%s_%d%s.pkl" %
                          (args.pkl_output + folder + '/',
                           file_name, idx, nameRes))
+
+            df.to_json("%sface/%s_%d%s.json" %
+                       (args.json_output + folder + '/',
+                        file_name, idx, nameRes))
 
         list_X.clear()
         list_Y.clear()
@@ -268,10 +282,13 @@ for folder in folder_list:
                         'y': list_Y,
                         'z': list_Z})
 
-            df.to_pickle("%shands/%s_pickle_%d%s.pkl" %
+            df.to_pickle("%shands/%s_%d%s.pkl" %
                          (args.pkl_output + folder + '/',
                           file_name, idx, nameRes))
 
+            df.to_json("%shands/%s_%d%s.json" %
+                       (args.json_output + folder + '/',
+                        file_name, idx, nameRes))
         list_X.clear()
         list_Y.clear()
         list_Z.clear()
@@ -293,6 +310,10 @@ for folder in folder_list:
             df.to_pickle("%spose/%s_%d%s.pkl" %
                          (args.pkl_output + folder + '/',
                           file_name, idx, nameRes))
+
+            df.to_json("%spose/%s_%d%s.json" %
+                       (args.json_output + folder + '/',
+                        file_name, idx, nameRes))
 
         list_X.clear()
         list_Y.clear()
