@@ -69,8 +69,8 @@ for idx, file in enumerate(file_list):
 
     if not os.path.isdir(args.img_output + folderName):
         print("Directory %s has successfully created" %
-              args.img_output + folderName)
-        os.mkdir(folderName)
+              (args.img_output + folderName))
+        os.mkdir(args.img_output + folderName)
 
     while(success):
 

@@ -7,6 +7,12 @@ Created on Thu Nov 26 10:51:46 2020
 import sys
 import os
 
+path = "./Data/Videos/OnlySquare/frames"
+if not os.path.isdir(path):
+    print("Directory %s has successfully created" % path)
+    os.mkdir(path)
+
+
 #######################
 # FROM VIDEO TO FRAMES
 script_descriptor = open("./1.Preprocessing/Video/videoToFrames.py")
