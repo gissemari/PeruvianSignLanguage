@@ -4,6 +4,8 @@ Created on Sun Nov  1 20:46:15 2020
 
 @author: Joe
 
+Updated on 29 Dic 2020 by Gissella Bejarano
+
 The structure of this three used model are very similar
 So I decide to separe their similar parts by section defined by
 
@@ -26,15 +28,7 @@ import mediapipe as mp
 import time
 import numpy as np
 import pickle as pkl
-#########################
-# UTIL METODS
-##############
-
-
-def createFolder(path):
-    if not os.path.isdir(path):
-        print("Directory %s has successfully created" % path)
-        os.mkdir(path)
+import utils.video as uv #for create folder
 
 
 #########################
@@ -46,34 +40,28 @@ parser = argparse.ArgumentParser(description='Mediapipe models ' +
                                  '(FaceMesh, Hands, Pose)')
 
 # Models
-parser.add_argument('--face_mesh', action="store_true",
-                    help='Use face mesh model')
+parser.add_argument('--face_mesh', action="store_true",help='Use face mesh model')
 parser.add_argument('--hands', action="store_true", help='Use hands model')
 parser.add_argument('--pose', action="store_true", help='Use pose model')
+parser.add_argument('--holistic', action="store_true", help='Use holistic model: face, hands and pose')
 
 # File paths
-parser.add_argument('--img_input', type=str,
-                    default="./Data/Videos/OnlySquare/frames/",
-                    help='relative path of images input.' +
-                    ' Default: ./Data/Videos/OnlySquare/frames/')
+parser.add_argument('--inputPath', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Videos/Segmented_gestures/",
+                    help='relative path of images input.' + ' Default: ./Data/Videos/OnlySquare/frames/')
 
-parser.add_argument('--img_output', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Videos_Keypoints/Segmented_gestures",
-                    help='relative path of images output with landmarks.' +
-                    ' Default: ./imgOut/mediapipe/')
+parser.add_argument('--img_output', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Keypoints/png/Segmented_gestures",
+                    help='relative path of images output with landmarks.' + ' Default: ./imgOut/mediapipe/')
 
-#parser.add_argument('--pkl_output', type=str, default="./pklOut/", help='relative path of scv output set of landmarks.' + ' Default: ./pklOut/')
+parser.add_argument('--json_output', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Keypoints/json/Segmented_gestures",
+                    help='relative path of scv output set of landmarks.' +' Default: ./jsonOut/mediapipe/')
 
-parser.add_argument('--json_output', type=str, default="./jsonOut/mediapipe/",
-                    help='relative path of scv output set of landmarks.' +
-                    ' Default: ./jsonOut/mediapipe/')
-
-parser.add_argument('--pkl_output', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Keypoints/Segmented_gestures",
-                    help='relative path of csv output set of landmarks.' +
-                    ' Default: ./jsonOut/mediapipe/')
+parser.add_argument('--pkl_output', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Keypoints/pkl/Segmented_gestures",
+                    help='relative path of csv output set of landmarks.' + ' Default: ./jsonOut/mediapipe/')
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
 
 args = parser.parse_args()
+
 
 #########################
 # MODELS(Mediapipe) - Notice that this given orden is important
@@ -82,6 +70,7 @@ args = parser.parse_args()
 #  1-FaceMesh
 #  2-Hands
 #  3-Pose
+#  4-Holistic
 ##############
 if(args.face_mesh):
     mp_face_mesh = mp.solutions.face_mesh
@@ -89,9 +78,9 @@ if(args.hands):
     mp_hands = mp.solutions.hands
 if(args.pose):
     mp_pose = mp.solutions.pose
+if(args.holistic):
+    mp_holistic = mp.solutions.holistic
 
-mp_drawing = mp.solutions.drawing_utils
-mp_holistic = mp.solutions.holistic
 
 #########################
 # MODELS PARAMETERS
@@ -114,7 +103,9 @@ if(args.pose):
     pose = mp_pose.Pose(static_image_mode=True,
                         min_detection_confidence=0.5)
 
-holistic = mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+if (args.holistic):
+    holistic = mp_holistic.Holistic(min_detection_confidence=0.5, 
+                                    min_tracking_confidence=0.5)
 
 
 #########################
@@ -138,213 +129,157 @@ drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 ###
 
 # Folder list of videos's frames
-if os.path.isdir(args.img_input):
-    folder_list = os.listdir(args.img_input)
-    print("Is Directorys")
+if os.path.isdir(args.inputPath):
+    folder_list = [ file for file in os.listdir(args.inputPath) if os.path.isdir(args.inputPath+file)]
+    print("Is Directory")
 else:
-    folder_list = [args.img_input]
+    folder_list = [args.inputPath]
 
-for videoFile in folder_list:
+print(folder_list)
+# Iterate over the folders of each video in Video/Segmented_gesture
+for videoFolder in folder_list:
+    videoFolderName = args.inputPath+videoFolder
+    uv.createFolder(args.pkl_output+  '/'+videoFolder)
+    uv.createFolder(args.img_output+  '/'+videoFolder)
+    uv.createFolder(args.json_output+  '/'+videoFolder)
 
-    # Loading
-    loading = "Loading:[          ]"
-    timer = -1
-
-    list_seq = []
-
-
-    # Create Folders
-    '''
-    createFolder(args.pkl_output + folder)
-    createFolder(args.pkl_output + folder + "/face")
-    createFolder(args.pkl_output + folder + "/hands")
-    createFolder(args.pkl_output + folder + "/pose")
-
-    createFolder(args.json_output + folder)
-    createFolder(args.json_output + folder + "/face")
-    createFolder(args.json_output + folder + "/hands")
-    createFolder(args.json_output + folder + "/pose")
-
-    createFolder(args.img_output + folder)
-    '''
-
-    # dictionary counter for models results.
-    #
-    # Face Mesh  -> F
-    # Hands      -> H  +  (number of hands detected)
-    # Pose       -> P
-
-    counter = dict({('100', '_F'): 0,
-                    ('010', '_H1'): 0,
-                    ('020', '_H2'): 0,
-                    ('001', '_P'): 0,
-                    ('110', '_FH1'): 0,
-                    ('120', '_FH2'): 0,
-                    ('101', '_FP'): 0,
-                    ('011', '_H1P'): 0,
-                    ('021', '_H2P'): 0,
-                    ('111', '_FH1P'): 0,
-                    ('121', '_FH2P'): 0,
-                    ('000', '_'): 0,  # No model used
-                    })
-
-    videoFileName = args.img_input+'/'+videoFile
-    videoFolderName = args.img_input.split('/')[-1]
-    pcklFileName = args.pkl_output+  '/'+videoFolderName +'/'+videoFile[:-4]+'.pkl'
-    videoKeypointName = args.img_output+  '/'+videoFolderName +'/'+videoFile[:-4]+'.png'
-    os.mkdir(args.img_output+  '/'+videoFolderName +'/'+videoFile[:-4])
-
-    print("\nReading %s frames\n" % videoFileName)
+    videoFolderList = [ file for file in os.listdir(videoFolderName)]
 
 
+    for videoFile in videoFolderList:
+        list_seq = []     
+
+        videoSegFolderName = videoFolderName+'/'+videoFile[:-4]
+        #videoFolderName = args.inputPath.split('/')[-1]
+        pcklFileName = args.pkl_output+  '/'+videoFolder +'/'+videoFile[:-4]+'.pkl'
+        # Creating folder for each gesture in img:
+        imgFolder = args.img_output+  '/'+videoFolder +'/'+videoFile[:-4]
+        uv.createFolder(imgFolder)
+        jsonName = args.json_output+  '/'+videoFolder +'/'+videoFile[:-4]+'.json'
+        
+
+        # Create a VideoCapture object
+        cap = cv2.VideoCapture(videoFolderName+'/'+videoFile)
+
+        # Check if camera opened successfully
+        if (cap.isOpened() == False):
+            print("Unable to read camera feed", videoSegFolderName)
 
 
-    # Create a VideoCapture object
-    cap = cv2.VideoCapture(videoFileName)
+        idx =0
+        ret, frame = cap.read()
+        # While a frame was read
+        while ret == True:
+            # temporal variables
+            list_X = []
+            list_Y = []
+            #list_Z = []
 
-    # Check if camera opened successfully
-    if (cap.isOpened() == False):
-        print("Unable to read camera feed", videoFileName)
+            # Convert the BGR image to RGB before processing.
+            imageBGR = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+            # ###### IMAGE - LANDMARK ANOTATION SECTION #######
 
-    idx =0
-    ret, frame = cap.read()
-    # While a frame was read
-    while ret == True:
+            # Draw annotations on the image
+            annotated_image = frame.copy()
+            annotated_image.flags.writeable = True
 
+            # Process
+            if(args.face_mesh):
+                faceResults = face_mesh.process(imageBGR)
 
-        # Convert the BGR image to RGB before processing.
-        imageBGR = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                for data_point in faceResults.multi_face_landmarks[0].landmark:
+                    list_X.append(data_point.x)
+                    list_Y.append(data_point.y)
+                    #list_Z.append(data_point.z)
 
-        # Process
-        if(args.face_mesh):
-            faceResults = face_mesh.process(imageBGR)
-
-        if(args.hands):
-            handsResults = hands.process(imageBGR)
-
-        if(args.pose):
-            poseResults = pose.process(imageBGR)
-
-        if(True):
-            holisResults = holistic.process(imageBGR)
-
-        # ###### CHECK MODELS RESULTS SECTION #######
-
-        # nameRes will be use to help us recognise which model have results
-        # for each model result, a letter that represent that model
-        # will be added
-        #
-        # Face Mesh  -> F
-        # Hands      -> H  +  number of hands detected
-        # Pose       -> P
-
-        nameRes = '_'
-        dictIndex = ''
-
-        #print(len(holisResults.pose_landmarks.landmark), len(holisResults.left_hand_landmarks.landmark)
-        #        , len(holisResults.right_hand_landmarks.landmark), len(holisResults.face_landmarks.landmark))
+                mp_drawing.draw_landmarks(
+                            image=annotated_image,
+                            landmark_list=faceResults.multi_face_landmarks[0],
+                            connections=mp_face_mesh.FACE_CONNECTIONS,
+                            landmark_drawing_spec=drawing_spec,
+                            connection_drawing_spec=drawing_spec)
 
 
-        # temporal variables
-        list_X = []
-        list_Y = []
-        list_Z = []
+            if(args.hands):
+                handsResults = hands.process(imageBGR)
 
+                            # For each hand
+                for hand_landmarks in handsResults.multi_hand_landmarks:
+                    for data_point in hand_landmarks.landmark:
+                        list_X.append(data_point.x)
+                        list_Y.append(data_point.y)
+                        #list_Z.append(data_point.z)
 
-        # Pose_landmark might already be enough
-        for data_point in holisResults.pose_landmarks.landmark:
-            list_X.append(data_point.x)
-            list_Y.append(data_point.y)
+                for hand_landmarks in handsResults.multi_hand_landmarks:
+                    # Add landmarks into the image
+                    mp_drawing.draw_landmarks(
+                                    image=annotated_image,
+                                    landmark_list=hand_landmarks,
+                                    connections=mp_hands.HAND_CONNECTIONS)
 
-        '''
-        for data_point in holisResults.left_hand_landmarks.landmark:
-            list_X.append(data_point.landmark.x)
-            list_Y.append(data_point.landmark.y)
+            if(args.pose):
+                poseResults = pose.process(imageBGR)
 
-        for data_point in holisResults.right_hand_landmarks.landmark:
-            list_X.append(data_point.landmark.x)
-            list_Y.append(data_point.landmark.y)
+                for hand_landmarks in poseResults.pose_landmarks.landmark:
 
+                    list_X.append(data_point.x)
+                    list_Y.append(data_point.y)
+                    #list_Z.append(data_point.z)
 
-        for data_point in holisResults.face_landmarks.landmark:
-            list_X.append(data_point.landmark.x)
-            list_Y.append(data_point.landmark.y)
-        '''
-
-        list_seq.append([list_X,list_Y])
-
-
-        # ###### IMAGE - LANDMARK ANOTATION SECTION #######
-
-        # Draw annotations on the image
-        annotated_image = frame.copy()
-        annotated_image.flags.writeable = True
-
-        # FACE MESH landmarks
-        if(args.face_mesh and args.pkl_output and faceResults.multi_face_landmarks):
-
-            # Add landmarks into the image
-            mp_drawing.draw_landmarks(
-                        image=annotated_image,
-                        landmark_list=faceResults.multi_face_landmarks[0],
-                        connections=mp_face_mesh.FACE_CONNECTIONS,
-                        landmark_drawing_spec=drawing_spec,
-                        connection_drawing_spec=drawing_spec)
-
-        # HANDS landmarks
-        if(args.hands and args.pkl_output and handsResults.multi_hand_landmarks):
-
-            # In case the model detect two hands
-            for hand_landmarks in handsResults.multi_hand_landmarks:
                 # Add landmarks into the image
                 mp_drawing.draw_landmarks(
                                 image=annotated_image,
-                                landmark_list=hand_landmarks,
-                                connections=mp_hands.HAND_CONNECTIONS)
+                                landmark_list=poseResults.pose_landmarks,
+                                connections=mp_pose.POSE_CONNECTIONS)
+            if(args.holistic):
+                holisResults = holistic.process(imageBGR)
+                # Pose_landmark might already be enough
+                # for data_point in faceResults.landmarkS:
+                #     list_X.append(data_point.landmark.x)
+                #     list_Y.append(data_point.landmark.y)
 
-        # POSE landmarks
-        if(args.pose and args.img_output and poseResults.pose_landmarks):
+                # for data_point in holisResults.left_hand_landmarks.landmark:
+                #     list_X.append(data_point.landmark.x)
+                #     list_Y.append(data_point.landmark.y)
 
-            # Add landmarks into the image
-            mp_drawing.draw_landmarks(
-                            image=annotated_image,
-                            landmark_list=poseResults.pose_landmarks,
-                            connections=mp_pose.POSE_CONNECTIONS)
+                # for data_point in holisResults.right_hand_landmarks.landmark:
+                #     list_X.append(data_point.landmark.x)
+                #     list_Y.append(data_point.landmark.y)
 
-        #mp_drawing.draw_landmarks(annotated_image, holisResults.face_landmarks, mp_holistic.FACE_CONNECTIONS)
-        #mp_drawing.draw_landmarks(annotated_image, holisResults.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-        #mp_drawing.draw_landmarks(annotated_image, holisResults.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-        mp_drawing.draw_landmarks(annotated_image, holisResults.pose_landmarks, mp_holistic.POSE_CONNECTIONS)
+                for data_point in holisResults.pose_landmarks.landmark:
+                    list_X.append(data_point.x)
+                    list_Y.append(data_point.y)
 
-
-        print(videoKeypointName)
-
-        cv2.imwrite("%s.png" % (args.img_output+  '/'+videoFolderName +'/'+videoFile[:-4]+'/'+str(idx)), annotated_image)
-
-        # Print time for each image
-        if(args.verbose):
-            print(file, time.time()-start_time, " seconds")
-
-
-        ret, frame = cap.read()
-        idx+=1
+                #mp_drawing.draw_landmarks(annotated_image, holisResults.face_landmarks, mp_holistic.FACE_CONNECTIONS)
+                #mp_drawing.draw_landmarks(annotated_image, holisResults.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+                #mp_drawing.draw_landmarks(annotated_image, holisResults.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+                mp_drawing.draw_landmarks(annotated_image, holisResults.pose_landmarks, mp_holistic.POSE_CONNECTIONS)
 
 
-    new3D = np.asarray(list_seq).reshape((-1,33*2))
-    print(new3D.shape)
-    with open(pcklFileName, 'wb') as pickle_file:
-        pkl.dump(new3D, pickle_file)
+            list_seq.append([list_X,list_Y])
 
-    #########################
-    # PRINT FOLDER SUMMARY
-    ##############
+            cv2.imwrite("%s.png" % (imgFolder+'/'+str(idx)), annotated_image)
 
-print(loading+" Complete!")
-print("\nSummary:  (total: %d)" % len(folder_list))
-for index, name in counter:
-    print(counter[(index, name)], " <-- ", name)
-print()
+            # Print time for each image
+            if(args.verbose):
+                print(file, time.time()-start_time, " seconds")
+
+            ret, frame = cap.read()
+            idx+=1
+
+
+        new3D = np.asarray(list_seq).reshape((-1,33*2))
+        print(videoFolder,videoFile, new3D.shape)
+
+        # Save JSON
+        df = pd.DataFrame({'seq': list_seq})
+        df.to_json(jsonName)
+
+        # Save Pickle
+        with open(pcklFileName, 'wb') as pickle_file:
+            pkl.dump(new3D, pickle_file)
+
 
 #########################
 # CLOSE MODELS

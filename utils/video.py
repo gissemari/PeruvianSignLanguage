@@ -1,4 +1,13 @@
 import cv2
+import os
+
+def createFolder(path):
+    if not os.path.isdir(path):
+        print("Directory %s has successfully been created" % path)
+        os.mkdir(path)
+        return 1
+    return 0
+
 
 def getNumFrames(cap):
 	# Read number of frames and version

@@ -2,14 +2,15 @@ import cv2
 import numpy as np
 import argparse
 import utils.video as uv
+from os import path
 
 from os import listdir
 from os.path import isfile, join, exists
 
 parser = argparse.ArgumentParser(description='The Embedded Topic Model')
-parser.add_argument('--rawVideoPath', type=str, default='./../../Data/RawVideo/', help='Path where per-line files are located')
+parser.add_argument('--rawVideoPath', type=str, default='./../../Data/Videos/RawVideo/', help='Path where per-line files are located')
 parser.add_argument('--inputName', type=str, default='', help='Input File Name')
-parser.add_argument('--outputVideoPath', type=str, default='./../../Data/OnlySquare/', help='Path where per-line files are located')
+parser.add_argument('--outputVideoPath', type=str, default='./../../Data/Videos/OnlySquare/', help='Path where per-line files are located')
 
 args = parser.parse_args()
 
@@ -19,6 +20,7 @@ outputVideoPath = args.outputVideoPath
 
 
 # Create a VideoCapture object
+
 cap = cv2.VideoCapture(rawVideoPath+inputName+'.mp4')
 
 # Check if camera opened successfully
@@ -38,8 +40,8 @@ fps = uv.getNumFrames(cap)
 videoWidth = 220
 videoHeight = 220
 
-fcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
-out = cv2.VideoWriter(outputVideoPath+inputName+'_result2.avi', fcc, fps, (videoWidth, videoHeight))
+fcc = cv2.VideoWriter_fourcc(*'MP4V')#'M', 'J', 'P', 'G'
+out = cv2.VideoWriter(outputVideoPath+inputName+'.mp4', fcc, fps, (videoWidth, videoHeight))
 # 29 -> 29:37 de 28:40
 # 29.97 -> 21.06 de 28:40
 
