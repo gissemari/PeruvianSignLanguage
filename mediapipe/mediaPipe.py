@@ -146,32 +146,50 @@ for folder in folder_list:
 
     createFolder(args.img_output + folder)
 
-    # dictionary counter for models results.
+    # dictionary counter for models result patterns
     #
-    # Face Mesh  -> F
-    # Hands      -> H  +  (number of hands detected)
-    # Pose       -> P
+    # The key is a pattern where each char corresponds to
+    # the number of results that have been generated for each model.
+    #
+    # First element  => Face Mesh  -> F
+    # Second element => Hands      -> H  +  (number of hands detected)
+    # Third element  => Pose       -> P
+    #
+    # The value is an array where the first element shows the number of frames
+    # that corresponds with each pattern and the second element shows the
+    # meaning of its key pattern
 
-    counter = dict({('100', '_F'): 0,
-                    ('010', '_H1'): 0,
-                    ('020', '_H2'): 0,
-                    ('001', '_P'): 0,
-                    ('110', '_FH1'): 0,
-                    ('120', '_FH2'): 0,
-                    ('101', '_FP'): 0,
-                    ('011', '_H1P'): 0,
-                    ('021', '_H2P'): 0,
-                    ('111', '_FH1P'): 0,
-                    ('121', '_FH2P'): 0,
-                    ('000', '_'): 0,  # No model used
+    counter = dict({'100': [0, 'F'],
+                    '010': [0, 'H1'],
+                    '020': [0, 'H2'],
+                    '001': [0, 'P'],
+                    '110': [0, 'FH1'],
+                    '120': [0, 'FH2'],
+                    '101': [0, 'FP'],
+                    '011': [0, 'H1P'],
+                    '021': [0, 'H2P'],
+                    '111': [0, 'FH1P'],
+                    '121': [0, 'FH2P'],
+                    '000': [0, '_'],  # No model results
                     })
 
     print("\nReading %s frames" % folder)
+
+    fileNameList = []
+    modelsDetectedList = []
 
     # For each image in the folder
     for idx, file in enumerate(file_list):
 
         start_time = time.time()
+
+        # Loading Bar
+        part = int(idx*10/len(file_list))
+        if(timer != part):
+            print(loading, "%d/%d" % (idx, len(file_list)))
+            for n in range(part - timer):
+                loading = loading.replace(" ", "~", 1)
+            timer = part
 
         file_ext = os.path.splitext(file)[1]
         file_name = os.path.splitext(file)[0]
@@ -196,35 +214,36 @@ for folder in folder_list:
 
         # ###### CHECK MODELS RESULTS SECTION #######
 
-        # nameRes will be use to help us recognise which model have results
-        # for each model result, a letter that represent that model
+        # modelsDetected will be use to help us recognise which model have
+        # results for each model result, a letter that represent that model
         # will be added
         #
-        # Face Mesh  -> F
-        # Hands      -> H  +  number of hands detected
-        # Pose       -> P
+        # First element  => Face Mesh  -> F
+        # Second element => Hands      -> H  +  (number of hands detected)
+        # Third element  => Pose       -> P
 
-        nameRes = '_'
+        modelsDetected = [0, 0, 0]
         dictIndex = ''
 
         # FACE results
         if(args.face_mesh and faceResults.multi_face_landmarks):
-            nameRes += 'F'
+            modelsDetected[0] = 1
 
         # HANDS results
         if(args.hands and handsResults.multi_hand_landmarks):
-            nameRes += 'H' + str(len(handsResults.multi_hand_landmarks))
+            modelsDetected[1] = len(handsResults.multi_hand_landmarks)
 
         # POSE results
         if(args.pose and poseResults.pose_landmarks):
-            nameRes += 'P'
+            modelsDetected[2] = 1
 
         # count results by nameResult
-        dictIndex += '1' if('F' in nameRes) else'0'
-        dictIndex += '2' if('2' in nameRes) else'1' if('1' in nameRes) else'0'
-        dictIndex += '1' if('P' in nameRes) else'0'
+        dictIndex = ''.join(str(e) for e in modelsDetected)
 
-        counter[(dictIndex, nameRes)] += 1
+        counter[dictIndex][0] += 1
+
+        fileNameList.append(file_name)
+        modelsDetectedList.append(modelsDetected)
 
         # ###### PICKLE - LANDMARK ANOTATION SECTION #######
 
@@ -236,6 +255,7 @@ for folder in folder_list:
         # Face Mesh landmarks
         if(args.face_mesh and faceResults.multi_face_landmarks):
 
+            # X, Y, Z points for each landmark
             for data_point in faceResults.multi_face_landmarks[0].landmark:
                 list_X.append(data_point.x)
                 list_Y.append(data_point.y)
@@ -246,13 +266,13 @@ for folder in folder_list:
                         'y': list_Y,
                         'z': list_Z})
 
-            df.to_pickle("%sface/%s_%d%s.pkl" %
+            df.to_pickle("%sface/%s.pkl" %
                          (args.pkl_output + folder + '/',
-                          file_name, idx, nameRes))
+                          file_name))
 
-            df.to_json("%sface/%s_%d%s.json" %
+            df.to_json("%sface/%s.json" %
                        (args.json_output + folder + '/',
-                        file_name, idx, nameRes))
+                        file_name))
 
         list_X.clear()
         list_Y.clear()
@@ -282,13 +302,13 @@ for folder in folder_list:
                         'y': list_Y,
                         'z': list_Z})
 
-            df.to_pickle("%shands/%s_%d%s.pkl" %
+            df.to_pickle("%shands/%s.pkl" %
                          (args.pkl_output + folder + '/',
-                          file_name, idx, nameRes))
+                          file_name))
 
-            df.to_json("%shands/%s_%d%s.json" %
+            df.to_json("%shands/%s.json" %
                        (args.json_output + folder + '/',
-                        file_name, idx, nameRes))
+                        file_name))
         list_X.clear()
         list_Y.clear()
         list_Z.clear()
@@ -307,13 +327,13 @@ for folder in folder_list:
                         'y': list_Y,
                         'z': list_Z})
 
-            df.to_pickle("%spose/%s_%d%s.pkl" %
+            df.to_pickle("%spose/%s.pkl" %
                          (args.pkl_output + folder + '/',
-                          file_name, idx, nameRes))
+                          file_name))
 
-            df.to_json("%spose/%s_%d%s.json" %
+            df.to_json("%spose/%s.json" %
                        (args.json_output + folder + '/',
-                        file_name, idx, nameRes))
+                        file_name))
 
         list_X.clear()
         list_Y.clear()
@@ -358,30 +378,35 @@ for folder in folder_list:
                             landmark_list=poseResults.pose_landmarks,
                             connections=mp_pose.POSE_CONNECTIONS)
 
-        cv2.imwrite("%s%s_%d%s.png" %
-                    (args.img_output + folder + '/', file_name, idx, nameRes),
+        cv2.imwrite("%s%s_%d.png" %
+                    (args.img_output + folder + '/', file_name, idx),
                     annotated_image)
 
         # Print time for each image
         if(args.verbose):
             print(file, time.time()-start_time, " seconds")
 
-        # Loading Bar
-        part = int(idx*10/len(file_list))
-        if(timer != part):
-            print(loading, "%d/%d" % (idx, len(file_list)))
-            for n in range(part - timer):
-                loading = loading.replace(" ", "~", 1)
-            timer = part
-
     #########################
     # PRINT FOLDER SUMMARY
     ##############
 
+    # To save in a csv file information about
+    # which model have results in each frame
+    index = pd.MultiIndex.from_product([fileNameList], names=['Filename'])
+    columns = pd.MultiIndex.from_product([['Face', 'Hands', 'Pose']],
+                                         names=['model'])
+    df = pd.DataFrame(modelsDetectedList,
+                      index=index,
+                      columns=columns)
+
+    df.to_csv("%s%s.csv" % (args.json_output + folder + '/', folder))
+    df.to_csv("%s%s.csv" % (args.pkl_output + folder + '/', folder))
+
+    # To print Summary data in the terminal
     print(loading+" Complete!")
     print("\nSummary:  (total: %d)" % len(file_list))
-    for index, name in counter:
-        print(counter[(index, name)], " <-- ", name)
+    for index in counter:
+        print("%4d ---> %4s" % (counter[index][0], counter[index][1]))
     print()
 
 #########################
