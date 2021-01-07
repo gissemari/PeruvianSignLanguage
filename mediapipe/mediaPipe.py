@@ -25,6 +25,7 @@ import pandas as pd
 import mediapipe as mp
 import time
 
+
 #########################
 # UTIL METODS
 ##############
@@ -140,9 +141,6 @@ for folder in folder_list:
     createFolder(args.pkl_output + folder + "/pose")
 
     createFolder(args.json_output + folder)
-    createFolder(args.json_output + folder + "/face")
-    createFolder(args.json_output + folder + "/hands")
-    createFolder(args.json_output + folder + "/pose")
 
     createFolder(args.img_output + folder)
 
@@ -222,6 +220,7 @@ for folder in folder_list:
         # Second element => Hands      -> H  +  (number of hands detected)
         # Third element  => Pose       -> P
 
+        #                 F  H# P
         modelsDetected = [0, 0, 0]
         dictIndex = ''
 
@@ -248,96 +247,49 @@ for folder in folder_list:
         # ###### PICKLE - LANDMARK ANOTATION SECTION #######
 
         # temporal variables
-        list_X = []
-        list_Y = []
-        list_Z = []
+        face_list_X = []
+        face_list_Y = []
 
         # Face Mesh landmarks
         if(args.face_mesh and faceResults.multi_face_landmarks):
 
             # X, Y, Z points for each landmark
             for data_point in faceResults.multi_face_landmarks[0].landmark:
-                list_X.append(data_point.x)
-                list_Y.append(data_point.y)
-                list_Z.append(data_point.z)
+                face_list_X.append(data_point.x)
+                face_list_Y.append(data_point.y)
 
-            df = pd.DataFrame({
-                        'x': list_X,
-                        'y': list_Y,
-                        'z': list_Z})
-
-            df.to_pickle("%sface/%s.pkl" %
-                         (args.pkl_output + folder + '/',
-                          file_name))
-
-            df.to_json("%sface/%s.json" %
-                       (args.json_output + folder + '/',
-                        file_name))
-
-        list_X.clear()
-        list_Y.clear()
-        list_Z.clear()
+        hand_1_list_X = []
+        hand_1_list_Y = []
+        hand_2_list_X = []
+        hand_2_list_Y = []
 
         # Hands landmarks
         if(args.hands and handsResults.multi_hand_landmarks):
 
             # For each hand
-            for hand_landmarks in handsResults.multi_hand_landmarks:
+            for hands_num, hand_landmarks in enumerate(
+                    handsResults.multi_hand_landmarks):
+
                 for data_point in hand_landmarks.landmark:
-                    list_X.append(data_point.x)
-                    list_Y.append(data_point.y)
-                    list_Z.append(data_point.z)
 
-                # To separate both hands landmarks
-                # (both are saved in the same pkl file)
+                    if(hands_num == 0):
+                        hand_1_list_X.append(data_point.x)
+                        hand_1_list_Y.append(data_point.y)
 
-                # TODO check another better way to improve this structure
-                if(len(handsResults.multi_hand_landmarks) > 1):
-                    list_X.append(-9999)
-                    list_Y.append(-9999)
-                    list_Z.append(-9999)
+                    if(hands_num == 1):
+                        hand_2_list_X.append(data_point.x)
+                        hand_2_list_Y.append(data_point.y)
 
-            df = pd.DataFrame({
-                        'x': list_X,
-                        'y': list_Y,
-                        'z': list_Z})
-
-            df.to_pickle("%shands/%s.pkl" %
-                         (args.pkl_output + folder + '/',
-                          file_name))
-
-            df.to_json("%shands/%s.json" %
-                       (args.json_output + folder + '/',
-                        file_name))
-        list_X.clear()
-        list_Y.clear()
-        list_Z.clear()
+        pose_list_X = []
+        pose_list_Y = []
 
         # Pose landmarks
         if(args.pose and poseResults.pose_landmarks):
 
             for hand_landmarks in poseResults.pose_landmarks.landmark:
 
-                list_X.append(data_point.x)
-                list_Y.append(data_point.y)
-                list_Z.append(data_point.z)
-
-            df = pd.DataFrame({
-                        'x': list_X,
-                        'y': list_Y,
-                        'z': list_Z})
-
-            df.to_pickle("%spose/%s.pkl" %
-                         (args.pkl_output + folder + '/',
-                          file_name))
-
-            df.to_json("%spose/%s.json" %
-                       (args.json_output + folder + '/',
-                        file_name))
-
-        list_X.clear()
-        list_Y.clear()
-        list_Z.clear()
+                pose_list_X.append(data_point.x)
+                pose_list_Y.append(data_point.y)
 
         # ###### IMAGE - LANDMARK ANOTATION SECTION #######
 
@@ -386,6 +338,16 @@ for folder in folder_list:
         if(args.verbose):
             print(file, time.time()-start_time, " seconds")
 
+        # Save each frame in a Json file
+        dist = {'face':   {'x': face_list_X,   'y': face_list_Y},
+                'hand_1': {'x': hand_1_list_X, 'y': hand_1_list_X},
+                'hand_2': {'x': hand_2_list_X, 'y': hand_2_list_X},
+                'pose':   {'x': pose_list_X,   'y': pose_list_Y}}
+
+        df = pd.DataFrame.from_dict(dist)
+        df.to_json("%s%s_keypoints.json" % (args.json_output + folder + '/', file_name))
+
+        #print(nani)
     #########################
     # PRINT FOLDER SUMMARY
     ##############
