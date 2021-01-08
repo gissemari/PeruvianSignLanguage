@@ -286,7 +286,7 @@ for folder in folder_list:
         # Pose landmarks
         if(args.pose and poseResults.pose_landmarks):
 
-            for hand_landmarks in poseResults.pose_landmarks.landmark:
+            for data_point in poseResults.pose_landmarks.landmark:
 
                 pose_list_X.append(data_point.x)
                 pose_list_Y.append(data_point.y)
@@ -345,9 +345,9 @@ for folder in folder_list:
                 'pose':   {'x': pose_list_X,   'y': pose_list_Y}}
 
         df = pd.DataFrame.from_dict(dist)
-        df.to_json("%s%s_keypoints.json" % (args.json_output + folder + '/', file_name))
+        df.to_json("%s%s_keypoints.json" %
+                   (args.json_output + folder + '/', file_name))
 
-        #print(nani)
     #########################
     # PRINT FOLDER SUMMARY
     ##############
