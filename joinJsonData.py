@@ -305,3 +305,11 @@ for videoFolder in foldersToJoin:
 
         joinedData['face'] = joinedFace
 
+        joinedDataFrame = pd.DataFrame.from_dict(joinedData)
+
+        path = './jsonOut/joined/'
+        if not os.path.isdir(path + videoFolder):
+            print("Directory %s has successfully created" % path + videoFolder)
+            os.mkdir(path + videoFolder)
+
+        joinedDataFrame.to_json(path + videoFolder + '/' + file)
