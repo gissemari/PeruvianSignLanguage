@@ -18,6 +18,7 @@ https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.
 """
 import os
 import pandas as pd
+import math
 
 path = "./jsonOut/joined"
 if not os.path.isdir(path):
@@ -70,8 +71,8 @@ for videoFolder in foldersToJoin:
         # UTILS
         ###########
 
-        rightWrist = -1
-        leftWrist = -1
+        rightWrist = []
+        leftWrist = []
 
         #################
         # MEDIAPIPE DATA
@@ -83,6 +84,9 @@ for videoFolder in foldersToJoin:
         mpHand1 = jsonMP.get('hand_1')
         mpHand2 = jsonMP.get('hand_2')
         mpPose = jsonMP.get('pose')
+
+        mpLeftHand = {'x': [], 'y': []}
+        mpRightHand = {'x': [], 'y': []}
 
         #################
         # OPENPOSE DATA
@@ -108,19 +112,9 @@ for videoFolder in foldersToJoin:
         ###########
 
         joinedPose = {}
-        # Results in both models
-        if (len(mpPose['x']) != 0 and len(opPose) != 0):
-
-            rightWrist = [mpPose['x'][16], mpPose['y'][16]]
-            leftWrist = [mpPose['x'][15], mpPose['y'][15]]
-
-            indexOrder = [11, 12, 13, 14, 15, 16]
-
-            joinedPose['x'] = [mpPose['x'][pos]*220 for pos in indexOrder]
-            joinedPose['y'] = [mpPose['y'][pos]*220 for pos in indexOrder]
 
         # if mediapipe have results
-        elif (len(mpPose['x']) != 0):
+        if (len(mpPose['x']) != 0):
 
             rightWrist = [mpPose['x'][16], mpPose['y'][16]]
             leftWrist = [mpPose['x'][15], mpPose['y'][15]]
@@ -160,16 +154,112 @@ for videoFolder in foldersToJoin:
         # HANDs
         ###########
 
+        # This section will be use to know
+        # which side the hand belongs to
+        # (right or left)
 
+        if(len(mpHand1['x']) != 0):
+
+            if(len(rightWrist) != 0 and len(leftWrist) != 0):
+
+                right1X = math.pow(mpHand1['x'][0] - rightWrist[0], 2)
+                right1Y = math.pow(mpHand1['y'][0] - rightWrist[1], 2)
+                distanceRight1 = right1X + right1Y
+
+                left1X = math.pow(mpHand1['x'][0] - leftWrist[0], 2)
+                left1Y = math.pow(mpHand1['y'][0] - leftWrist[1], 2)
+                distanceLeft2 = left1X + left1Y
+
+                if(distanceRight1 < distanceLeft2):
+
+                    mpRightHand['x'] = mpHand1['x']
+                    mpRightHand['y'] = mpHand1['y']
+
+                else:
+
+                    mpLeftHand['x'] = mpHand1['x']
+                    mpLeftHand['y'] = mpHand1['y']
+
+        if(len(mpHand2['x']) != 0):
+
+            if(len(rightWrist) != 0 and len(leftWrist) != 0):
+
+                right2X = math.pow(mpHand2['x'][0] - rightWrist[0], 2)
+                right2Y = math.pow(mpHand2['y'][0] - rightWrist[1], 2)
+                distanceRight2 = right2X + right2Y
+
+                left2X = math.pow(mpHand2['x'][0] - leftWrist[0], 2)
+                left2Y = math.pow(mpHand2['y'][0] - leftWrist[1], 2)
+                distanceLeft2 = left2X + left2Y
+
+                if(distanceRight2 < distanceLeft2):
+
+                    mpRightHand['x'] = mpHand2['x']
+                    mpRightHand['y'] = mpHand2['y']
+
+                else:
+
+                    mpLeftHand['x'] = mpHand2['x']
+                    mpLeftHand['y'] = mpHand2['y']
+
+        #################
+        # LEFT HAND
+        ###########
+        # This section will be use
+        # to join Left hand
+
+        joinedLeftHand = {}
+
+        # if mediapipe have results
+        if(len(opLeftHand) != 0):
+
+            newLeftHandX = []
+            newLeftHandY = []
+
+            for index, val in enumerate(opLeftHand):
+                if(index % 3 == 2):
+                    newLeftHandX.append(opLeftHand[index-2])
+                    newLeftHandY.append(opLeftHand[index-1])
+
+            joinedLeftHand['x'] = newLeftHandX
+            joinedLeftHand['y'] = newLeftHandY
+
+        elif(len(mpLeftHand['x']) != 0):
+
+            joinedLeftHand['x'] = mpLeftHand['x']
+            joinedLeftHand['y'] = mpLeftHand['y']
+
+        #################
+        # RIGHT HAND
+        ###########
+        # This section will be use
+        # to join Right hand
+
+        joinedRightHand = {}
+
+        # if mediapipe have results
+        if(len(opRightHand) != 0):
+
+            newRightHandX = []
+            newRightHandY = []
+
+            for index, val in enumerate(opRightHand):
+                if(index % 3 == 2):
+                    newRightHandX.append(opRightHand[index-2])
+                    newRightHandY.append(opRightHand[index-1])
+
+            joinedRightHand['x'] = newRightHandX
+            joinedRightHand['y'] = newRightHandY
+
+        elif(len(mpRightHand['x']) != 0):
+
+            joinedRightHand['x'] = mpRightHand['x']
+            joinedRightHand['y'] = mpRightHand['y']
 
         #################
         # FACE
         ###########
-        
 
-        
-
-        
         #print(len(opFace), len(mpFace['x']))
         #print(len(opLeftHand), len(mpHand1['x']))
         #print(len(opRightHand), len(mpHand2['x']))
