@@ -25,6 +25,16 @@ if not os.path.isdir(path):
     print("Directory %s has successfully created" % path)
     os.mkdir(path)
 
+path = "./jsonOut/mediapipe"
+if not os.path.isdir(path):
+    print("Directory %s has successfully created" % path)
+    os.mkdir(path)
+
+path = "./jsonOut/openpose"
+if not os.path.isdir(path):
+    print("Directory %s has successfully created" % path)
+    os.mkdir(path)
+
 mediapipe_folder_list = os.listdir("./jsonOut/mediapipe/")
 openpose_folder_list = os.listdir("./jsonOut/openpose/")
 
