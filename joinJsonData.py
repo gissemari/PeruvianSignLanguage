@@ -111,7 +111,7 @@ for videoFolder in foldersToJoin:
         # POSE
         ###########
 
-        joinedPose = {}
+        joinedPose = {'x': [], 'y': []}
 
         # if mediapipe have results
         if (len(mpPose['x']) != 0):
@@ -143,11 +143,6 @@ for videoFolder in foldersToJoin:
             joinedPose['x'] = [newPoseX[pos] for pos in indexOrder]
             joinedPose['y'] = [newPoseY[pos] for pos in indexOrder]
 
-        # No results in both models
-        else:
-            joinedPose['x'] = []
-            joinedPose['y'] = []
-
         joinedData['pose'] = joinedPose
 
         #################
@@ -155,7 +150,7 @@ for videoFolder in foldersToJoin:
         ###########
 
         # This section will be use to know
-        # which side the hand belongs to
+        # which side one or both hands belongs to
         # (right or left)
 
         if(len(mpHand1['x']) != 0):
@@ -168,9 +163,9 @@ for videoFolder in foldersToJoin:
 
                 left1X = math.pow(mpHand1['x'][0] - leftWrist[0], 2)
                 left1Y = math.pow(mpHand1['y'][0] - leftWrist[1], 2)
-                distanceLeft2 = left1X + left1Y
+                distanceLeft1 = left1X + left1Y
 
-                if(distanceRight1 < distanceLeft2):
+                if(distanceRight1 < distanceLeft1):
 
                     mpRightHand['x'] = mpHand1['x']
                     mpRightHand['y'] = mpHand1['y']
@@ -208,7 +203,7 @@ for videoFolder in foldersToJoin:
         # This section will be use
         # to join Left hand
 
-        joinedLeftHand = {}
+        joinedLeftHand = {'x': [], 'y': []}
 
         # if mediapipe have results
         if(len(opLeftHand) != 0):
@@ -229,13 +224,15 @@ for videoFolder in foldersToJoin:
             joinedLeftHand['x'] = mpLeftHand['x']
             joinedLeftHand['y'] = mpLeftHand['y']
 
+        joinedData['left_hand'] = joinedLeftHand
+
         #################
         # RIGHT HAND
         ###########
         # This section will be use
         # to join Right hand
 
-        joinedRightHand = {}
+        joinedRightHand = {'x': [], 'y': []}
 
         # if mediapipe have results
         if(len(opRightHand) != 0):
@@ -256,14 +253,55 @@ for videoFolder in foldersToJoin:
             joinedRightHand['x'] = mpRightHand['x']
             joinedRightHand['y'] = mpRightHand['y']
 
+        joinedData['right_hand'] = joinedRightHand
+
         #################
         # FACE
         ###########
 
-        #print(len(opFace), len(mpFace['x']))
-        #print(len(opLeftHand), len(mpHand1['x']))
-        #print(len(opRightHand), len(mpHand2['x']))
-        #print(len(opPose), len(mpPose['x']))
-        
-        
-        
+        joinedFace = {'x': [], 'y': []}
+
+        # if mediapipe have results
+        if (len(mpFace['x']) != 0 and False):
+            print("mediapipe")
+            # left and right eyes
+            # the first 6 elements is an eye
+            # the rest is the other eye
+            eyesIndex = [33,  160, 158, 133, 153, 144,
+                         362, 385, 387, 263, 373, 380]
+
+            mouthIndex = [61, 40, 37, 0, 267, 270, 291, 321, 314, 17, 84, 91,
+                          78, 82, 13, 312, 308, 317, 14, 87]
+
+            faceIndex = eyesIndex + mouthIndex
+
+            joinedFace['x'] = [mpFace['x'][pos]*220 for pos in faceIndex]
+            joinedFace['y'] = [mpFace['y'][pos]*220 for pos in faceIndex]
+
+        # if openpose have results
+        elif (len(opFace) != 0):
+
+            newFaceX = []
+            newFaceY = []
+
+            for index, val in enumerate(opFace):
+                if(index % 3 == 2):
+                    newFaceX.append(opFace[index-2])
+                    newFaceY.append(opFace[index-1])
+
+            # left and right eyes
+            # ("+1" is added to easily recognize the upper value of the range)
+            # 68 and 69 are pupil eyes but it will not be used because
+            # mediapipe model can't detect eyes
+
+            eyesIndex = list(range(36, 41+1)) + list(range(42, 47+1))
+
+            mouthIndex = list(range(48, 59+1)) + list(range(60, 67+1))
+
+            faceIndex = eyesIndex + mouthIndex
+
+            joinedFace['x'] = [newFaceX[pos] for pos in faceIndex]
+            joinedFace['y'] = [newFaceY[pos] for pos in faceIndex]
+
+        joinedData['face'] = joinedFace
+
