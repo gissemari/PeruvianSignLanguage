@@ -53,14 +53,15 @@ for videoFolder in foldersToJoin:
 
     # Create folders which will be used to join
     subfolder = path + '/' + videoFolder
+
     if not os.path.isdir(subfolder):
         print("Directory %s has successfully created" % subfolder)
         os.mkdir(subfolder)
 
-    # MEDIAPIPE
+    # MEDIAPIPE keypoints
     mp_vid_frames = os.listdir("./jsonOut/mediapipe/"+videoFolder)
 
-    # OPENPOSE
+    # OPENPOSE keypoints
     op_vid_frames = os.listdir("./jsonOut/openpose/"+videoFolder)
 
     # to Join frames that are similar in both model results
@@ -71,6 +72,7 @@ for videoFolder in foldersToJoin:
         if(mediapipeFrame in op_vid_frames):
             framesToJoin.append(mediapipeFrame)
 
+    # variable used to join mediapipe and openpose data
     joinedData = {}
 
     # ######### JOIN SECTION ##########
@@ -81,34 +83,44 @@ for videoFolder in foldersToJoin:
         # UTILS
         ###########
 
+        # Lists that will be use to know
+        # which side one or both hands belongs to (left or right)
+        #
+        # first element = x
+        # second element = y
         rightWrist = []
         leftWrist = []
 
+        # dictionaries that will be used to save left and right hands data
+        # from mediapipe
+        mpLeftHand = {'x': [], 'y': []}
+        mpRightHand = {'x': [], 'y': []}
+
         #################
-        # MEDIAPIPE DATA
+        # MEDIAPIPE DATA - MP
         ###########
         jsonMP = pd.read_json(
             "./jsonOut/mediapipe/" + videoFolder + '/' + file).to_dict()
 
+        # dictionaries obtained from the mediapipe model
         mpFace = jsonMP.get('face')
         mpHand1 = jsonMP.get('hand_1')
         mpHand2 = jsonMP.get('hand_2')
         mpPose = jsonMP.get('pose')
 
-        mpLeftHand = {'x': [], 'y': []}
-        mpRightHand = {'x': [], 'y': []}
-
         #################
-        # OPENPOSE DATA
+        # OPENPOSE DATA - OP
         ###########
         jsonOP = pd.read_json(
             "./jsonOut/openpose/" + videoFolder + '/' + file).to_dict()
 
+        # initialization of lists obtained from the openpose model
         opFace = []
         opLeftHand = []
         opRightHand = []
         opPose = []
 
+        # if the model detect at least one person
         if len(jsonOP.get('people')) > 0:
 
             opFace = jsonOP.get('people')[0].get('face_keypoints_2d')
@@ -121,6 +133,7 @@ for videoFolder in foldersToJoin:
         # POSE
         ###########
 
+        # dictionary that will be used to save the joined pose data
         joinedPose = {'x': [], 'y': []}
 
         # if mediapipe have results
@@ -129,7 +142,17 @@ for videoFolder in foldersToJoin:
             rightWrist = [mpPose['x'][16], mpPose['y'][16]]
             leftWrist = [mpPose['x'][15], mpPose['y'][15]]
 
+            # List that have the list position of pose keypoints
             indexOrder = [11, 12, 13, 14, 15, 16]
+
+            # 220 is used because it is the dimention (width and height)
+            # of the processed image.
+            #
+            # the data from mediapipe is defined by:
+            #
+            # x_value = x / width
+            # y_value = y / height
+            #
 
             joinedPose['x'] = [mpPose['x'][pos]*220 for pos in indexOrder]
             joinedPose['y'] = [mpPose['y'][pos]*220 for pos in indexOrder]
@@ -140,6 +163,10 @@ for videoFolder in foldersToJoin:
             newPoseX = []
             newPoseY = []
 
+            # if(index % 3 == 2) is used because all the data is in one array
+            # with the following structure:
+            # x, y, confidence
+
             for index, val in enumerate(opPose):
                 if(index % 3 == 2):
                     newPoseX.append(opPose[index-2])
@@ -148,6 +175,7 @@ for videoFolder in foldersToJoin:
             rightWrist = [newPoseX[4], newPoseY[4]]
             leftWrist = [newPoseX[7], newPoseY[7]]
 
+            # List that have the list position of pose keypoints
             indexOrder = [5, 2, 6, 3, 7, 4]
 
             joinedPose['x'] = [newPoseX[pos] for pos in indexOrder]
@@ -163,18 +191,31 @@ for videoFolder in foldersToJoin:
         # which side one or both hands belongs to
         # (right or left)
 
+        # if hand 1 of mediapipe model have results
         if(len(mpHand1['x']) != 0):
+
+            # rightWrist and leftWrist are necesary to do the comparison
+            #
+            # in order to compare it,
+            # it will be necessary to get the distance between
+            # rightWrist (of pose model) and hand 1 (of mediapipe model)
+            #
+            # and the distance between
+            # leftWrist (of pose model) and hand 1 (of mediapipe model)
 
             if(len(rightWrist) != 0 and len(leftWrist) != 0):
 
                 right1X = math.pow(mpHand1['x'][0] - rightWrist[0], 2)
                 right1Y = math.pow(mpHand1['y'][0] - rightWrist[1], 2)
+
                 distanceRight1 = right1X + right1Y
 
                 left1X = math.pow(mpHand1['x'][0] - leftWrist[0], 2)
                 left1Y = math.pow(mpHand1['y'][0] - leftWrist[1], 2)
                 distanceLeft1 = left1X + left1Y
 
+                # if the lower distance correspond to the right hand
+                # hand 1 will be save as Right hand
                 if(distanceRight1 < distanceLeft1):
 
                     mpRightHand['x'] = mpHand1['x']
@@ -186,6 +227,15 @@ for videoFolder in foldersToJoin:
                     mpLeftHand['y'] = mpHand1['y']
 
         if(len(mpHand2['x']) != 0):
+            
+            # rightWrist and leftWrist are necesary to do the comparison
+            #
+            # in order to compare it,
+            # it will be necessary to get the distance between
+            # rightWrist (of pose model) and hand 2 (of mediapipe model)
+            #
+            # and the distance between
+            # leftWrist (of pose model) and hand 2 (of mediapipe model)
 
             if(len(rightWrist) != 0 and len(leftWrist) != 0):
 
@@ -197,6 +247,8 @@ for videoFolder in foldersToJoin:
                 left2Y = math.pow(mpHand2['y'][0] - leftWrist[1], 2)
                 distanceLeft2 = left2X + left2Y
 
+                # if the lower distance correspond to the right hand
+                # hand 2 will be save as Right hand
                 if(distanceRight2 < distanceLeft2):
 
                     mpRightHand['x'] = mpHand2['x']
@@ -273,7 +325,7 @@ for videoFolder in foldersToJoin:
 
         # if mediapipe have results
         if (len(mpFace['x']) != 0 and False):
-            print("mediapipe")
+
             # left and right eyes
             # the first 6 elements is an eye
             # the rest is the other eye
@@ -315,11 +367,16 @@ for videoFolder in foldersToJoin:
 
         joinedData['face'] = joinedFace
 
+        # the compilation of "face", "hands" and "Pose" in
+        # joinedData dictionary will be save as a
+        # pandas DataFrame
         joinedDataFrame = pd.DataFrame.from_dict(joinedData)
 
+        # create the respective video folder
         path = './jsonOut/joined/'
         if not os.path.isdir(path + videoFolder):
             print("Directory %s has successfully created" % path + videoFolder)
             os.mkdir(path + videoFolder)
 
+        # Save the joined data as json
         joinedDataFrame.to_json(path + videoFolder + '/' + file)
