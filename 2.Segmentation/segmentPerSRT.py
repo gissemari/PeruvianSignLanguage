@@ -1,14 +1,19 @@
-import cv2
-import numpy as np
+# Standard library imports
 import argparse
-import pysrt
+import os
+
+# Third party imports
+import cv2
 import nltk
+import numpy as np
+import pysrt
+from scenedetect.frame_timecode import FrameTimecode
+
+# Local imports
 import utils.video as uv
 
-import os
 #from os import listdir, mkdir
 #from os.path import isfile, join, exists
-from scenedetect.frame_timecode import FrameTimecode
 
 parser = argparse.ArgumentParser(description='The Embedded Topic Model')
 parser.add_argument('--rawVideoPath', type=str, default='./../Data/Videos/RawVideo/', help='Path where per-line files are located')
@@ -73,12 +78,11 @@ for filePath in listFile:
     if (cap.isOpened() == False):
         print("Unable to read camera feed", rawVideoPath+inputName+'.mp4')
 
-
     fps = uv.getNumFrames(cap)
     fpsOutput = fps
     print(fps)
     # Define the codec and create VideoWriter object.The output is stored in 'outpy.avi' file.
-    fcc = cv2.VideoWriter_fourcc(*'MP4V')#'M', 'J', 'P', 'G' # *'MP4V'
+    fcc = cv2.VideoWriter_fourcc(*'mp4v')#'M', 'J', 'P', 'G' # *'MP4V' <- lower case (for no warnings)
 
     # Read SRT
     srtOriginal = pysrt.open(srtPath+inputName+'.srt', encoding='utf-8')#, encoding='iso-8859-1'
