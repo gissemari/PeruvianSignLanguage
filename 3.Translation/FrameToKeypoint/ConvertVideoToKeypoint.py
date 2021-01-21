@@ -19,16 +19,19 @@ and
 
 
 """
-
+# Standard library imports
 import argparse
-import cv2
 import os
-import pandas as pd
+
+# Third party imports
+import cv2
 import mediapipe as mp
-import time
 import numpy as np
+import pandas as pd
 import pickle as pkl
-import utils.video as uv #for create folder
+
+# Local imports
+import utils.video as uv  # for create folder
 
 
 #########################
@@ -40,22 +43,24 @@ parser = argparse.ArgumentParser(description='Mediapipe models ' +
                                  '(FaceMesh, Hands, Pose)')
 
 # Models
-parser.add_argument('--face_mesh', action="store_true",help='Use face mesh model')
+parser.add_argument('--face_mesh', action="store_true",
+                    help='Use face mesh model')
 parser.add_argument('--hands', action="store_true", help='Use hands model')
 parser.add_argument('--pose', action="store_true", help='Use pose model')
-parser.add_argument('--holistic', action="store_true", help='Use holistic model: face, hands and pose')
+parser.add_argument('--holistic', action="store_true",
+                    help='Use holistic model: face, hands and pose')
 
 # File paths
-parser.add_argument('--inputPath', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Videos/Segmented_gestures/",
+parser.add_argument('--inputPath', type=str, default="./Data/Videos/Segmented_gestures/",
                     help='relative path of images input.' + ' Default: ./Data/Videos/OnlySquare/frames/')
 
-parser.add_argument('--img_output', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Keypoints/png/Segmented_gestures",
+parser.add_argument('--img_output', type=str, default="./Data/Keypoints/png/Segmented_gestures",
                     help='relative path of images output with landmarks.' + ' Default: ./imgOut/mediapipe/')
 
-parser.add_argument('--json_output', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Keypoints/json/Segmented_gestures",
+parser.add_argument('--json_output', type=str, default="./Data/Keypoints/json/Segmented_gestures",
                     help='relative path of scv output set of landmarks.' +' Default: ./jsonOut/mediapipe/')
 
-parser.add_argument('--pkl_output', type=str, default="/home/gissella/Documents/Research/SignLanguage/PeruvianSignLanguaje/Data/Keypoints/pkl/Segmented_gestures",
+parser.add_argument('--pkl_output', type=str, default="./Data/Keypoints/pkl/Segmented_gestures",
                     help='relative path of csv output set of landmarks.' + ' Default: ./jsonOut/mediapipe/')
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
@@ -104,9 +109,8 @@ if(args.pose):
                         min_detection_confidence=0.5)
 
 if (args.holistic):
-    holistic = mp_holistic.Holistic(min_detection_confidence=0.5, 
+    holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
                                     min_tracking_confidence=0.5)
-
 
 #########################
 # UTILS
@@ -115,7 +119,6 @@ if (args.holistic):
 # Drawing
 mp_drawing = mp.solutions.drawing_utils
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
-
 
 
 #########################
@@ -130,7 +133,8 @@ drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
 # Folder list of videos's frames
 if os.path.isdir(args.inputPath):
-    folder_list = [ file for file in os.listdir(args.inputPath) if os.path.isdir(args.inputPath+file)]
+    folder_list = [file for file in os.listdir(args.inputPath)
+                   if os.path.isdir(args.inputPath+file)]
     print("Is Directory")
 else:
     folder_list = [args.inputPath]
@@ -139,37 +143,34 @@ print(folder_list)
 # Iterate over the folders of each video in Video/Segmented_gesture
 for videoFolder in folder_list:
     videoFolderName = args.inputPath+videoFolder
-    uv.createFolder(args.pkl_output+  '/'+videoFolder)
-    uv.createFolder(args.img_output+  '/'+videoFolder)
-    uv.createFolder(args.json_output+  '/'+videoFolder)
+    uv.createFolder(args.pkl_output+'/'+videoFolder)
+    uv.createFolder(args.img_output+'/'+videoFolder)
+    uv.createFolder(args.json_output+'/'+videoFolder)
 
-    videoFolderList = [ file for file in os.listdir(videoFolderName)]
-
+    videoFolderList = [file for file in os.listdir(videoFolderName)]
 
     for videoFile in videoFolderList:
-        list_seq = []     
+        list_seq = []
 
         videoSegFolderName = videoFolderName+'/'+videoFile[:-4]
-        #videoFolderName = args.inputPath.split('/')[-1]
+        # videoFolderName = args.inputPath.split('/')[-1]
         pcklFileName = args.pkl_output+  '/'+videoFolder +'/'+videoFile[:-4]+'.pkl'
         # Creating folder for each gesture in img:
         imgFolder = args.img_output+  '/'+videoFolder +'/'+videoFile[:-4]
         uv.createFolder(imgFolder)
         jsonName = args.json_output+  '/'+videoFolder +'/'+videoFile[:-4]+'.json'
-        
 
         # Create a VideoCapture object
         cap = cv2.VideoCapture(videoFolderName+'/'+videoFile)
 
         # Check if camera opened successfully
-        if (cap.isOpened() == False):
+        if (cap.isOpened() is False):
             print("Unable to read camera feed", videoSegFolderName)
 
-
-        idx =0
+        idx = 0
         ret, frame = cap.read()
         # While a frame was read
-        while ret == True:
+        while ret is True:
             # temporal variables
             list_X = []
             list_Y = []
@@ -191,7 +192,7 @@ for videoFolder in folder_list:
                 for data_point in faceResults.multi_face_landmarks[0].landmark:
                     list_X.append(data_point.x)
                     list_Y.append(data_point.y)
-                    #list_Z.append(data_point.z)
+                    # list_Z.append(data_point.z)
 
                 mp_drawing.draw_landmarks(
                             image=annotated_image,
@@ -200,16 +201,15 @@ for videoFolder in folder_list:
                             landmark_drawing_spec=drawing_spec,
                             connection_drawing_spec=drawing_spec)
 
-
             if(args.hands):
                 handsResults = hands.process(imageBGR)
 
-                            # For each hand
+                # For each hand
                 for hand_landmarks in handsResults.multi_hand_landmarks:
                     for data_point in hand_landmarks.landmark:
                         list_X.append(data_point.x)
                         list_Y.append(data_point.y)
-                        #list_Z.append(data_point.z)
+                        # list_Z.append(data_point.z)
 
                 for hand_landmarks in handsResults.multi_hand_landmarks:
                     # Add landmarks into the image
@@ -225,7 +225,7 @@ for videoFolder in folder_list:
 
                     list_X.append(data_point.x)
                     list_Y.append(data_point.y)
-                    #list_Z.append(data_point.z)
+                    # list_Z.append(data_point.z)
 
                 # Add landmarks into the image
                 mp_drawing.draw_landmarks(
@@ -256,21 +256,19 @@ for videoFolder in folder_list:
                 #mp_drawing.draw_landmarks(annotated_image, holisResults.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
                 mp_drawing.draw_landmarks(annotated_image, holisResults.pose_landmarks, mp_holistic.POSE_CONNECTIONS)
 
-
-            list_seq.append([list_X,list_Y])
+            list_seq.append([list_X, list_Y])
 
             cv2.imwrite("%s.png" % (imgFolder+'/'+str(idx)), annotated_image)
 
             # Print time for each image
-            if(args.verbose):
-                print(file, time.time()-start_time, " seconds")
+            # if(args.verbose):
+            #    print(file, time.time()-start_time, " seconds")
 
             ret, frame = cap.read()
-            idx+=1
+            idx += 1
 
-
-        new3D = np.asarray(list_seq).reshape((-1,33*2))
-        print(videoFolder,videoFile, new3D.shape)
+        new3D = np.asarray(list_seq).reshape((-1, 33*2))
+        print(videoFolder, videoFile, new3D.shape)
 
         # Save JSON
         df = pd.DataFrame({'seq': list_seq})
