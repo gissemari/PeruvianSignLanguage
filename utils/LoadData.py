@@ -115,6 +115,7 @@ def getTopNWordData(nWords, mainFolderPath, minimun=False):
 
             for data in fileData:
                 x.append(data)
+                if(len(data) != 66): print("hehe")
                 y.append(topWordDict[word])
 
     # To get the category with the least amount of data. So, all categories
