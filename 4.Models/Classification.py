@@ -96,14 +96,6 @@ class Net(torch.nn.Module):
         return z
 
 
-# ----------------------------------------------------
-# 3. train network
-def netTrain(net, dataTrain, parameters):
-
-    
-    return net
-
-
 # accuracy (used in batch)
 def multi_acc(y_pred, y_test):
 
@@ -188,7 +180,7 @@ def main():
 
     batch_size = 88
     nEpoch = 1000
-    lrn_rate = 0.1
+    lrn_rate = 0.074
 
     print("minimun sizes of data: %s" % minimun)
     print("data train split at: %2.2f" % split)

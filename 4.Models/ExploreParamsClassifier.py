@@ -24,7 +24,7 @@ conda: 4.9.2
 # -*- coding: utf-8 -*-
 
 # Standard library imports
-import time
+
 
 # Third party imports
 import numpy as np
@@ -140,7 +140,7 @@ def netTrain(net, dataTrain, parameters):
             optimizer.step()
             scheduler.step()
 
-        if epoch % nEpoch/10 == 0 or epoch == nEpoch-1:
+        if epoch % 100 == 0 or epoch == nEpoch-1:
             print("================================================")
             print("epoch = %4d   loss = %0.4f" % (epoch, epoch_loss))
             print("acc = %0.4f" % (epoch_acc / len(dataTrain)))
@@ -303,6 +303,7 @@ def main():
             # {"name": "max_epoch", "type": "range", "bounds": [1000, 10000]},
             # {"name": "stepsize", "type": "range", "bounds": [20, 40]},
             ],
+        total_trials=20,  # 20 is the default
         evaluation_function=trainEvaluate,
         objective_name='accuracy'
     )
