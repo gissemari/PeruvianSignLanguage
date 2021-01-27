@@ -14,6 +14,35 @@ import pandas as pd
 # Local imports
 
 
+def splitData(x, y, split=0.8):
+
+    # to count repeated targets in y
+    targetDict = dict(Counter(y))
+    pivot = targetDict.copy()
+
+    for key in targetDict:
+        pivot[key] = int(targetDict[key]*split)
+
+    x_train = []
+    y_train = []
+
+    x_test = []
+    y_test = []
+
+    for index, key in enumerate(y):
+
+        if(pivot[key]):
+            x_train.append(x[index])
+            y_train.append(y[index])
+
+            pivot[key] = pivot[key] - 1
+        else:
+            x_test.append(x[index])
+            y_test.append(y[index])
+
+    return x_train, y_train, x_test, y_test
+
+
 def ReduceDataToMinimunSize(x, y):
 
     # to count repeated targets in y
@@ -28,16 +57,16 @@ def ReduceDataToMinimunSize(x, y):
     # to set a counter for all categories to the minimun data
     reverseCounter = dict.fromkeys(targetDict, minimun)
 
-    for index, value in enumerate(y):
+    for index, key in enumerate(y):
 
-        # if reverseCounter is not zero(value)
-        if reverseCounter[value]:
+        # if reverseCounter is not zero(key)
+        if reverseCounter[key]:
 
             newX.append(x[index])
             newY.append(y[index])
 
             # to do reverse counter from minimun to zero
-            reverseCounter[value] = reverseCounter[value] - 1
+            reverseCounter[key] = reverseCounter[key] - 1
 
     return newX, newY
 
@@ -115,13 +144,11 @@ def getTopNWordData(nWords, mainFolderPath, minimun=False):
 
             for data in fileData:
                 x.append(data)
-                if(len(data) != 66): print("hehe")
                 y.append(topWordDict[word])
 
     # To get the category with the least amount of data. So, all categories
     # have the same amount of data
     if(minimun):
-        return ReduceDataToMinimunSize(x, y)
+        x, y = ReduceDataToMinimunSize(x, y)
 
-    else:
-        return x, y
+    return x, y
