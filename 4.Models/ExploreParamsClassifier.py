@@ -38,7 +38,6 @@ from ax.plot.contour import plot_contour
 # Local imports
 from utils import LoadData
 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 

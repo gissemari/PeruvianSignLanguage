@@ -31,9 +31,6 @@ import torch
 # Local imports
 from utils import LoadData
 
-# from utils import testNeuralNetworkClassifier as testNNC
-
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -178,9 +175,9 @@ def main():
     minimun = True
     split = 0.8
 
-    batch_size = 88
+    batch_size = 16
     nEpoch = 1000
-    lrn_rate = 0.074
+    lrn_rate = 0.075
 
     print("minimun sizes of data: %s" % minimun)
     print("data train split at: %2.2f" % split)
@@ -254,7 +251,8 @@ def main():
             }
             torch.save(info_dict, fn)
             print("================================================")
-            print("epoch = %4d   loss = %0.4f" % (epoch, epoch_loss))
+            print("epoch = %4d   loss = %0.4f" %
+                  (epoch, epoch_loss/len(dataTrain)))
             print("acc = %0.4f" % (epoch_acc / len(dataTrain)))
 
     print("Done ")
