@@ -27,6 +27,7 @@ import time
 # Third party imports
 import numpy as np
 import torch
+import matplotlib.pyplot as plt
 
 # Local imports
 from utils import LoadData
@@ -145,6 +146,17 @@ def accuracy_eval(model, dataset):
     return acc
 
 
+def accuracy_quick(yPred, yTarget):
+    # assumes model.eval()
+    # en masse but quick
+    n = len(yTarget)
+
+    arg_maxs = torch.argmax(yPred, dim=1)  # collapse cols
+    num_correct = torch.sum(yTarget == arg_maxs)
+    acc = (num_correct * 1.0 / n)
+    return acc.item()
+
+
 """
 def accuracy_quick(model, dataset):
     # assumes model.eval()
@@ -175,9 +187,10 @@ def main():
     minimun = True
     split = 0.8
 
-    batch_size = 16
-    nEpoch = 1000
-    lrn_rate = 0.075
+    batch_size = 88
+    nEpoch = 5000
+    lrn_rate = 0.001
+    momentum = 0.1
 
     print("minimun sizes of data: %s" % minimun)
     print("data train split at: %2.2f" % split)
@@ -193,6 +206,8 @@ def main():
     dataTrain = torch.utils.data.DataLoader(dataXY, batch_size=batch_size,
                                             shuffle=True)
 
+    XY_test = SignLanguageDataset(src, nTopWords=20, getDatatest=True,
+                                  minimun=minimun)
     ##################################################
     # 2. create neural network
     net = Net().to(device)
@@ -216,47 +231,103 @@ def main():
     net.train()  # set mode
 
     loss_func = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=lrn_rate)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lrn_rate,
+                                momentum=momentum)
+
+    accEpochAcum = []
+    lossEpochAcum = []
+    accTestEpochAcum = []
+    lossTestEpochAcum = []
 
     for epoch in range(0, nEpoch):
         # T.manual_seed(1 + epoch)  # recovery reproducibility
         epoch_loss = 0.0  # sum avg loss per item
         epoch_acc = 0.0
 
+        epoch_loss_test = 0.0
+        epoch_acc_test = 0.0
+
         for (batch_idx, batch) in enumerate(dataTrain):
+
             X = batch['predictors']  # inputs
             Y = batch['targets']
 
-            optimizer.zero_grad()
-            oupt = net(X)
+            xTest = XY_test.x_data
+            yTest = XY_test.y_data
 
+            net.train()
+            optimizer.zero_grad()
+
+            # Batch evaluation
+            oupt = net(X)
             loss_val = loss_func(oupt, Y)  # avg loss in batch
             epoch_loss += loss_val.item()  # a sum of averages
 
-            train_acc = multi_acc(oupt, Y)
+            train_acc = accuracy_quick(oupt, Y)
             epoch_acc += train_acc
+
+            net.eval()
+            # Test evaluation
+            with torch.no_grad():
+                ouptTest = net(xTest)
+
+            loss_val_test = loss_func(ouptTest, yTest)
+            epoch_loss_test += loss_val_test.item()
+
+            test_acc = accuracy_quick(ouptTest, yTest)
+            epoch_acc_test += test_acc
 
             loss_val.backward()
             optimizer.step()
 
-        if epoch % 100 == 0 or epoch == nEpoch-1:
-            dt = time.strftime("%Y_%m_%d-%H_%M_%S")
-            fn = ".\\Logs\\" + str(dt) + str("-") + \
-                str(epoch) + "_checkpoint.pt"
+        dt = time.strftime("%Y_%m_%d-%H_%M_%S")
+        fn = ".\\Logs\\" + str(dt) + str("-") + \
+            str(epoch) + "_checkpoint.pt"
 
-            info_dict = {
-                'epoch': epoch,
-                'net_state': net.state_dict(),
-                'optimizer_state': optimizer.state_dict()
-            }
-            torch.save(info_dict, fn)
+        info_dict = {
+            'epoch': epoch,
+            'net_state': net.state_dict(),
+            'optimizer_state': optimizer.state_dict()
+        }
+
+        torch.save(info_dict, fn)
+
+        lossEpochAcum.append(epoch_loss/len(dataTrain))
+        accEpochAcum.append(epoch_acc / len(dataTrain))
+
+        lossTestEpochAcum.append(epoch_loss_test/len(dataTrain))
+        accTestEpochAcum.append(epoch_acc_test / len(dataTrain))
+
+        if(epoch % 10 == 0):
             print("================================================")
             print("epoch = %4d   loss = %0.4f" %
                   (epoch, epoch_loss/len(dataTrain)))
             print("acc = %0.4f" % (epoch_acc / len(dataTrain)))
+            print("----------------------")
+            print("loss (test) = %0.4f" % (epoch_loss_test/len(dataTrain)))
+            print("acc(test) = %0.4f" % (epoch_acc_test / len(dataTrain)))
 
     print("Done ")
 
+    plt.figure(figsize=(15, 5))
+
+    plt.subplot(131)
+    plt.plot(range(0, nEpoch), lossEpochAcum,
+             range(0, nEpoch), lossTestEpochAcum)
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.ylim(0.0)
+    plt.legend(["Train","Test"])
+    plt.title("Training and Test Loss")
+
+    plt.subplot(132)
+    plt.plot(range(0, nEpoch), accEpochAcum,
+             range(0, nEpoch), accTestEpochAcum)
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.ylim(0.0)
+    plt.legend(["Train","Test"])
+    plt.title("Training and Test Accuracy")
     ##################################################
     # 4. evaluate model
 

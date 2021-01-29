@@ -148,6 +148,7 @@ def getTopNWordData(nWords, mainFolderPath, minimun=False):
 
     # To get the category with the least amount of data. So, all categories
     # have the same amount of data
+
     if(minimun):
         x, y = ReduceDataToMinimunSize(x, y)
 
