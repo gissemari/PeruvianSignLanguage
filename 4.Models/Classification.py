@@ -43,7 +43,10 @@ class SignLanguageDataset(torch.utils.data.Dataset):
                  split=0.8, minimun=False):
 
         x, y = LoadData.getTopNWordData(nTopWords, src_file, minimun)
+
         x_train, y_train, x_test, y_test = LoadData.splitData(x, y, split)
+
+        self.inputSize = len(x[0])
 
         if(getDatatest):
             self.x_data = torch.tensor(x_test, dtype=torch.float32).to(device)
@@ -69,14 +72,14 @@ class SignLanguageDataset(torch.utils.data.Dataset):
 # 2. create neural network
 class Net(torch.nn.Module):
 
-    def __init__(self):
+    def __init__(self, inputSize):
 
         super(Net, self).__init__()
-        self.hid1 = torch.nn.Linear(66, 132)  # 66-(132-132)-20
+        self.hid1 = torch.nn.Linear(inputSize, inputSize)
         self.drop1 = torch.nn.Dropout(0.50)
-        self.hid2 = torch.nn.Linear(132, 132)
+        self.hid2 = torch.nn.Linear(inputSize, int(inputSize/2))
         self.drop2 = torch.nn.Dropout(0.25)
-        self.oupt = torch.nn.Linear(132, 20)
+        self.oupt = torch.nn.Linear(int(inputSize/2), 20)
 
         torch.nn.init.xavier_uniform_(self.hid1.weight)
         torch.nn.init.zeros_(self.hid1.bias)
@@ -186,10 +189,9 @@ def main():
 
     minimun = True
     split = 0.8
-
-    batch_size = 88
-    nEpoch = 5000
-    lrn_rate = 0.001
+    batch_size = 66*2
+    nEpoch = 1000
+    lrn_rate = 0.01
     momentum = 0.1
 
     print("minimun sizes of data: %s" % minimun)
@@ -210,7 +212,7 @@ def main():
                                   minimun=minimun)
     ##################################################
     # 2. create neural network
-    net = Net().to(device)
+    net = Net(dataXY.inputSize).to(device)
 
     # In case it is necesary to recover part of the trained model
     '''
@@ -311,22 +313,22 @@ def main():
 
     plt.figure(figsize=(15, 5))
 
-    plt.subplot(131)
+    plt.subplot(132)
     plt.plot(range(0, nEpoch), lossEpochAcum,
              range(0, nEpoch), lossTestEpochAcum)
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
     plt.ylim(0.0)
-    plt.legend(["Train","Test"])
+    plt.legend(["Train", "Test"])
     plt.title("Training and Test Loss")
 
-    plt.subplot(132)
+    plt.subplot(133)
     plt.plot(range(0, nEpoch), accEpochAcum,
              range(0, nEpoch), accTestEpochAcum)
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
     plt.ylim(0.0)
-    plt.legend(["Train","Test"])
+    plt.legend(["Train", "Test"])
     plt.title("Training and Test Accuracy")
     ##################################################
     # 4. evaluate model
@@ -355,8 +357,8 @@ def main():
 
     ##################################################
     # 6. make a prediction
-
-    model = Net().to(device)
+    '''
+    model = Net(dataXY.inputSize).to(device)
     path = ".\\trainedModels\\20WordsStateDictModel.pth"
     model.load_state_dict(torch.load(path))
 
@@ -368,6 +370,7 @@ def main():
 
     print("Prediction is " + str(y))
     print("End predict student major demo ")
+    '''
 
 
 if __name__ == "__main__":
