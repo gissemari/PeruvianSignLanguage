@@ -227,7 +227,7 @@ for videoFolder in foldersToJoin:
                     mpLeftHand['y'] = mpHand1['y']
 
         if(len(mpHand2['x']) != 0):
-            
+
             # rightWrist and leftWrist are necesary to do the comparison
             #
             # in order to compare it,

@@ -42,11 +42,13 @@ class SignLanguageDataset(torch.utils.data.Dataset):
     def __init__(self, src_file, nTopWords=20, getDatatest=False,
                  split=0.8, minimun=False):
 
-        x, y = LoadData.getTopNWordData(nTopWords, src_file, minimun)
+        x, y = LoadData.getTopNWordData(nTopWords, src_file, minimun,
+                                        is3D=True)
 
         x_train, y_train, x_test, y_test = LoadData.splitData(x, y, split)
 
-        self.inputSize = len(x[0])
+        self.inputSize = len(x[0][0])
+        self.outputSize = nTopWords
 
         if(getDatatest):
             self.x_data = torch.tensor(x_test, dtype=torch.float32).to(device)
@@ -72,48 +74,49 @@ class SignLanguageDataset(torch.utils.data.Dataset):
 # 2. create neural network
 class Net(torch.nn.Module):
 
-    def __init__(self, inputSize):
+    def __init__(self, inputSize, hiddenSize, numLayers, outputSize):
 
         super(Net, self).__init__()
-        self.hid1 = torch.nn.Linear(inputSize, inputSize)
-        self.drop1 = torch.nn.Dropout(0.50)
-        self.hid2 = torch.nn.Linear(inputSize, int(inputSize/2))
-        self.drop2 = torch.nn.Dropout(0.25)
-        self.oupt = torch.nn.Linear(int(inputSize/2), 20)
+        '''
+        self.hidden_size = hiddenSize
 
-        torch.nn.init.xavier_uniform_(self.hid1.weight)
-        torch.nn.init.zeros_(self.hid1.bias)
-        torch.nn.init.xavier_uniform_(self.hid2.weight)
-        torch.nn.init.zeros_(self.hid2.bias)
-        torch.nn.init.xavier_uniform_(self.oupt.weight)
-        torch.nn.init.zeros_(self.oupt.bias)
+        self.i2h = torch.nn.Linear(inputSize + hiddenSize, hiddenSize)
+        self.i2o = torch.nn.Linear(inputSize + hiddenSize, outputSize)
+        self.softmax = torch.nn.LogSoftmax(dim=1)
+
+        '''
+        self.hiddenSize = hiddenSize
+        self.numLayers = numLayers
+        self.rnn = torch.nn.RNN(inputSize, hiddenSize, numLayers,
+                                nonlinearity='relu', batch_first=True)
+        self.fc = torch.nn.Linear(hiddenSize, outputSize)
+        self.softmax = torch.nn.LogSoftmax(dim=1)
+        
 
     def forward(self, x):
-        z = torch.relu(self.hid1(x))
-        z = self.drop1(z)
-        z = torch.relu(self.hid2(z))
-        z = self.drop2(z)
-        z = self.oupt(z)  # no softmax: CrossEntropyLoss()
-        return z
+        '''
+        combined = torch.cat((x.unsqueeze(0), hidden), 1)
+        hidden = self.i2h(combined)
+        output = self.i2o(combined)
+        output = self.softmax(output)
+        return output, hidden
 
+        '''
 
-# accuracy (used in batch)
-def multi_acc(y_pred, y_test):
+        h0 = torch.zeros(self.numLayers, x.size(0), self.hiddenSize
+                         ).to(device=device)
 
-    n_correct = 0
-    n_wrong = 0
+        out, hidden = self.rnn(x, h0)
 
-    for i in range(len(y_pred)):
+        out = self.fc(out[:, -1, :])
 
-        y_pred_tags = torch.argmax(y_pred[i])
+        out = self.softmax(out)
 
-        if y_pred_tags == y_test[i]:
-            n_correct += 1
-        else:
-            n_wrong += 1
-    acc = (n_correct * 1.0) / (n_correct + n_wrong)
+        return out, hidden
+        
 
-    return acc
+    #def initHidden(self):
+    #    return torch.zeros(1, self.hidden_size)
 
 
 # ----------------------------------------------------
@@ -131,7 +134,7 @@ def accuracy_eval(model, dataset):
         Y = dataset[i]['targets']  # [0], [1], ..., [Nwords]
 
         with torch.no_grad():
-            oupt = model(X)  # logits form
+            oupt, _ = model(X.unsqueeze(0))  # logits form
 
         y_pred_tags = torch.argmax(oupt)  # [0], [1], ..., [Nwords]
 
@@ -155,26 +158,10 @@ def accuracy_quick(yPred, yTarget):
     n = len(yTarget)
 
     arg_maxs = torch.argmax(yPred, dim=1)  # collapse cols
+
     num_correct = torch.sum(yTarget == arg_maxs)
     acc = (num_correct * 1.0 / n)
     return acc.item()
-
-
-"""
-def accuracy_quick(model, dataset):
-    # assumes model.eval()
-    # en masse but quick
-    n = len(dataset)
-    X = dataset[0:n]['predictors']  # all X
-    Y = torch.flatten(dataset[0:n]['targets'])  # 1-D
-
-    with torch.no_grad():
-        oupt = model(X)
-    arg_maxs = torch.argmax(oupt, dim=1)  # collapse cols
-    num_correct = torch.sum(Y==arg_maxs)
-    acc = (num_correct * 1.0 / len(dataset))
-    return acc.item()
-"""
 
 
 def main():
@@ -189,30 +176,37 @@ def main():
 
     minimun = True
     split = 0.8
-    batch_size = 66*2
+
+    num_layers = 2
+    num_classes = 20
+    batch_size = 64
     nEpoch = 1000
-    lrn_rate = 0.01
-    momentum = 0.1
+    lrn_rate = 0.0001
+    hidden_size = 256
+    sequence_length = 40
 
     print("minimun sizes of data: %s" % minimun)
     print("data train split at: %2.2f" % split)
-
+    print("hidden size: %d" % hidden_size)
     print("batch_size: %d" % batch_size)
     print("number of epoch: %d", nEpoch)
     print("learning rate: %f", lrn_rate)
 
     ##################################################
     # 1. create Dataset and DataLoader objects
-    src = "./Data/Keypoints/pkl/Segmented_gestures/"
-    dataXY = SignLanguageDataset(src, nTopWords=20, minimun=minimun)
-    dataTrain = torch.utils.data.DataLoader(dataXY, batch_size=batch_size,
-                                            shuffle=True)
 
-    XY_test = SignLanguageDataset(src, nTopWords=20, getDatatest=True,
+    # with open(args.output_Path+'3D/X.data','rb') as f: new_data = pkl.load(f)
+
+    src = "./Data/Keypoints/pkl/Segmented_gestures/"
+    dataXY = SignLanguageDataset(src, nTopWords=num_classes, minimun=minimun)
+    dataTrain = torch.utils.data.DataLoader(dataXY, batch_size=batch_size)
+
+    XY_test = SignLanguageDataset(src, nTopWords=num_classes, getDatatest=True,
                                   minimun=minimun)
     ##################################################
     # 2. create neural network
-    net = Net(dataXY.inputSize).to(device)
+    net = Net(dataXY.inputSize, hidden_size,
+              num_layers, dataXY.outputSize).to(device)
 
     # In case it is necesary to recover part of the trained model
     '''
@@ -232,9 +226,11 @@ def main():
     # 3. train network
     net.train()  # set mode
 
-    loss_func = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=lrn_rate,
-                                momentum=momentum)
+    loss_func = torch.nn.NLLLoss()
+    # loss_func = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(net.parameters(), lr=lrn_rate)
+
+    net.zero_grad()
 
     accEpochAcum = []
     lossEpochAcum = []
@@ -243,6 +239,7 @@ def main():
 
     for epoch in range(0, nEpoch):
         # T.manual_seed(1 + epoch)  # recovery reproducibility
+
         epoch_loss = 0.0  # sum avg loss per item
         epoch_acc = 0.0
 
@@ -251,27 +248,37 @@ def main():
 
         for (batch_idx, batch) in enumerate(dataTrain):
 
+            # Get data from batch
             X = batch['predictors']  # inputs
             Y = batch['targets']
 
+            X = X.to(device=device)
+            Y = Y.to(device=device)
+
+            # Get data from test
             xTest = XY_test.x_data
             yTest = XY_test.y_data
 
             net.train()
+
+            #hidden = net.initHidden()
+
             optimizer.zero_grad()
 
-            # Batch evaluation
-            oupt = net(X)
-            loss_val = loss_func(oupt, Y)  # avg loss in batch
-            epoch_loss += loss_val.item()  # a sum of averages
+            #for i in range(X.size()[1]):
+            #    output, hidden = net(X[0][i], hidden)
 
-            train_acc = accuracy_quick(oupt, Y)
+            output, hidden = net(X)
+
+            loss_val = loss_func(output, Y)
+            epoch_loss += loss_val.item()  # a sum of averages
+            train_acc = accuracy_quick(output, Y)
             epoch_acc += train_acc
 
             net.eval()
             # Test evaluation
             with torch.no_grad():
-                ouptTest = net(xTest)
+                ouptTest, _ = net(xTest)
 
             loss_val_test = loss_func(ouptTest, yTest)
             epoch_loss_test += loss_val_test.item()
@@ -279,9 +286,15 @@ def main():
             test_acc = accuracy_quick(ouptTest, yTest)
             epoch_acc_test += test_acc
 
+            # Backward
             loss_val.backward()
-            optimizer.step()
 
+            for p in net.parameters():
+                p.data.add_(p.grad.data, alpha=-lrn_rate)
+
+            # Step
+            optimizer.step()
+        '''
         dt = time.strftime("%Y_%m_%d-%H_%M_%S")
         fn = ".\\Logs\\" + str(dt) + str("-") + \
             str(epoch) + "_checkpoint.pt"
@@ -293,14 +306,14 @@ def main():
         }
 
         torch.save(info_dict, fn)
-
+        '''
         lossEpochAcum.append(epoch_loss/len(dataTrain))
         accEpochAcum.append(epoch_acc / len(dataTrain))
 
         lossTestEpochAcum.append(epoch_loss_test/len(dataTrain))
         accTestEpochAcum.append(epoch_acc_test / len(dataTrain))
 
-        if(epoch % 10 == 0):
+        if(epoch % 1 == 0):
             print("================================================")
             print("epoch = %4d   loss = %0.4f" %
                   (epoch, epoch_loss/len(dataTrain)))

@@ -128,7 +128,7 @@ def getTopNWords(nWords, mainFolderPath):
 
     for word, value in topWords:
         union = union + timeStepDict[word]
-
+    '''
     plt.hist(union, bins=max(union))
     plt.xlabel("Number of time steps")
     plt.ylabel("frequency")
@@ -138,22 +138,22 @@ def getTopNWords(nWords, mainFolderPath):
     mean = unionArr.mean()
     std = unionArr.std()
 
-    '''
     print("Number of instances:")
     print("-------------------")
     print("2nd deviation range: ", [mean - 2 * std, mean + 2 * std])
     print("Minimun: %d" % min(union))
     print("Maximun: %d" % max(union))
     '''
-    return topWords, int(mean + 2 * std)+1
+    return topWords, min(union), 40
 
 
-def getTopNWordData(nWords, mainFolderPath, minimun=False):
+def getTopNWordData(nWords, mainFolderPath, minimun=False, is3D=True):
 
-    # return a list of 2D tuple
-    top20Words, maxTimeStepAllowed = getTopNWords(nWords, mainFolderPath)
+    # return a list of 2D tuple, min and max timestep size
+    topNWords, minTimeStep, maxTimeStepAllowed = getTopNWords(
+        nWords, mainFolderPath)
 
-    topWordList = [key for (key, value) in top20Words]
+    topWordList = [key for (key, value) in topNWords]
     wordLabels = list(range(len(topWordList)))
 
     # To identify which word corresponds to its label (int: 1, 2, 3, ...)
@@ -189,14 +189,23 @@ def getTopNWordData(nWords, mainFolderPath, minimun=False):
             timeStepSize = len(fileData)
 
             if timeStepSize > maxTimeStepAllowed:
-
                 continue
+
             fileData = fileData.flatten()
             for _ in range(maxTimeStepAllowed - timeStepSize):
-
                 fileData = np.append(fileData, [np.zeros(66)])
 
             x = x + [list(fileData)]
             y = y + [topWordDict[word]]
 
-    return x, y, maxTimeStepAllowed
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    if(is3D):
+        newX = []
+        for instance in x:
+            instance = np.reshape(instance, (40, 66), order='C')
+            newX.append(instance)
+        x = np.asarray(newX)
+
+    return x, y
