@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser(description='X and Y Dataset generator')
 parser.add_argument('--is3D', action="store_true",
                     help='To have dataset x in 3 dimentions')
 
+
 # Path to folder with videos
 parser.add_argument('--main_folder_Path', type=str,
                     default="./Data/Keypoints/pkl/Segmented_gestures/",
@@ -40,6 +41,8 @@ parser.add_argument("--words", type=int, default=20,
 # Number of Time steps
 parser.add_argument("--timesteps", type=int, default=40,
                     help="Max number of timestep allowed")
+
+
 
 args = parser.parse_args()
 
@@ -96,6 +99,7 @@ for word, value in topWords:
     union = union + timeStepDict[word]
 
 topWordList = [key for (key, value) in topWords]
+
 wordLabels = list(range(len(topWordList)))
 
 # To identify which word corresponds to its label (int: 1, 2, 3, ...)
@@ -123,6 +127,7 @@ for folderName in foldersToLoad:
 
         word = file.split('_')[0]
 
+        # To process only topWordList
         if word not in topWordList:
             continue
 
@@ -130,36 +135,43 @@ for folderName in foldersToLoad:
 
         timeStepSize = len(fileData)
 
+        # Not consider large timesteps
         if timeStepSize > args.timesteps:
             continue
 
-        fileData = fileData.flatten()
-        for _ in range(args.timesteps - timeStepSize):
+        if(args.is3D):
 
-            fileData = np.append(fileData, [np.zeros(66)])
+            for _ in range(args.timesteps - timeStepSize):
+                fileData = np.append(fileData, [np.zeros(66)], axis=0)
+
+        # if is in 2D
+        else:
+            fileData = fileData.flatten()
+            for _ in range(args.timesteps - timeStepSize):
+                fileData = np.append(fileData, np.zeros(66))
 
         x = x + [list(fileData)]
         y = y + [topWordDict[word]]
 
 x = np.asarray(x)
+print("X shape: ", x.shape)
 y = np.asarray(y)
+print("Y shape: ", y.shape)
+
+# to switch key and values to have y number meaning
+y_meaning = {y: x for x, y in topWordDict.items()}
+
 
 if(args.is3D):
+    shapePath = '3D/'
+else:
+    shapePath = '2D/'
 
-    newX = []
-    for instance in x:
-        newX.append(np.reshape(instance, (40, 66), order='C'))
-    x = np.asarray(newX)
+with open(args.output_Path+shapePath+'X.data', 'wb') as f:
+    pkl.dump(x, f)
 
-    with open(args.output_Path+'3D/X.data', 'wb') as f:
-        pkl.dump(x, f)
+with open(args.output_Path+shapePath+'Y.data', 'wb') as f:
+    pkl.dump(y, f)
 
-    with open(args.output_Path+'3D/Y.data', 'wb') as f:
-        pkl.dump(y, f)
-
-else:  # if 2D
-    with open(args.output_Path+'2D/X.data', 'wb') as f:
-        pkl.dump(x, f)
-
-    with open(args.output_Path+'2D/Y.data', 'wb') as f:
-        pkl.dump(y, f)
+with open(args.output_Path+shapePath+'Y_meaning.data', 'wb') as f:
+    pkl.dump(y_meaning, f)

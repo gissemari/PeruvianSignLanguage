@@ -12,6 +12,7 @@ from collections import Counter
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
 # Local imports
 
@@ -209,3 +210,22 @@ def getTopNWordData(nWords, mainFolderPath, minimun=False, is3D=True):
         x = np.asarray(newX)
 
     return x, y
+
+
+def getData(is3D=True):
+
+    if is3D:
+        dimPath = '3D/'
+    else:
+        dimPath = '2D/'
+
+    with open('./Data/Dataset/'+dimPath+'X.data', 'rb') as f:
+        X = pickle.load(f)
+
+    with open('./Data/Dataset/'+dimPath+'Y.data', 'rb') as f:
+        Y = pickle.load(f)
+
+    with open('./Data/Dataset/'+dimPath+'Y_meaning.data', 'rb') as f:
+        y_meaning = pickle.load(f)
+
+    return X, Y, y_meaning

@@ -31,7 +31,7 @@ import pandas as pd
 import pickle as pkl
 
 # Local imports
-import utils.video as uv  # for create folder
+import utils.video as uv  # for folder creation
 
 
 #########################
@@ -275,6 +275,7 @@ for videoFolder in folder_list:
         df.to_json(jsonName)
 
         # Save Pickle
+        print(pcklFileName)
         with open(pcklFileName, 'wb') as pickle_file:
             pkl.dump(new3D, pickle_file)
 
