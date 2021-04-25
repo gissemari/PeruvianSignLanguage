@@ -39,23 +39,21 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 1. create Dataset and DataLoader objects
 class SignLanguageDataset(torch.utils.data.Dataset):
 
-    def __init__(self, src_file, nTopWords=20, getDatatest=False,
+    def __init__(self, src_file, nTopWords=20,
                  split=0.8, minimun=False):
 
-        x, y = LoadData.getTopNWordData(nTopWords, src_file, minimun,
-                                        is3D=True)
+        x, y, y_meaning = LoadData.getData()
 
         x_train, y_train, x_test, y_test = LoadData.splitData(x, y, split)
 
         self.inputSize = len(x[0][0])
         self.outputSize = nTopWords
 
-        if(getDatatest):
-            self.x_data = torch.tensor(x_test, dtype=torch.float32).to(device)
-            self.y_data = torch.tensor(y_test, dtype=torch.int64).to(device)
-        else:
-            self.x_data = torch.tensor(x_train, dtype=torch.float32).to(device)
-            self.y_data = torch.tensor(y_train, dtype=torch.int64).to(device)
+        self.x_data_Test = torch.tensor(x_test, dtype=torch.float32).to(device)
+        self.y_data_Test = torch.tensor(y_test, dtype=torch.int64).to(device)
+
+        self.x_data = torch.tensor(x_train, dtype=torch.float32).to(device)
+        self.y_data = torch.tensor(y_train, dtype=torch.int64).to(device)
 
     def __len__(self):
         return len(self.y_data)
@@ -77,21 +75,13 @@ class Net(torch.nn.Module):
     def __init__(self, inputSize, hiddenSize, numLayers, outputSize):
 
         super(Net, self).__init__()
-        '''
-        self.hidden_size = hiddenSize
 
-        self.i2h = torch.nn.Linear(inputSize + hiddenSize, hiddenSize)
-        self.i2o = torch.nn.Linear(inputSize + hiddenSize, outputSize)
-        self.softmax = torch.nn.LogSoftmax(dim=1)
-
-        '''
         self.hiddenSize = hiddenSize
         self.numLayers = numLayers
         self.rnn = torch.nn.RNN(inputSize, hiddenSize, numLayers,
                                 nonlinearity='relu', batch_first=True)
         self.fc = torch.nn.Linear(hiddenSize, outputSize)
         self.softmax = torch.nn.LogSoftmax(dim=1)
-        
 
     def forward(self, x):
         '''
@@ -113,9 +103,8 @@ class Net(torch.nn.Module):
         out = self.softmax(out)
 
         return out, hidden
-        
 
-    #def initHidden(self):
+    # def initHidden(self):
     #    return torch.zeros(1, self.hidden_size)
 
 
@@ -177,11 +166,11 @@ def main():
     minimun = True
     split = 0.8
 
-    num_layers = 2
+    num_layers = 5
     num_classes = 20
     batch_size = 64
-    nEpoch = 1000
-    lrn_rate = 0.0001
+    nEpoch = 5000
+    lrn_rate = 0.00003
     hidden_size = 256
     sequence_length = 40
 
@@ -201,8 +190,6 @@ def main():
     dataXY = SignLanguageDataset(src, nTopWords=num_classes, minimun=minimun)
     dataTrain = torch.utils.data.DataLoader(dataXY, batch_size=batch_size)
 
-    XY_test = SignLanguageDataset(src, nTopWords=num_classes, getDatatest=True,
-                                  minimun=minimun)
     ##################################################
     # 2. create neural network
     net = Net(dataXY.inputSize, hidden_size,
@@ -237,6 +224,12 @@ def main():
     accTestEpochAcum = []
     lossTestEpochAcum = []
 
+    '''
+    plt.ion()
+    fig, axs = plt.subplots(1, 2)
+    fig.set_figheight(5)
+    fig.set_figwidth(10)
+    '''
     for epoch in range(0, nEpoch):
         # T.manual_seed(1 + epoch)  # recovery reproducibility
 
@@ -255,18 +248,9 @@ def main():
             X = X.to(device=device)
             Y = Y.to(device=device)
 
-            # Get data from test
-            xTest = XY_test.x_data
-            yTest = XY_test.y_data
-
             net.train()
 
-            #hidden = net.initHidden()
-
             optimizer.zero_grad()
-
-            #for i in range(X.size()[1]):
-            #    output, hidden = net(X[0][i], hidden)
 
             output, hidden = net(X)
 
@@ -274,6 +258,10 @@ def main():
             epoch_loss += loss_val.item()  # a sum of averages
             train_acc = accuracy_quick(output, Y)
             epoch_acc += train_acc
+
+            # Get data from test
+            xTest = dataXY.x_data_Test.to(device=device)
+            yTest = dataXY.y_data_Test.to(device=device)
 
             net.eval()
             # Test evaluation
@@ -313,7 +301,7 @@ def main():
         lossTestEpochAcum.append(epoch_loss_test/len(dataTrain))
         accTestEpochAcum.append(epoch_acc_test / len(dataTrain))
 
-        if(epoch % 1 == 0):
+        if(epoch % 2 == 0):
             print("================================================")
             print("epoch = %4d   loss = %0.4f" %
                   (epoch, epoch_loss/len(dataTrain)))
@@ -321,6 +309,26 @@ def main():
             print("----------------------")
             print("loss (test) = %0.4f" % (epoch_loss_test/len(dataTrain)))
             print("acc(test) = %0.4f" % (epoch_acc_test / len(dataTrain)))
+
+            '''
+            axs[0].clear()
+            axs[1].clear()
+
+            axs[0].plot(range(0, epoch+1), lossEpochAcum,
+                        range(0, epoch+1), lossTestEpochAcum)
+            axs.flat[0].set(xlabel="Epoch",ylabel="Loss",ylim = 0.0)
+            axs[0].legend(["Train", "Test"])
+            axs[0].set_title("Training and Test Loss")
+
+            axs[1].plot(range(0, epoch+1), accEpochAcum,
+                        range(0, epoch+1), accTestEpochAcum)
+            axs.flat[1].set(xlabel="Epoch",ylabel="Accuracy",ylim = 0.0)
+            axs[1].set_ylabel("Accuracy")
+            axs[1].legend(["Train", "Test"])
+            axs[1].set_title("Training and Test Accuracy")
+            fig.canvas.draw()
+            fig.canvas.flush_events()
+            '''
 
     print("Done ")
 

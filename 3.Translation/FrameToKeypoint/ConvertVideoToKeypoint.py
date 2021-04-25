@@ -62,6 +62,11 @@ parser.add_argument('--json_output', type=str, default="./Data/Keypoints/json/Se
 
 parser.add_argument('--pkl_output', type=str, default="./Data/Keypoints/pkl/Segmented_gestures",
                     help='relative path of csv output set of landmarks.' + ' Default: ./jsonOut/mediapipe/')
+# Add Line feature
+parser.add_argument('--withLineFeature', action="store_true",
+                    help='To have dataset x in 3 dimentions')
+
+
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
 
@@ -109,12 +114,22 @@ if(args.pose):
                         min_detection_confidence=0.5)
 
 if (args.holistic):
-    holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
-                                    min_tracking_confidence=0.5)
-
+    if args.withLineFeature:
+        holistic = mp_holistic.Holistic(upper_body_only=True,
+                                        min_detection_confidence=0.5,
+                                        min_tracking_confidence=0.5)
+    else:
+        holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
+                                        min_tracking_confidence=0.5)
 #########################
 # UTILS
 ##############
+
+# Line feature coneccions
+LineFeatureConect = [[11, 12], [12, 14], [14, 16], [16, 18],
+                     [16, 20], [16, 22], [11, 13], [13, 15],
+                     [15, 17], [15, 19], [15, 21],
+                     [0, 8], [0, 7]]
 
 # Drawing
 mp_drawing = mp.solutions.drawing_utils
@@ -247,14 +262,33 @@ for videoFolder in folder_list:
                 #     list_X.append(data_point.landmark.x)
                 #     list_Y.append(data_point.landmark.y)
 
-                for data_point in holisResults.pose_landmarks.landmark:
+                for posi,  data_point in enumerate(holisResults.pose_landmarks.landmark):
                     list_X.append(data_point.x)
                     list_Y.append(data_point.y)
+
+                if(args.withLineFeature):
+                    for conections in LineFeatureConect:
+                        p1 = holisResults.pose_landmarks.landmark[conections[0]]
+                        p2 = holisResults.pose_landmarks.landmark[conections[1]]
+
+                        lineX = p2.x - p1.x
+                        lineY = p2.y - p1.y
+
+                        list_X.append(lineX)
+                        list_Y.append(lineY)
 
                 #mp_drawing.draw_landmarks(annotated_image, holisResults.face_landmarks, mp_holistic.FACE_CONNECTIONS)
                 #mp_drawing.draw_landmarks(annotated_image, holisResults.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
                 #mp_drawing.draw_landmarks(annotated_image, holisResults.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-                mp_drawing.draw_landmarks(annotated_image, holisResults.pose_landmarks, mp_holistic.POSE_CONNECTIONS)
+
+                if(args.withLineFeature):
+                    mp_drawing.draw_landmarks(annotated_image,
+                                              holisResults.pose_landmarks,
+                                              mp_holistic.UPPER_BODY_POSE_CONNECTIONS)
+                else:
+                    mp_drawing.draw_landmarks(annotated_image,
+                                              holisResults.pose_landmarks,
+                                              mp_holistic.POSE_CONNECTIONS)
 
             list_seq.append([list_X, list_Y])
 
@@ -267,7 +301,15 @@ for videoFolder in folder_list:
             ret, frame = cap.read()
             idx += 1
 
-        new3D = np.asarray(list_seq).reshape((-1, 33*2))
+        new3D = []
+
+        if args.withLineFeature:
+            # 25 (points) + 13(lines) * 2 (x and y axes)
+            new3D = np.asarray(list_seq).reshape((-1, (25+13)*2))
+        else:
+            # 33 (points) * 2 (x and y axes)
+            new3D = np.asarray(list_seq).reshape((-1, 33*2))
+
         print(videoFolder, videoFile, new3D.shape)
 
         # Save JSON

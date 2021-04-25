@@ -21,7 +21,6 @@ parser = argparse.ArgumentParser(description='X and Y Dataset generator')
 parser.add_argument('--is3D', action="store_true",
                     help='To have dataset x in 3 dimentions')
 
-
 # Path to folder with videos
 parser.add_argument('--main_folder_Path', type=str,
                     default="./Data/Keypoints/pkl/Segmented_gestures/",
@@ -41,7 +40,6 @@ parser.add_argument("--words", type=int, default=20,
 # Number of Time steps
 parser.add_argument("--timesteps", type=int, default=40,
                     help="Max number of timestep allowed")
-
 
 
 args = parser.parse_args()
