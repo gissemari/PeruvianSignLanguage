@@ -89,7 +89,7 @@ wordTrends = Counter(wordList)
 # the Counter
 
 topWords = wordTrends.most_common(args.words)
-
+print(topWords)
 # to acumulate timesteps to do statistic
 union = []
 
@@ -108,6 +108,7 @@ topWordDict = dict(zip(topWordList, wordLabels))
 
 x = []
 y = []
+y_oneHot = []
 
 foldersToLoad = os.listdir(args.main_folder_Path)
 
@@ -140,25 +141,40 @@ for folderName in foldersToLoad:
         if(args.is3D):
 
             for _ in range(args.timesteps - timeStepSize):
-                fileData = np.append(fileData, [np.zeros(66)], axis=0)
+                fileData = np.append(fileData, [np.zeros(len(fileData[0]))], axis=0)
 
         # if is in 2D
         else:
             fileData = fileData.flatten()
             for _ in range(args.timesteps - timeStepSize):
-                fileData = np.append(fileData, np.zeros(66))
+                fileData = np.append(fileData, np.zeros(len(fileData[0])))
+
+        oneHot = np.zeros(args.words)
+        oneHot[topWordDict[word]] = 1
 
         x = x + [list(fileData)]
         y = y + [topWordDict[word]]
+        y_oneHot = y_oneHot + [oneHot]
+
 
 x = np.asarray(x)
 print("X shape: ", x.shape)
 y = np.asarray(y)
 print("Y shape: ", y.shape)
+y_oneHot = np.asarray(y_oneHot)
+print("Y (one hot) shape: ", y_oneHot.shape)
 
 # to switch key and values to have y number meaning
-y_meaning = {y: x for x, y in topWordDict.items()}
+y_meaning = {_y: _x for _x, _y in topWordDict.items()}
 
+# to get weights for all topwords selected
+dict_weight = Counter(y)
+
+total_weight = max([w for w in dict_weight.values()])
+weight = [dict_weight[w]/total_weight for w in range(args.words)]
+
+weight = np.asarray(weight)
+print("weight shape: ", weight.shape)
 
 if(args.is3D):
     shapePath = '3D/'
@@ -170,6 +186,12 @@ with open(args.output_Path+shapePath+'X.data', 'wb') as f:
 
 with open(args.output_Path+shapePath+'Y.data', 'wb') as f:
     pkl.dump(y, f)
+
+with open(args.output_Path+shapePath+'weight.data', 'wb') as f:
+    pkl.dump(weight, f)
+
+with open(args.output_Path+shapePath+'Y_oneHot.data', 'wb') as f:
+    pkl.dump(y_oneHot, f)
 
 with open(args.output_Path+shapePath+'Y_meaning.data', 'wb') as f:
     pkl.dump(y_meaning, f)

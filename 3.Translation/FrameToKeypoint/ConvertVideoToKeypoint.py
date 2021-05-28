@@ -43,12 +43,10 @@ parser = argparse.ArgumentParser(description='Mediapipe models ' +
                                  '(FaceMesh, Hands, Pose)')
 
 # Models
-parser.add_argument('--face_mesh', action="store_true",
-                    help='Use face mesh model')
+parser.add_argument('--face_mesh', action="store_true", help='Use face mesh model')
 parser.add_argument('--hands', action="store_true", help='Use hands model')
 parser.add_argument('--pose', action="store_true", help='Use pose model')
-parser.add_argument('--holistic', action="store_true",
-                    help='Use holistic model: face, hands and pose')
+parser.add_argument('--holistic', action="store_true", help='Use holistic model: face, hands and pose')
 
 # File paths
 parser.add_argument('--inputPath', type=str, default="./Data/Videos/Segmented_gestures/",
@@ -82,13 +80,19 @@ args = parser.parse_args()
 #  3-Pose
 #  4-Holistic
 ##############
+print()
+print("model (using):")
 if(args.face_mesh):
+    print(" - faceMesh")
     mp_face_mesh = mp.solutions.face_mesh
 if(args.hands):
+    print(" - hands")
     mp_hands = mp.solutions.hands
 if(args.pose):
+    print(" - pose")
     mp_pose = mp.solutions.pose
 if(args.holistic):
+    print(" - holistic")
     mp_holistic = mp.solutions.holistic
 
 
@@ -115,6 +119,7 @@ if(args.pose):
 
 if (args.holistic):
     if args.withLineFeature:
+        print("   + with Line Feature")
         holistic = mp_holistic.Holistic(upper_body_only=True,
                                         min_detection_confidence=0.5,
                                         min_tracking_confidence=0.5)
