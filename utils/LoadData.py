@@ -7,6 +7,7 @@ Created on Fri Jan 22 23:40:24 2021
 # Standard library imports
 import os
 from collections import Counter
+from random import shuffle
 
 # Third party imports
 import pandas as pd
@@ -15,24 +16,62 @@ import numpy as np
 import pickle
 
 # Local imports
+#
 
 
-def splitData(x, y, split=0.8):
+def getData(is3D=True):
+
+    if is3D:
+        dimPath = '3D/'
+    else:
+        dimPath = '2D/'
+
+    with open('./Data/Dataset/'+dimPath+'X.data', 'rb') as f:
+        X = pickle.load(f)
+
+    with open('./Data/Dataset/'+dimPath+'Y.data', 'rb') as f:
+        Y = pickle.load(f)
+
+    with open('./Data/Dataset/'+dimPath+'weight.data', 'rb') as f:
+        weight = pickle.load(f)
+
+    with open('./Data/Dataset/'+dimPath+'Y_meaning.data', 'rb') as f:
+        y_meaning = pickle.load(f)
+
+    return X, Y, weight, y_meaning
+
+
+def splitData(x, y, split=0.8, leastValue=False, balancedTest=False, doShuffle=False):
 
     # to count repeated targets in y
     targetDict = dict(Counter(y))
 
     pivot = targetDict.copy()
+    end = targetDict.copy()
+    
+    if leastValue:
+        value = min([val for val in targetDict.values()])
+        minValue = int(value*split)
+        if(balancedTest):
+            minTest = value - minValue
 
     for key in targetDict:
 
-        pivot[key] = int(targetDict[key]*split)
+        if leastValue:
+            pivot[key] = minValue
+            if(balancedTest):
+                end[key] = minTest
+        else:
+            pivot[key] = int(targetDict[key]*split)
 
     x_train = []
     y_train = []
 
     x_test = []
     y_test = []
+    
+    if(doShuffle):
+        shuffle(y)
 
     for index, key in enumerate(y):
 
@@ -41,6 +80,12 @@ def splitData(x, y, split=0.8):
             y_train.append(y[index])
 
             pivot[key] = pivot[key] - 1
+        elif(leastValue and balancedTest):
+            if(end[key]):
+                x_test.append(x[index])
+                y_test.append(y[index])
+                
+                end[key] = end[key] -1
         else:
             x_test.append(x[index])
             y_test.append(y[index])
@@ -210,22 +255,3 @@ def getTopNWordData(nWords, mainFolderPath, minimun=False, is3D=True):
         x = np.asarray(newX)
 
     return x, y
-
-
-def getData(is3D=True):
-
-    if is3D:
-        dimPath = '3D/'
-    else:
-        dimPath = '2D/'
-
-    with open('./Data/Dataset/'+dimPath+'X.data', 'rb') as f:
-        X = pickle.load(f)
-
-    with open('./Data/Dataset/'+dimPath+'Y.data', 'rb') as f:
-        Y = pickle.load(f)
-
-    with open('./Data/Dataset/'+dimPath+'Y_meaning.data', 'rb') as f:
-        y_meaning = pickle.load(f)
-
-    return X, Y, y_meaning
