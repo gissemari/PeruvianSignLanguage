@@ -7,6 +7,7 @@ Created on Fri Jan 22 23:40:24 2021
 # Standard library imports
 import os
 from collections import Counter
+import random
 from random import shuffle
 
 # Third party imports
@@ -71,7 +72,8 @@ def splitData(x, y, split=0.8, leastValue=False, balancedTest=False, doShuffle=F
     y_test = []
     
     if(doShuffle):
-        shuffle(y)
+        random.Random(52).shuffle(y)
+        #shuffle(y)
 
     for index, key in enumerate(y):
 

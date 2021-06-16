@@ -4,7 +4,7 @@ cp -r utils 3.Translation/FrameToKeypoint
 
 python 2.Segmentation/segmentPerSRT.py --rawVideoPath ./Data/Videos/RawVideo/ --srtPath ./Data/SRT/SRT_gestures/ --outputVideoPath ./Data/Videos/Segmented_gestures/ --flgGesture 1 
 
-python 3.Translation/FrameToKeypoint/ConvertVideoToKeypoint.py --holistic --withLineFeature
+python 3.Translation/FrameToKeypoint/ConvertVideoToKeypoint.py --holistic
 
 # errase created files to avoid confusions
 rm -r 2.Segmentation/utils

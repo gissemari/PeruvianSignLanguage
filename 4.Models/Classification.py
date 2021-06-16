@@ -23,7 +23,6 @@ conda: 4.9.2
 
 # Standard library imports
 import time
-import itertools
 
 # Third party imports
 import numpy as np
@@ -32,6 +31,10 @@ import matplotlib.pyplot as plt
 
 # Local imports
 from utils import LoadData
+import utils.video as uv
+import utils.wandbFunctions as wandbF
+import utils.backupModel as bckmod
+import utils.classificationPlotAndPrint as pp
 
 torch.cuda.empty_cache()
 device = torch.device("cuda" )
@@ -48,16 +51,16 @@ class SignLanguageDataset(torch.utils.data.Dataset):
 
         x_train, y_train, x_test, y_test = LoadData.splitData(x, y, split,
                                                               leastValue=True,
-                                                              balancedTest=True,
-                                                              doShuffle=False)
+                                                              balancedTest=False,
+                                                              doShuffle=True)
 
         self.inputSize = len(x[0][0])
         self.outputSize = nTopWords
 
         self.weight = torch.tensor(weight, dtype=torch.float32).to(device)
-        self.y_meaning = y_labels
+        self.y_labels = y_labels
 
-        self.x_data_Test = torch.tensor(x_test, dtype=torch.float32)
+        self.x_data_Test = torch.tensor(x_test, dtype=torch.float32).to(device)
         self.y_data_Test = torch.tensor(y_test, dtype=torch.int64).to(device)
 
         self.x_data = torch.tensor(x_train, dtype=torch.float32).to(device)
@@ -80,57 +83,31 @@ class SignLanguageDataset(torch.utils.data.Dataset):
 # 2. create neural network
 class Net(torch.nn.Module):
 
-    def __init__(self, inputSize, hiddenSize, numLayers, outputSize):
+    def __init__(self, inputSize, hiddenSize, numLayers, outputSize,dropout=0):
 
         super(Net, self).__init__()
 
         self.hiddenSize = hiddenSize
         self.numLayers = numLayers
-        self.rnn = torch.nn.RNN(inputSize, hiddenSize, numLayers,
-                                 batch_first=True)
+        self.withDropout = dropout
 
+        if(dropout):
+            self.rnn = torch.nn.RNN(inputSize, hiddenSize, numLayers,dropout=0.25, batch_first=True, nonlinearity="relu")
+        else:
+            self.rnn = torch.nn.RNN(inputSize, hiddenSize, numLayers,batch_first=True, nonlinearity="relu")
         self.fc = torch.nn.Linear(hiddenSize, outputSize)
+        if(dropout):
+            self.dropout = torch.nn.Dropout(dropout)
 
     def forward(self, x):
 
-        h0 = torch.zeros(self.numLayers, x.size(0), self.hiddenSize
-                         ).to(device=device)
-
+        h0 = torch.zeros(self.numLayers, x.size(0), self.hiddenSize).to(device=device)
         out, hidden = self.rnn(x, h0)
-
+        if(self.withDropout):
+            out = self.dropout(out)
         out = self.fc(out[:, -1, :])
 
         return out, hidden
-
-
-# ----------------------------------------------------
-# 4. evaluate model
-def accuracy_eval(model, x, y):
-
-    # assumes model.eval()
-    # granular but slow approach
-    n_correct = 0
-    n_wrong = 0
-
-    for i in range(len(y)):
-
-        X = x
-        Y = y  # [0], [1], ..., [Nwords]
-
-        with torch.no_grad():
-            oupt, _ = model(X)  # logits form
-
-        y_pred_tags = torch.argmax(oupt, dim=1)  # [0], [1], ..., [Nwords]
-
-        print(y_pred_tags.shape, Y.shape, oupt.shape)
-        if y_pred_tags == Y:
-            n_correct += 1
-        else:
-            n_wrong += 1
-
-    acc = (n_correct * 1.0) / (n_correct + n_wrong)
-    return acc
-
 
 def accuracy_quick(yPred, yTarget):
     # assumes model.eval()
@@ -142,29 +119,33 @@ def accuracy_quick(yPred, yTarget):
     acc = (num_correct * 1.0 / n)
     return acc.item()
 
+
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 
 def main():
 
     ##################################################
     # 0. get started
+    
     print("Begin predict sign language")
     np.random.seed(1)
     torch.manual_seed(1)
 
     # variables
-
     minimun = True
     split = 0.8
-
-    num_layers = 100
+    dropout = 0.25
+    num_layers = 15
     num_classes = 10
-    batch_size = 30
-    nEpoch = 500
-    lrn_rate = 0.001
-    hidden_size = 512
+    batch_size = 2
+    nEpoch = 1000
+    lrn_rate = 0.0005
+    hidden_size = 32   
     # sequence_length = 40
+    wandbF.initConfigWandb(num_layers, num_classes, batch_size, nEpoch,
+                    lrn_rate, hidden_size, dropout)
 
     print("minimun sizes of data: %s" % minimun)
     print("data train split at: %2.2f" % split)
@@ -185,32 +166,24 @@ def main():
 
     ##################################################
     # 2. create neural network
-    net = Net(dataXY.inputSize, hidden_size,
-              num_layers, dataXY.outputSize).to(device)
+    net = Net(dataXY.inputSize, hidden_size, num_layers, dataXY.outputSize).to(device)
+    
     print('The number of parameter is: %d' % count_parameters(net))
-    # print(pytorch_total_params)
-    # In case it is necesary to recover part of the trained model
-    '''
-    fn = ".\\Log\\2021_01_25-10_32_57-900_checkpoint.pt"
-    chkpt = torch.load(fn)
-    net.load_state_dict(chkpt['net_state'])
-    optimizer.load_state_dict(chkpt['optimizer_state'])
-    ....
-    # add thispart in netTrain
-    epoch_saved = chkpt['epoch'] + 1
-    for epoch in range(epoch_saved, max_epochs):
-        torch.manual_seed(1 + epoch)
-        # resume training as usual
-    '''
+    
+    # Wandb the network weight
+    wandbF.watch(net)
 
     ##################################################
     # 3. train network
     net.train()  # set mode
 
-    # loss_func = torch.nn.NLLLoss()
     # loss_func = torch.nn.CrossEntropyLoss(weight=dataXY.weight)
     loss_func = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=lrn_rate)
+
+    # In case it is necesary to recover part of the trained model from checkpoint
+    # chkPntPath = ""
+    # bckmod.loadFromCheckPoint(chkPntPath, net, optimizer, nEpoch)
 
     net.zero_grad()
 
@@ -219,12 +192,8 @@ def main():
     accTestEpochAcum = []
     lossTestEpochAcum = []
 
-    plt.ion()
-    fig, axs = plt.subplots(1, 2    )
-    fig.set_figheight(10)
-    fig.set_figwidth(15)
-    
-    
+    fig, axs = pp.interactivePlotConf()
+
     start_time = time.time()
     
     for epoch in range(0, nEpoch):
@@ -246,7 +215,8 @@ def main():
             Y = batch['targets']
             XTrain = X.to(device)
             YTrain = Y.to(device)
-
+            
+            ### Test evaluation
             net.train()
 
             optimizer.zero_grad()
@@ -262,8 +232,9 @@ def main():
             xTest = dataXY.x_data_Test.to(device)
             yTest = dataXY.y_data_Test.to(device)
 
+            ### Test evaluation
             net.eval()
-            # Test evaluation
+
             with torch.no_grad():
                 ouptTest, _ = net(xTest)
 
@@ -276,80 +247,68 @@ def main():
             # Backward
             loss_val.backward()
 
-            for p in net.parameters():
-                p.data.add_(p.grad.data, alpha=-lrn_rate)    
-    # def initHidden(self):
-    # return torch.zeros(1, self.hidden_size)
-
             # Step
             optimizer.step()
-        '''
-        dt = time.strftime("%Y_%m_%d-%H_%M_%S")
-        fn = ".\\Logs\\" + str(dt) + str("-") + \
-            str(epoch) + "_checkpoint.pt"
 
-        info_dict = {
-            'epoch': epoch,
-            'net_state': net.state_dict(),
-            'optimizer_state': optimizer.state_dict()
-        }
+        # if you need to save checkpoint of the model
+        # chkPntPath=""
+        # bckmod.saveCheckPoint(chkPntPath, net, optimizer, nEpoch)
 
-        torch.save(info_dict, fn)
-        '''
-        lossEpochAcum.append(epoch_loss/len(dataTrain))
-        accEpochAcum.append(epoch_acc / len(dataTrain))
+        lossEpoch = epoch_loss/len(dataTrain)
+        accEpoch = epoch_acc / len(dataTrain)
+        lossEpochAcum.append(lossEpoch)
+        accEpochAcum.append(accEpoch)
 
-        lossTestEpochAcum.append(epoch_loss_test/len(dataTrain))
-        accTestEpochAcum.append(epoch_acc_test / len(dataTrain))
+        lossTestEpoch = epoch_loss_test/len(dataTrain)
+        accTestEpoch = epoch_acc_test / len(dataTrain)
+        lossTestEpochAcum.append(lossTestEpoch)
+        accTestEpochAcum.append(accTestEpoch)
 
         if(epoch % 1 == 0):
-            print("================================================")
-            print("epoch = %4d   loss = %0.4f" %
-                  (epoch, epoch_loss/len(dataTrain)))
-            print("acc = %0.4f" % (epoch_acc / len(dataTrain)))
-            print("----------------------")
-            print("loss (test) = %0.4f" % (epoch_loss_test/len(dataTrain)))
-            print("acc(test) = %0.4f" % (epoch_acc_test / len(dataTrain)))
-            print("Epoch time: %0.4f seconds" % (time.time() - start_bach_time))
-            axs[0].clear()
-            axs[1].clear()
-            plt.title("hola")
-            axs[0].plot(range(0, epoch+1), lossEpochAcum,
-                        range(0, epoch+1), lossTestEpochAcum)
-            axs.flat[0].set(xlabel="Epoch",ylabel="Loss",ylim = 0.0)
-            axs[0].legend(["Train", "Test"])
-            axs[0].set_title("Loss (CrossEntropyLoss)")
-            fig.suptitle('Num layers: %d | ' % (num_layers) +
-                         'batch size: %d\n' % (batch_size) +
-                         'num classes: %d | ' % (num_classes) +
-                         'nEpoch: %d\n' % (nEpoch) +
-                         'lrn rate: %f | ' % (lrn_rate) +
-                         'hidden size: %d' % (hidden_size))
-
-            axs[1].plot(range(0, epoch+1), accEpochAcum,
-                        range(0, epoch+1), accTestEpochAcum)
-            axs.flat[1].set(xlabel="Epoch",ylabel="Accuracy",ylim = 0.0)
-            axs[1].set_ylabel("Accuracy")
-            axs[1].legend(["Train", "Test"])
-            axs[1].set_title("Accuracy")
-            fig.canvas.draw()
-            fig.canvas.flush_events()
+            
+            #Log in wandb
+            wandbF.wandbLog(lossEpoch, accEpoch, lossTestEpoch, accTestEpoch)
+            
+            #print epoch evaluation
+            pp.printEpochEval(epoch, lossEpoch, accEpoch, lossTestEpoch,
+                           accTestEpoch, start_bach_time)
+            
+            pp.plotEpochEval(fig, plt, axs, epoch, lossEpochAcum, lossTestEpochAcum,
+                  accEpochAcum, accTestEpochAcum, num_layers, num_classes, 
+                  batch_size, nEpoch, lrn_rate, hidden_size)
+            
 
     print("Done ")
     print("Total time: %0.4f seconds" % (time.time() - start_time))
+    ########################
+    # END of the training section
+    ##################################################
+    
+    #Prepare folders
+    uv.createFolder("./evaluation/classes_%d" % num_classes)
+    uv.createFolder("./evaluation/classes_%d/layers_%d" % (num_classes, num_layers)) 
+    uv.createFolder("./evaluation/classes_%d/layers_%d/lrnRt_%f" % (num_classes, num_layers,lrn_rate))
+    uv.createFolder("./evaluation/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (num_classes, num_layers,lrn_rate, batch_size))
+    pltSavePath = "./evaluation/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (num_classes, num_layers,lrn_rate,batch_size)
+    plt.savefig(pltSavePath + '/LOSS_lrnRt-%f_batch-%d_nEpoch-%d_hidden-%d.png' % (lrn_rate, batch_size, nEpoch,hidden_size))
+    
     ##################################################
     # 4. evaluate model
 
     # net = Net().to(device)
     # path = ".\\trainedModels\\20WordsStateDictModel.pth"
     # net.load_state_dict(torch.load(path))
-
+    
     net.eval()
 
     src = "./Data/Keypoints/pkl/Segmented_gestures/"
 
+    ###
+    # Test Accuracy ###
+
     X_test = dataXY.x_data_Test.to(device)
     Y_test = dataXY.y_data_Test.to(device)
+    
 
     with torch.no_grad():
         ouptTest, _ = net(X_test)
@@ -358,65 +317,74 @@ def main():
     print("=======================================")
     print("\nTest Accuracy = %0.4f" % acc)
 
-    confusion_matrix = torch.zeros(num_classes, num_classes)
+    ###
+    # Confusion matrix (CM) ###
+
+    confusion_matrix_test = torch.zeros(num_classes, num_classes)
+    confusion_matrix_train = torch.zeros(num_classes, num_classes)
+
     with torch.no_grad():
+        # CM Test
+        inputsTest = dataXY.x_data_Test.to(device)
+        targetTest = dataXY.y_data_Test.to(device)
 
-        inputs = dataXY.x_data_Test.to(device)
-        classes = dataXY.y_data_Test.to(device)
+        outputsTest, _ = net(inputsTest)
 
-        outputs, _ = net(inputs)
 
-        _, preds = torch.max(outputs, 1)
+        _, predsTest = torch.max(outputsTest, 1)
 
-        for t, p in zip(classes.view(-1), preds.view(-1)):
-            confusion_matrix[t.long(), p.long()] += 1
+        for t, p in zip(targetTest.view(-1), predsTest.view(-1)):
+            confusion_matrix_test[t.long(), p.long()] += 1
 
-    print(confusion_matrix)
-    print(confusion_matrix.diag()/confusion_matrix.sum(1))
+        # CM Train
+        inputsTrain = dataXY.x_data.to(device)
+        targetTrain = dataXY.y_data.to(device)
 
-    confusion_matrix = confusion_matrix.to("cpu").numpy()
-    classes = classes.to("cpu").numpy()
+        outputsTrain, _ = net(inputsTrain)
+        
+        _, predsTrain = torch.max(outputsTrain, 1)
+        
+        for t, p in zip(targetTrain.view(-1), predsTrain.view(-1)):
+            confusion_matrix_train[t.long(), p.long()] += 1
 
-    cmap=plt.cm.Blues
+    # print(confusion_matrix)
+    # print(confusion_matrix.diag()/confusion_matrix.sum(1))
 
-    normalize = False
-    fig2, ax3 = plt.subplots()
-    fig2.set_figheight(13)
-    fig2.set_figwidth(15)
-    plt.title('Num layers: %d | ' % (num_layers) +
-              'batch size: %d\n' % (batch_size) +
-              'num classes: %d | ' % (num_classes) +
-              'nEpoch: %d\n' % (nEpoch) +
-              'lrn rate: %f | ' % (lrn_rate) +
-              'hidden size: %d' % (hidden_size))
-    plt.imshow(confusion_matrix, interpolation='nearest', cmap=cmap)
-    # Specify the tick marks and axis text
-    tick_marks = np.arange(num_classes)
-    plt.xticks(tick_marks, dataXY.y_meaning.values(), rotation=90)
-    plt.yticks(tick_marks, dataXY.y_meaning.values())
+    ###
+    # Plot CM Test ###
 
-    # The data formatting
-    fmt = '.2f' if normalize else '.2f'
-    thresh = confusion_matrix.max() / 2.
+    confusion_matrix_test = confusion_matrix_test.to("cpu").numpy()
 
-    # Print the text of the matrix, adjusting text colour for display
-    for i, j in itertools.product(range(confusion_matrix.shape[0]), 
-                                  range(confusion_matrix.shape[1])):
-        plt.text(j, i, format(confusion_matrix[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if confusion_matrix[i, j] > thresh else "black")
+    pp.plotConfusionMatrixTest(plt, dataXY, pltSavePath, confusion_matrix_test,
+                            num_layers, num_classes, batch_size, nEpoch,
+                            lrn_rate, hidden_size)
 
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-    plt.tight_layout()
-    plt.show()
+   
+    ###
+    # Plot CM Train ###
 
+    confusion_matrix_train = confusion_matrix_train.to("cpu").numpy()
+    
+    pp.plotConfusionMatrixTrain(plt, dataXY, pltSavePath, confusion_matrix_test,
+                             num_layers, num_classes, batch_size, nEpoch,
+                             lrn_rate, hidden_size)
+
+    # Send confusion matrix Test to Wandb
+    wandbF.sendConfusionMatrix(targetTest.to("cpu").numpy(), 
+                               predsTest.to("cpu").numpy(), 
+                               list(dataXY.y_labels.values()),
+                               cmTrain=False)
+    
+    # Send confusion matrix Train to Wandb
+    wandbF.sendConfusionMatrix(targetTrain.to("cpu").numpy(),
+                               predsTrain.to("cpu").numpy(),
+                               list(dataXY.y_labels.values()),
+                               cmTrain=True)
+    
     ##################################################
     # 5. save model
 
-    print("Saving trained model state dict ")
-    path = ".\\trainedModels\\20WordsStateDictModel.pth"
-    torch.save(net.state_dict(), path)
+    bckmod.saveModel(net)
 
     ##################################################
     # 6. make a prediction
@@ -425,16 +393,21 @@ def main():
               num_layers, dataXY.outputSize).to(device)
     path = ".\\trainedModels\\20WordsStateDictModel.pth"
     model.load_state_dict(torch.load(path))
+    wandbF.finishWandb()
 
 if __name__ == "__main__":
     main()
+    '''
+    src = "./Data/Keypoints/pkl/Segmented_gestures/"
+    dataXY = SignLanguageDataset(src, nTopWords=10)
+    dataTrain = torch.utils.data.DataLoader(dataXY, batch_size=8)
+    for (batch_idx, batch) in enumerate(dataTrain):
+        X = batch['predictors']  # inputs
+        Y = batch['targets']
+        XTrain = X.to(device)
+        YTrain = Y.to(device)
+    torch.device('cuda')
+    meaning = list(dataXY.y_labels.values())
 
-# 20, 50 y 100
-# 0.01 y 0.001
-# 10 clases
-# 40 * 20 => 800 (parámetros)
-# 20 * 20 => 400 *3 (cell []hid, aou, ) = 1200
-# 800 + 1200 = 2000 (parametros)
-# matriz de confusion
-# limitar las instancias
-# 
+    print(meaning)
+    '''
