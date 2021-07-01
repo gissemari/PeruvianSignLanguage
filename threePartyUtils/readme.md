@@ -66,3 +66,8 @@ where necessary
 ### WLASL_VID
 
 videos extracted from our proyect
+
+# P.D.
+
+Remember to modify patha in main of train_tgcn.py  
+
