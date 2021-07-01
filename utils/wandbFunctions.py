@@ -8,7 +8,9 @@ Created on Tue Jun  8 20:34:41 2021
 import wandb
 
 def initConfigWandb(num_layers, num_classes, batch_size, 
-                    nEpoch, lrn_rate, hidden_size, dropout):
+                    nEpoch, lrn_rate, hidden_size, dropout,
+                    weight_decay, epsilon):
+
     wandb.init(project='sign-language', entity='joenatan30')
     config = wandb.config
     
@@ -19,6 +21,8 @@ def initConfigWandb(num_layers, num_classes, batch_size,
     config.learning_rate = lrn_rate
     config["hidden_size"] = hidden_size
     config.dropout = dropout
+    config["weight_decay"] = weight_decay
+    config["epsilon"] = epsilon
 
 def wandbLog(trainLoss, TrainAcc, testLoss, TestAcc):
     wandb.log({"Train loss": trainLoss,
