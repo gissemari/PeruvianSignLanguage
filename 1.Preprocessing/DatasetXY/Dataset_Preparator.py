@@ -142,7 +142,8 @@ for folderName in foldersToLoad:
             
             # To replace with [0,0...,0] missed steps in a timestep
             for _ in range(args.timesteps - timeStepSize):
-                fileData = np.append(fileData, [np.zeros(len(fileData[0]))], axis=0)
+                # fileData = np.append(fileData, [np.zeros(len(fileData[0]))], axis=0)
+                fileData = np.append(fileData, [fileData[timeStepSize-1]], axis=0)
 
         # if is in 2D
         else:

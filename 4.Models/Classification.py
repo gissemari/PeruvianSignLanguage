@@ -95,9 +95,8 @@ class Net(torch.nn.Module):
             self.rnn = torch.nn.RNN(inputSize, hiddenSize, numLayers,dropout=0.25, batch_first=True, nonlinearity="relu")
         else:
             self.rnn = torch.nn.RNN(inputSize, hiddenSize, numLayers,batch_first=True, nonlinearity="relu")
+        
         self.fc = torch.nn.Linear(hiddenSize, outputSize)
-        if(dropout):
-            self.dropout = torch.nn.Dropout(dropout)
 
     def forward(self, x):
 
@@ -136,16 +135,18 @@ def main():
     # variables
     minimun = True
     split = 0.8
-    dropout = 0.25
-    num_layers = 15
+    dropout = 0.3
+    num_layers = 4
     num_classes = 10
-    batch_size = 2
+    batch_size = 6
     nEpoch = 1000
-    lrn_rate = 0.0005
-    hidden_size = 32   
+    lrn_rate = 0.001
+    weight_decay = 0 # 1e-7
+    epsilon = 1e-3
+    hidden_size = 64
     # sequence_length = 40
     wandbF.initConfigWandb(num_layers, num_classes, batch_size, nEpoch,
-                    lrn_rate, hidden_size, dropout)
+                    lrn_rate, hidden_size, dropout, weight_decay, epsilon)
 
     print("minimun sizes of data: %s" % minimun)
     print("data train split at: %2.2f" % split)
@@ -179,7 +180,8 @@ def main():
 
     # loss_func = torch.nn.CrossEntropyLoss(weight=dataXY.weight)
     loss_func = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=lrn_rate)
+    optimizer = torch.optim.Adam(net.parameters(), lr=lrn_rate,
+                                 weight_decay=weight_decay, eps=epsilon)
 
     # In case it is necesary to recover part of the trained model from checkpoint
     # chkPntPath = ""
@@ -232,6 +234,12 @@ def main():
             xTest = dataXY.x_data_Test.to(device)
             yTest = dataXY.y_data_Test.to(device)
 
+            # Backward
+            loss_val.backward()
+
+            # Step
+            optimizer.step()
+
             ### Test evaluation
             net.eval()
 
@@ -244,11 +252,6 @@ def main():
             test_acc = accuracy_quick(ouptTest, yTest)
             epoch_acc_test += test_acc
 
-            # Backward
-            loss_val.backward()
-
-            # Step
-            optimizer.step()
 
         # if you need to save checkpoint of the model
         # chkPntPath=""
