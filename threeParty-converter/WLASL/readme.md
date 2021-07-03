@@ -1,12 +1,13 @@
 # data_converter.py
 
-Use this py to convert our data to TGCN and I3D data (retrieved from https://dxli94.github.io/WLASL/ ) to try these models.
+Use this .py to convert our data to TGCN and I3D data to try these models. (models are retrieved from https://dxli94.github.io/WLASL/ )
 
 
 # USES
 
-1. move "data_converter.py" and "data" folder into the root folder of WLASL proyect.
+1. run ConvertVideoToTGCNKeypoint.py (with its respective args)
 2. run data_converter.py (with its respective args)
+3. move"data" folder into the root folder of WLASL proyect.
 
 # Data structure
 
@@ -69,5 +70,5 @@ videos extracted from our proyect
 
 # P.D.
 
-Remember to modify patha in main of train_tgcn.py  
+Remember to modify paths in main of train_tgcn.py  
 

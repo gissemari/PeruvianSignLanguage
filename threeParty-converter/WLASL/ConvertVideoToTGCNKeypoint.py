@@ -29,6 +29,7 @@ import mediapipe as mp
 import numpy as np
 import pandas as pd
 import pickle as pkl
+from math import hypot
 
 # Local imports
 import utils.video as uv  # for folder creation
@@ -39,7 +40,7 @@ import utils.video as uv  # for folder creation
 ##############
 
 # Title
-parser = argparse.ArgumentParser(description='Mediapipe models ' +
+parser = argparse.ArgumentParser(description='Mediapipe models to TGCN' +
                                  '(FaceMesh, Hands, Pose)')
 
 # Models
@@ -58,12 +59,8 @@ parser.add_argument('--img_output', type=str, default="./Data/Keypoints/png/Segm
 parser.add_argument('--json_output', type=str, default="./Data/Keypoints/json/Segmented_gestures",
                     help='relative path of scv output set of landmarks.' +' Default: ./jsonOut/mediapipe/')
 
-parser.add_argument('--pkl_output', type=str, default="./Data/Keypoints/pkl/Segmented_gestures",
+parser.add_argument('--pkl_output', type=str, default="./Data/Keypoints/pkl_TGCN/Segmented_gestures",
                     help='relative path of csv output set of landmarks.' + ' Default: ./jsonOut/mediapipe/')
-# Add Line feature
-parser.add_argument('--withLineFeature', action="store_true",
-                    help='To have dataset x in 3 dimentions')
-
 
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
@@ -94,7 +91,7 @@ if(args.pose):
 if(args.holistic):
     print(" - holistic")
     mp_holistic = mp.solutions.holistic
-
+print()
 
 #########################
 # MODELS PARAMETERS
@@ -130,16 +127,9 @@ if (args.holistic):
 # UTILS
 ##############
 
-# Line feature coneccions
-LineFeatureConect = [[11, 12], [12, 14], [14, 16], [16, 18],
-                     [16, 20], [16, 22], [11, 13], [13, 15],
-                     [15, 17], [15, 19], [15, 21],
-                     [0, 8], [0, 7]]
-
 # Drawing
 mp_drawing = mp.solutions.drawing_utils
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
-
 
 #########################
 # FOLDER LIST LOOP
@@ -159,30 +149,33 @@ if os.path.isdir(args.inputPath):
 else:
     folder_list = [args.inputPath]
 
-print(folder_list)
+print("Total videos to process: ", len(folder_list))
+
 # Iterate over the folders of each video in Video/Segmented_gesture
 for videoFolder in folder_list:
+
     videoFolderName = args.inputPath+videoFolder
+    uv.createFolder(args.pkl_output, createFullPath=True)
     uv.createFolder(args.pkl_output+'/'+videoFolder)
     uv.createFolder(args.img_output+'/'+videoFolder)
     uv.createFolder(args.json_output+'/'+videoFolder)
 
     videoFolderList = [file for file in os.listdir(videoFolderName)]
-
+    print("Video: ", videoFolder)
     for videoFile in videoFolderList:
         list_seq = []
 
         videoSegFolderName = videoFolderName+'/'+videoFile[:-4]
-        # videoFolderName = args.inputPath.split('/')[-1]
-        pcklFileName = args.pkl_output+  '/'+videoFolder +'/'+videoFile[:-4]+'.pkl'
+
+        pcklFileName = args.pkl_output+'/'+videoFolder +'/'+videoFile[:-4]+'.pkl'
         # Creating folder for each gesture in img:
-        imgFolder = args.img_output+  '/'+videoFolder +'/'+videoFile[:-4]
+        imgFolder = args.img_output+'/'+videoFolder +'/'+videoFile[:-4]
         uv.createFolder(imgFolder)
-        jsonName = args.json_output+  '/'+videoFolder +'/'+videoFile[:-4]+'.json'
+        jsonName = args.json_output+'/'+videoFolder +'/'+videoFile[:-4]+'.json'
 
         # Create a VideoCapture object
         cap = cv2.VideoCapture(videoFolderName+'/'+videoFile)
-
+        print("Processing: ", videoFile)
         # Check if camera opened successfully
         if (cap.isOpened() is False):
             print("Unable to read camera feed", videoSegFolderName)
@@ -192,9 +185,11 @@ for videoFolder in folder_list:
         # While a frame was read
         while ret is True:
             # temporal variables
-            list_X = []
-            list_Y = []
-            #list_Z = []
+            faceData = []
+            leftHandData = []
+            rightHandData = []
+            poseData = []
+            holisticData = []
 
             # Convert the BGR image to RGB before processing.
             imageBGR = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -209,10 +204,13 @@ for videoFolder in folder_list:
             if(args.face_mesh):
                 faceResults = face_mesh.process(imageBGR)
 
+                count = 0
+
                 for data_point in faceResults.multi_face_landmarks[0].landmark:
-                    list_X.append(data_point.x)
-                    list_Y.append(data_point.y)
-                    # list_Z.append(data_point.z)
+                    faceData.append(data_point.x * 256.0)
+                    faceData.append(data_point.y * 256.0)
+                    # P value equal to 0.0 because this model doen't return probabilities
+                    faceData.append(0.0)
 
                 mp_drawing.draw_landmarks(
                             image=annotated_image,
@@ -224,34 +222,53 @@ for videoFolder in folder_list:
             if(args.hands):
                 handsResults = hands.process(imageBGR)
 
-                # For each hand
-                for hand_landmarks in handsResults.multi_hand_landmarks:
-                    for data_point in hand_landmarks.landmark:
-                        list_X.append(data_point.x)
-                        list_Y.append(data_point.y)
-                        # list_Z.append(data_point.z)
+                
 
-                for hand_landmarks in handsResults.multi_hand_landmarks:
-                    # Add landmarks into the image
-                    mp_drawing.draw_landmarks(
-                                    image=annotated_image,
-                                    landmark_list=hand_landmarks,
-                                    connections=mp_hands.HAND_CONNECTIONS)
+                if (handsResults.multi_hand_landmarks):
+                    count = 0
+                    # For each hand
+                    for hand_landmarks in handsResults.multi_hand_landmarks:
+
+                        for data_point in hand_landmarks.landmark:
+                            if(handsResults.multi_handedness[count].classification[0].label == "Left"):
+                                leftHandData.append(data_point.x * 256.0)
+                                leftHandData.append(data_point.y * 256.0)
+                                # score is the estimated probability of the predicted handedness and is always greater than or equal to 0.5
+                                leftHandData.append(handsResults.multi_handedness[count].classification[0].score)
+                            else:
+                                rightHandData.append(data_point.x * 256.0)
+                                rightHandData.append(data_point.y * 256.0)
+                                # score is the estimated probability of the predicted handedness and is always greater than or equal to 0.5
+                                rightHandData.append(handsResults.multi_handedness[count].classification[0].score)
+    
+                        count = count + 1
+
+                    for hand_landmarks in handsResults.multi_hand_landmarks:
+                        # Add landmarks into the image
+                        mp_drawing.draw_landmarks(
+                                        image=annotated_image,
+                                        landmark_list=hand_landmarks,
+                                        connections=mp_hands.HAND_CONNECTIONS)
 
             if(args.pose):
                 poseResults = pose.process(imageBGR)
 
+                count = 0
+
                 for hand_landmarks in poseResults.pose_landmarks.landmark:
 
-                    list_X.append(hand_landmarks.x)
-                    list_Y.append(hand_landmarks.y)
-                    # list_Z.append(hand_landmarks.z)
+                    poseData.append(hand_landmarks.x * 256.0)
+                    poseData.append(hand_landmarks.y * 256.0)
+
+                    #visibility: A value in [0.0, 1.0] indicating the likelihood of the landmark being visible (present and not occluded) in the image.
+                    poseData.append(hand_landmarks.visibility)
 
                 # Add landmarks into the image
                 mp_drawing.draw_landmarks(
                                 image=annotated_image,
                                 landmark_list=poseResults.pose_landmarks,
                                 connections=mp_pose.POSE_CONNECTIONS)
+
             if(args.holistic):
                 holisResults = holistic.process(imageBGR)
                 # Pose_landmark might already be enough
@@ -267,35 +284,101 @@ for videoFolder in folder_list:
                 #     list_X.append(data_point.landmark.x)
                 #     list_Y.append(data_point.landmark.y)
 
-                for posi,  data_point in enumerate(holisResults.pose_landmarks.landmark):
-                    list_X.append(data_point.x)
-                    list_Y.append(data_point.y)
-
-                if(args.withLineFeature):
-                    for conections in LineFeatureConect:
-                        p1 = holisResults.pose_landmarks.landmark[conections[0]]
-                        p2 = holisResults.pose_landmarks.landmark[conections[1]]
-
-                        lineX = p2.x - p1.x
-                        lineY = p2.y - p1.y
-
-                        list_X.append(lineX)
-                        list_Y.append(lineY)
+                for data_point in holisResults.pose_landmarks.landmark:
+                    holisticData.append(data_point.x * 256.0)
+                    holisticData.append(data_point.y * 256.0)
+                    holisticData.append(0.0)
 
                 #mp_drawing.draw_landmarks(annotated_image, holisResults.face_landmarks, mp_holistic.FACE_CONNECTIONS)
                 #mp_drawing.draw_landmarks(annotated_image, holisResults.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
                 #mp_drawing.draw_landmarks(annotated_image, holisResults.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
 
-                if(args.withLineFeature):
-                    mp_drawing.draw_landmarks(annotated_image,
-                                              holisResults.pose_landmarks,
-                                              mp_holistic.UPPER_BODY_POSE_CONNECTIONS)
-                else:
-                    mp_drawing.draw_landmarks(annotated_image,
-                                              holisResults.pose_landmarks,
-                                              mp_holistic.POSE_CONNECTIONS)
+                mp_drawing.draw_landmarks(annotated_image,
+                                          holisResults.pose_landmarks,
+                                          mp_holistic.POSE_CONNECTIONS)
+                
 
-            list_seq.append([list_X, list_Y])
+            #POSE Corrections
+            exclude = list(range(23,33))
+
+            denied = set([9 , 10, 11, 12, 13, 14, 19, 20, 21, 22]) # 23 and 24 are zeros
+            toChange = set(range(1,11))
+
+            x = [v for i, v in enumerate(poseData) if i % 3 == 0 and i // 3 not in exclude]
+            y = [v for i, v in enumerate(poseData) if i % 3 == 1 and i // 3 not in exclude]
+            p = [v for i, v in enumerate(poseData) if i % 3 == 2 and i // 3 not in exclude]
+
+            x = x + [0.0, 0.0]
+            y = y + [0.0, 0.0]
+            p = p + [0.0, 0.0]
+
+            inter = denied & toChange        
+        
+            inter = list(inter)
+            denied = list(denied)
+            toChange = list(toChange)
+    
+            denied = [val for val in denied if val not in inter]
+            toChange = [val for val in toChange if val not in inter]
+    
+            for pos in range(len(toChange)):
+                if pos in inter:
+                    continue
+                tmp = x[toChange[pos]]
+                x[toChange[pos]] = x[denied[pos]]
+                x[denied[pos]] = tmp
+                
+                tmp = y[toChange[pos]]
+                y[toChange[pos]] = y[denied[pos]]
+                y[denied[pos]] = tmp
+                
+                tmp = p[toChange[pos]]
+                p[toChange[pos]] = p[denied[pos]]
+                p[denied[pos]] = tmp
+            
+            poseData = []
+            for val in range(len(x)):
+                poseData.append(x[val])
+                poseData.append(y[val])
+                poseData.append(p[val])
+                
+            #Hands Corrections
+            if(len(rightHandData) == 0):
+                rightHandData = [0]*63
+            if(len(leftHandData) == 0):
+                leftHandData = [0]*63
+            
+            if(len(rightHandData) == 126):
+                
+                distance_right = hypot(rightHandData[0]-x[16], rightHandData[1],y[16])
+                distance_left = hypot(rightHandData[3*21]-x[16], rightHandData[(3*21)+1],y[16])
+                if(distance_right < distance_left):
+                    leftHandData = rightHandData[63:126]
+                    rightHandData = rightHandData[0:63]
+                else:
+                    leftHandData = rightHandData[0:63]
+                    rightHandData = rightHandData[63:126]
+
+            if(len(leftHandData) == 126):
+                
+                distance_left = hypot(leftHandData[0]-x[15], leftHandData[1],y[15])
+                distance_right = hypot(leftHandData[3*21]-x[15], leftHandData[(3*21)+1],y[15])
+
+                if(distance_left < distance_right):
+                    rightHandData = leftHandData[63:126]
+                    leftHandData = leftHandData[0:63]
+                else:
+                    rightHandData = leftHandData[0:63]
+                    leftHandData = leftHandData[63:126]
+            if(len(leftHandData)!=63 or len(rightHandData)!=63 or len(poseData)!= 75):
+                print("ERROR: l-%d  r-%d p-%d" % (len(leftHandData),len(rightHandData), len(poseData)))
+
+            list_seq.append({
+                'pose_keypoints_2d':poseData,
+                'hand_left_keypoints_2d': leftHandData,
+                'hand_right_keypoints_2d': rightHandData,
+                'face_keypoints_2d': faceData
+                })
 
             cv2.imwrite("%s.png" % (imgFolder+'/'+str(idx)), annotated_image)
 
@@ -306,23 +389,16 @@ for videoFolder in folder_list:
             ret, frame = cap.read()
             idx += 1
 
-        new3D = []
+        new3D = np.asarray(list_seq)
 
-        if args.withLineFeature:
-            # 25 (points) + 13(lines) * 2 (x and y axes)
-            new3D = np.asarray(list_seq).reshape((-1, (25+13)*2))
-        else:
-            # 33 (points) * 2 (x and y axes)
-            new3D = np.asarray(list_seq).reshape((-1, 33*2))
-
-        print(videoFolder, videoFile, new3D.shape)
+        #print(videoFolder, videoFile, new3D.shape)
 
         # Save JSON
         df = pd.DataFrame({'seq': list_seq})
         df.to_json(jsonName)
 
         # Save Pickle
-        print(pcklFileName)
+        #print(pcklFileName)
         with open(pcklFileName, 'wb') as pickle_file:
             pkl.dump(new3D, pickle_file)
 

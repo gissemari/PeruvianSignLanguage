@@ -1,10 +1,13 @@
 import cv2
 import os
 
-def createFolder(path):
+def createFolder(path, createFullPath = False):
     if not os.path.isdir(path):
         print("Directory %s has successfully been created" % path)
-        os.mkdir(path)
+        if createFullPath:
+            os.makedirs(path)
+        else:
+            os.mkdir(path)
         return 1
     return 0
 

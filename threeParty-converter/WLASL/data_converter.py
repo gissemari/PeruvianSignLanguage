@@ -17,28 +17,24 @@ import pandas as pd
 import numpy as np
 
 # Local imports
-import video as vid
+import utils.video as vid
 
-parser = argparse.ArgumentParser(description='X and Y Dataset generator')
+parser = argparse.ArgumentParser(description='Dataset converter')
 
 # Path to folder with videos
 parser.add_argument('--main_folder_Path', type=str,
-                    default="./proyectos/PeruvianSignLanguaje/Data/Keypoints/pkl/Segmented_gestures/")
+                    default="./Data/Keypoints/pkl_TGCN/Segmented_gestures/")
 
 parser.add_argument('--main_video_path', type=str,
-                    default="./proyectos/PeruvianSignLanguaje/Data/Videos/Segmented_gestures/")
+                    default="./Data/Videos/Segmented_gestures/")
 
 # Path to the output folder
 parser.add_argument('--output_Path', type=str,
-                    default="./dePrueba/WLASL/data/")
+                    default="./threeParty-converter/WLASL/data/")
 
 # Number of top words
-parser.add_argument("--words", type=int, default=5,
+parser.add_argument("--words", type=int, default=10,
                     help="Number of top words")
-
-# Number of Time steps
-parser.add_argument("--timesteps", type=int, default=40,
-                    help="Max number of timestep allowed")
 
 args = parser.parse_args()
 
@@ -87,6 +83,7 @@ wordTrends = Counter(wordList)
 # the Counter
 
 topWords = wordTrends.most_common(args.words)
+print('Total of considered words: ',len(topWords))
 print(topWords)
 # to acumulate timesteps to do statistic
 union = []
@@ -125,7 +122,7 @@ for folderName in foldersToLoad:
     #
     count = 0
     for file in folder:
-        
+        print("Processing: ", file)
         videoName = file.split('.')[0]
 
         word = file.split('_')[0]
@@ -236,14 +233,16 @@ for folderName in foldersToLoad:
         ###################################
         # pose_per_individual_videos
         for ind, data in enumerate(fileData):
-            newData = np.concatenate((data, np.zeros(9)))
-            # print(len(newData))
+
+            if(len(data['hand_right_keypoints_2d'])!= 63):
+                print("right - error")
+            
             dataOut = {'version':1.3,
                        'people':[{'person_id':[0],
-                                  'pose_keypoints_2d':data[0:-21].tolist(),
-                                  'hand_left_keypoints_2d':np.zeros(63).tolist(),
+                                  'pose_keypoints_2d':data['pose_keypoints_2d'],
+                                  'hand_left_keypoints_2d':data['hand_left_keypoints_2d'],
                                   'face_keypoints_2d':[],
-                                  'hand_right_keypoints_2d':np.zeros(63).tolist(),
+                                  'hand_right_keypoints_2d':data['hand_right_keypoints_2d'],
                                   'face_keypoints_3d':[],
                                   'hand_left_keypoints_3d':[],
                                   'hand_right_keypoints_3d':[]
