@@ -103,6 +103,11 @@ topWordDict = dict(zip(topWordList, wordLabels))
 
 
 bigAsl = []
+vid.createFolder(args.output_Path)
+vid.createFolder(args.output_Path+'splits')
+vid.createFolder(args.output_Path+'WLASL_VID')
+vid.createFolder(args.output_Path+'pose_per_individual_videos')
+
 
 for folderName in foldersToLoad:
 
@@ -133,6 +138,7 @@ for folderName in foldersToLoad:
 
         fileData = pd.read_pickle(args.main_folder_Path+folderName+'/'+file)
         vid.createFolder(args.output_Path+'pose_per_individual_videos/'+videoName)
+       
 
         ###################################
         # Splits

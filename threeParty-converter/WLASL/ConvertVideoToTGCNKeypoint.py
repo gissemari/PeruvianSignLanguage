@@ -62,6 +62,7 @@ parser.add_argument('--json_output', type=str, default="./Data/Keypoints/json/Se
 parser.add_argument('--pkl_output', type=str, default="./Data/Keypoints/pkl_TGCN/Segmented_gestures",
                     help='relative path of csv output set of landmarks.' + ' Default: ./jsonOut/mediapipe/')
 
+
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
 
