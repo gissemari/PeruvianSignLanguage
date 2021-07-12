@@ -44,8 +44,7 @@ print("############ ", device, " ############")
 # 1. create Dataset and DataLoader objects
 class SignLanguageDataset(torch.utils.data.Dataset):
 
-    def __init__(self, src_file, nTopWords=10,
-                 split=0.8):
+    def __init__(self, src_file, split=0.8):
 
         x, y, weight, y_labels = LoadData.getData()
 
@@ -55,7 +54,7 @@ class SignLanguageDataset(torch.utils.data.Dataset):
                                                               doShuffle=True)
 
         self.inputSize = len(x[0][0])
-        self.outputSize = nTopWords
+        self.outputSize = len(y_labels)
 
         self.weight = torch.tensor(weight, dtype=torch.float32).to(device)
         self.y_labels = y_labels
@@ -128,6 +127,17 @@ def main():
     ##################################################
     # 0. get started
     
+
+
+    ##################################################
+    # 1. create Dataset and DataLoader objects
+
+    # with open(args.output_Path+'3D/X.data','rb') as f: new_data = pkl.load(f)
+
+    src = "./Data/Keypoints/pkl/Segmented_gestures/"
+    dataXY = SignLanguageDataset(src)
+    
+
     print("Begin predict sign language")
     np.random.seed(1)
     torch.manual_seed(1)
@@ -135,13 +145,13 @@ def main():
     # variables
     minimun = True
     split = 0.8
-    dropout = 0.3
-    num_layers = 4
-    num_classes = 10
+    dropout = 0.25
+    num_layers = 16
+    num_classes = dataXY.outputSize
     batch_size = 6
     nEpoch = 1000
-    lrn_rate = 0.001
-    weight_decay = 0 # 1e-7
+    lrn_rate = 0.005
+    weight_decay = 1e-7
     epsilon = 1e-3
     hidden_size = 64
     # sequence_length = 40
@@ -156,13 +166,6 @@ def main():
     print("learning rate: %f" % lrn_rate)
     print("Number of layers: %d" % num_layers)
 
-    ##################################################
-    # 1. create Dataset and DataLoader objects
-
-    # with open(args.output_Path+'3D/X.data','rb') as f: new_data = pkl.load(f)
-
-    src = "./Data/Keypoints/pkl/Segmented_gestures/"
-    dataXY = SignLanguageDataset(src, nTopWords=num_classes)
     dataTrain = torch.utils.data.DataLoader(dataXY, batch_size=batch_size)
 
     ##################################################

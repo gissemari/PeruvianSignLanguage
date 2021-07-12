@@ -49,7 +49,7 @@ def splitData(x, y, split=0.8, leastValue=False, balancedTest=False, doShuffle=F
 
     pivot = targetDict.copy()
     end = targetDict.copy()
-    
+
     if leastValue:
         value = min([val for val in targetDict.values()])
         minValue = int(value*split)

@@ -7,6 +7,7 @@ Created on Sun Feb  7 14:04:44 2021
 # Standard library imports
 import argparse
 import os
+import random
 from collections import Counter
 
 # Third party imports
@@ -34,11 +35,12 @@ parser.add_argument('--output_Path', type=str,
                     ' Default: ./Data/Dataset/')
 
 # Number of top words
-parser.add_argument("--words", type=int, default=20,
+parser.add_argument("--words", type=int, default=10,
                     help="Number of top words")
 
+
 # Number of Time steps
-parser.add_argument("--timesteps", type=int, default=40,
+parser.add_argument("--timesteps", type=int, default=20,
                     help="Max number of timestep allowed")
 
 
@@ -81,15 +83,26 @@ for folderName in foldersToLoad:
         else:
             timeStepDict.update({word: [len(fileData)]})
 
+#timeStepRank = {}
+
+#for key in timeStepDict.keys():
+#    timeStepRank[key] = sum(timeStepDict[key])
+
 # Convert the given list into dictionary
 # the output will be like {'ENTONCES':2,'HOY':3,'MAL':2, ...}
 wordTrends = Counter(wordList)
 
+
+#sortedTimeStepRank = sorted(timeStepRank.items(), key=lambda x: x[1], reverse=True)
+#print(sortedTimeStepRank[0:10])
+
+#print([(k,wordTrends[k]) for (k, v) in sortedTimeStepRank[0:10]])
 # most_common function create a 2D tuple of the N most common words of
 # the Counter
 
 topWords = wordTrends.most_common(args.words)
 print(topWords)
+
 # to acumulate timesteps to do statistic
 union = []
 
@@ -136,7 +149,9 @@ for folderName in foldersToLoad:
 
         # Not consider large timesteps
         if timeStepSize > args.timesteps:
-            continue
+            diff = timeStepSize - args.timesteps
+            start = random.Random(52).choice(range(diff))
+            fileData = fileData[start:start+args.timesteps]
 
         if(args.is3D):
             
@@ -159,7 +174,7 @@ for folderName in foldersToLoad:
         y_oneHot = y_oneHot + [oneHot]
 
 
-x = np.asarray(x)
+x = np.asarray(x, dtype="object")
 print("X shape: ", x.shape)
 y = np.asarray(y)
 print("Y shape: ", y.shape)
