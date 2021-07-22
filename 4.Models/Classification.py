@@ -27,6 +27,7 @@ import time
 # Third party imports
 import numpy as np
 import torch
+import argparse
 import matplotlib.pyplot as plt
 
 # Local imports
@@ -40,15 +41,25 @@ torch.cuda.empty_cache()
 device = torch.device("cuda" )
 print("############ ", device, " ############")
 
+parser = argparse.ArgumentParser(description='Classification')
+
+# 3D boolean
+parser.add_argument('--wandb', action="store_true",
+                    help='To activate wandb')
+
+args = parser.parse_args()
+
 # ----------------------------------------------------
 # 1. create Dataset and DataLoader objects
 class SignLanguageDataset(torch.utils.data.Dataset):
 
     def __init__(self, src_file, split=0.8):
 
-        x, y, weight, y_labels = LoadData.getData()
+        x, y, weight, y_labels, x_timeSteps = LoadData.getData()
 
-        x_train, y_train, x_test, y_test = LoadData.splitData(x, y, split,
+        x_train, y_train, x_test, y_test = LoadData.splitData(x, y,
+                                                              x_timeSteps,
+                                                              split=split,
                                                               leastValue=True,
                                                               balancedTest=False,
                                                               doShuffle=True)
@@ -61,10 +72,10 @@ class SignLanguageDataset(torch.utils.data.Dataset):
 
         self.x_data_Test = torch.tensor(x_test, dtype=torch.float32).to(device)
         self.y_data_Test = torch.tensor(y_test, dtype=torch.int64).to(device)
-
+        
         self.x_data = torch.tensor(x_train, dtype=torch.float32).to(device)
         self.y_data = torch.tensor(y_train, dtype=torch.int64).to(device)
-
+        print(self.x_data.shape, self.y_data.shape)
     def __len__(self):
         return len(self.y_data)
 
@@ -146,16 +157,16 @@ def main():
     minimun = True
     split = 0.8
     dropout = 0.25
-    num_layers = 16
+    num_layers = 4
     num_classes = dataXY.outputSize
     batch_size = 6
     nEpoch = 1000
-    lrn_rate = 0.005
-    weight_decay = 1e-7
+    lrn_rate = 0.0002
+    weight_decay = 1e-4
     epsilon = 1e-3
-    hidden_size = 64
+    hidden_size = 32
     # sequence_length = 40
-    wandbF.initConfigWandb(num_layers, num_classes, batch_size, nEpoch,
+    if args.wandb: wandbF.initConfigWandb(num_layers, num_classes, batch_size, nEpoch,
                     lrn_rate, hidden_size, dropout, weight_decay, epsilon)
 
     print("minimun sizes of data: %s" % minimun)
@@ -175,7 +186,7 @@ def main():
     print('The number of parameter is: %d' % count_parameters(net))
     
     # Wandb the network weight
-    wandbF.watch(net)
+    if args.wandb: wandbF.watch(net)
 
     ##################################################
     # 3. train network
@@ -273,7 +284,7 @@ def main():
         if(epoch % 1 == 0):
             
             #Log in wandb
-            wandbF.wandbLog(lossEpoch, accEpoch, lossTestEpoch, accTestEpoch)
+            if args.wandb: wandbF.wandbLog(lossEpoch, accEpoch, lossTestEpoch, accTestEpoch)
             
             #print epoch evaluation
             pp.printEpochEval(epoch, lossEpoch, accEpoch, lossTestEpoch,
@@ -376,13 +387,13 @@ def main():
                              lrn_rate, hidden_size)
 
     # Send confusion matrix Test to Wandb
-    wandbF.sendConfusionMatrix(targetTest.to("cpu").numpy(), 
+    if args.wandb: wandbF.sendConfusionMatrix(targetTest.to("cpu").numpy(), 
                                predsTest.to("cpu").numpy(), 
                                list(dataXY.y_labels.values()),
                                cmTrain=False)
     
     # Send confusion matrix Train to Wandb
-    wandbF.sendConfusionMatrix(targetTrain.to("cpu").numpy(),
+    if args.wandb: wandbF.sendConfusionMatrix(targetTrain.to("cpu").numpy(),
                                predsTrain.to("cpu").numpy(),
                                list(dataXY.y_labels.values()),
                                cmTrain=True)
@@ -399,7 +410,7 @@ def main():
               num_layers, dataXY.outputSize).to(device)
     path = ".\\trainedModels\\20WordsStateDictModel.pth"
     model.load_state_dict(torch.load(path))
-    wandbF.finishWandb()
+    if args.wandb: wandbF.finishWandb()
 
 if __name__ == "__main__":
     main()

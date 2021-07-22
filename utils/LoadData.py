@@ -30,6 +30,9 @@ def getData(is3D=True):
     with open('./Data/Dataset/'+dimPath+'X.data', 'rb') as f:
         X = pickle.load(f)
 
+    with open('./Data/Dataset/'+dimPath+'X_timeSteps.data', 'rb') as f:
+        X_timeSteps = pickle.load(f)
+
     with open('./Data/Dataset/'+dimPath+'Y.data', 'rb') as f:
         Y = pickle.load(f)
 
@@ -38,24 +41,41 @@ def getData(is3D=True):
 
     with open('./Data/Dataset/'+dimPath+'Y_meaning.data', 'rb') as f:
         y_meaning = pickle.load(f)
+        
 
-    return X, Y, weight, y_meaning
+
+    return X, Y, weight, y_meaning, X_timeSteps
 
 
-def splitData(x, y, split=0.8, leastValue=False, balancedTest=False, doShuffle=False):
+def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
+              balancedTest=False,doShuffle=False, augmentation=False):
 
     # to count repeated targets in y
     targetDict = dict(Counter(y))
 
+    augmentSize = []
+    augmentDict = {}
+
     pivot = targetDict.copy()
     end = targetDict.copy()
 
+    #To select the least value which will be use to split all the data
     if leastValue:
+
         value = min([val for val in targetDict.values()])
         minValue = int(value*split)
+
         if(balancedTest):
             minTest = value - minValue
+    if(augmentation):
+        for key, ts in x_timeSteps.items():
+            augmentSize.append(sum([val-timeStepSize for val in ts if val > timeStepSize]))
+            
+        minAugSize = min(augmentSize)
 
+        augmentDict = {k: minAugSize for k in range(0,len(targetDict.keys()))}
+      
+    # to prepare pivot dictionary to use it in the split separator
     for key in targetDict:
 
         if leastValue:
@@ -70,27 +90,82 @@ def splitData(x, y, split=0.8, leastValue=False, balancedTest=False, doShuffle=F
 
     x_test = []
     y_test = []
-    
+
     if(doShuffle):
-        random.Random(52).shuffle(y)
-        #shuffle(y)
+        newOrder= list(range(len(y)))
+        random.Random(52).shuffle(newOrder)
+    count = 1
+    countAug = 1
 
-    for index, key in enumerate(y):
+    for pos in newOrder:
+        
+        # To complete timesteps if it have less than timeStepSize
+        for _ in range(timeStepSize - len(x[pos])):
+            # Add zeros
+            # fileData = np.append(fileData, [np.zeros(len(fileData[0]))], axis=0)
 
-        if(pivot[key]):
-            x_train.append(x[index])
-            y_train.append(y[index])
+            # repeat the last frame
+            x[pos] = np.append(x[pos], [x[pos][-1]], axis=0) 
+        
+        #TRAIN
+        if(pivot[y[pos]]>=0):
+            
+            # if have more timesteps than timeStepSize
+            if(timeStepSize < len(x[pos])):
+                diff = len(x[pos]) - timeStepSize
+                if(augmentation and augmentDict[y[pos]]):
+                    for start in range(diff):
 
-            pivot[key] = pivot[key] - 1
+                        if(not augmentDict[y[pos]]): continue
+                        x_train.append(x[pos][start:start+timeStepSize])
+                        y_train.append(y[pos])
+                        augmentDict[y[pos]] = augmentDict[y[pos]] - 1
+                        #print("countAug: %d for %d:%d"%(count,y[pos], augmentDict[y[pos]]))
+                        count+=1
+                else:
+                    start = random.Random(52).choice(range(diff))
+                    x_train.append(x[pos][start:start+timeStepSize])
+                    y_train.append(y[pos])
+                    #print("count: %d"%(count), "at zero")
+                    count+=1
+            else:
+                x_train.append(x[pos])
+                y_train.append(y[pos])
+                #print("count: %d"%(count))
+                count+=1
+
+            pivot[y[pos]] = pivot[y[pos]] - 1
+        
         elif(leastValue and balancedTest):
-            if(end[key]):
-                x_test.append(x[index])
-                y_test.append(y[index])
-                
-                end[key] = end[key] -1
+            if(end[y[pos]]):
+                if(timeStepSize < len(x[pos])):
+                    diff = len(x[pos]) - timeStepSize
+                    if(augmentation and augmentDict[y[pos]]):
+                        for start in range(diff):
+                            if(not augmentDict[y[pos]]): continue
+                            x_train.append(x[pos][start:start+timeStepSize])
+                            x_train.append(y[pos])
+                            augmentDict[y[pos]] = augmentDict[y[pos]] - 1
+                    else:
+                        start = random.Random(52).choice(range(diff))
+                        x_train.append(x[pos][start:start+timeStepSize])
+                        x_train.append(y[pos])
+                else:
+                    x_train.append(x[pos])
+                    x_train.append(y[pos])
+
+                end[y[pos]] = end[y[pos]] - 1
+
+        #TEST
         else:
-            x_test.append(x[index])
-            y_test.append(y[index])
+            if(timeStepSize < len(x[pos])):
+                diff = len(x[pos]) - timeStepSize
+                start = random.Random(52).choice(range(diff))
+                x_test.append(x[pos][start:start+timeStepSize])
+                y_test.append(y[pos])
+            else:
+                x_test.append(x[pos])
+                y_test.append(y[pos])
 
     return x_train, y_train, x_test, y_test
 

@@ -102,13 +102,11 @@ wordTrends = Counter(wordList)
 
 topWords = wordTrends.most_common(args.words)
 print(topWords)
-
-# to acumulate timesteps to do statistic
-union = []
+x_timeSteps = {}
 
 for word, value in topWords:
-    union = union + timeStepDict[word]
-
+    x_timeSteps[word] = timeStepDict[word]
+print(x_timeSteps)
 topWordList = [key for (key, value) in topWords]
 
 wordLabels = list(range(len(topWordList)))
@@ -147,21 +145,8 @@ for folderName in foldersToLoad:
 
         timeStepSize = len(fileData)
 
-        # Not consider large timesteps
-        if timeStepSize > args.timesteps:
-            diff = timeStepSize - args.timesteps
-            start = random.Random(52).choice(range(diff))
-            fileData = fileData[start:start+args.timesteps]
-
-        if(args.is3D):
-            
-            # To replace with [0,0...,0] missed steps in a timestep
-            for _ in range(args.timesteps - timeStepSize):
-                # fileData = np.append(fileData, [np.zeros(len(fileData[0]))], axis=0)
-                fileData = np.append(fileData, [fileData[timeStepSize-1]], axis=0)
-
         # if is in 2D
-        else:
+        if not args.is3D:
             fileData = fileData.flatten()
             for _ in range(args.timesteps - timeStepSize):
                 fileData = np.append(fileData, np.zeros(len(fileData[0])))
@@ -212,3 +197,6 @@ with open(args.output_Path+shapePath+'Y_oneHot.data', 'wb') as f:
 
 with open(args.output_Path+shapePath+'Y_meaning.data', 'wb') as f:
     pkl.dump(y_meaning, f)
+
+with open(args.output_Path+shapePath+'X_timeSteps.data', 'wb') as f:
+    pkl.dump(x_timeSteps, f)
