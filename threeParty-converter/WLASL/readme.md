@@ -75,3 +75,31 @@ videos extracted from our proyect
 
 Remember to modify paths in main of train_tgcn.py  
 
+
+### TGCN Library Dependency map
+
+train_tgcn.py 
+	|_.-> utils.py
+	|_.-> config.py
+	|_.-> tgcn_model.py
+	|_.-> sign_dataset.py
+	|	    |.-> utils.py
+	|_.-> train_utils.py
+
+test_tgcn.py
+	|_.-> config.py
+	|_.-> sign_dataset.py
+	|_.-> train_utils.py
+	
+test.py
+    |_.-> configs.py
+    |_.-> sign_dataset.py
+    |_.-> tgcn_model.py
+    
+gen_features.py
+
+layers.py
+
+models.py
+
+videotransforms.py
