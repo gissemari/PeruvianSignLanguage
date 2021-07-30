@@ -161,27 +161,28 @@ else:
 
 print(folder_list)
 # Iterate over the folders of each video in Video/Segmented_gesture
-for videoFolder in folder_list:
-    videoFolderName = args.inputPath+videoFolder
-    uv.createFolder(args.pkl_output+'/'+videoFolder)
-    uv.createFolder(args.img_output+'/'+videoFolder)
-    uv.createFolder(args.json_output+'/'+videoFolder)
+for videoFolderName in folder_list:
 
-    videoFolderList = [file for file in os.listdir(videoFolderName)]
+    videoFolderPath = args.inputPath+videoFolderName
+    uv.createFolder(args.pkl_output+'/'+videoFolderName)
+    uv.createFolder(args.img_output+'/'+videoFolderName)
+    uv.createFolder(args.json_output+'/'+videoFolderName)
+
+    videoFolderList = [file for file in os.listdir(videoFolderPath)]
 
     for videoFile in videoFolderList:
         list_seq = []
 
-        videoSegFolderName = videoFolderName+'/'+videoFile[:-4]
-        # videoFolderName = args.inputPath.split('/')[-1]
-        pcklFileName = args.pkl_output+  '/'+videoFolder +'/'+videoFile[:-4]+'.pkl'
+        videoSegFolderName = videoFolderPath+'/'+videoFile[:-4]
+
+        pcklFileName = args.pkl_output+  '/'+ videoFolderName +'/'+videoFile[:-4]+'.pkl'
         # Creating folder for each gesture in img:
-        imgFolder = args.img_output+  '/'+videoFolder +'/'+videoFile[:-4]
+        imgFolder = args.img_output+  '/'+ videoFolderName +'/'+videoFile[:-4]
         uv.createFolder(imgFolder)
-        jsonName = args.json_output+  '/'+videoFolder +'/'+videoFile[:-4]+'.json'
+        jsonName = args.json_output+  '/'+ videoFolderName +'/'+videoFile[:-4]+'.json'
 
         # Create a VideoCapture object
-        cap = cv2.VideoCapture(videoFolderName+'/'+videoFile)
+        cap = cv2.VideoCapture(videoFolderPath+'/'+videoFile)
 
         # Check if camera opened successfully
         if (cap.isOpened() is False):
@@ -315,7 +316,7 @@ for videoFolder in folder_list:
             # 33 (points) * 2 (x and y axes)
             new3D = np.asarray(list_seq).reshape((-1, 33*2))
 
-        print(videoFolder, videoFile, new3D.shape)
+        print(videoFolderName, videoFile, new3D.shape)
 
         # Save JSON
         df = pd.DataFrame({'seq': list_seq})

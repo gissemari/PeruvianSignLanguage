@@ -76,6 +76,7 @@ class SignLanguageDataset(torch.utils.data.Dataset):
         self.x_data = torch.tensor(x_train, dtype=torch.float32).to(device)
         self.y_data = torch.tensor(y_train, dtype=torch.int64).to(device)
         print(self.x_data.shape, self.y_data.shape)
+
     def __len__(self):
         return len(self.y_data)
 
@@ -126,6 +127,7 @@ def accuracy_quick(yPred, yTarget):
     arg_maxs = torch.argmax(yPred, dim=1)  # collapse cols
     num_correct = torch.sum(yTarget == arg_maxs)
     acc = (num_correct * 1.0 / n)
+
     return acc.item()
 
 

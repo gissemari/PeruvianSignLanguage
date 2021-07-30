@@ -52,13 +52,13 @@ foldersToLoad = os.listdir(args.main_folder_Path)
 wordList = []
 timeStepDict = {}
 
-for folderName in foldersToLoad:
+for videoFolderName in foldersToLoad:
 
     # if the file have extension then that file will be omited
-    if(os.path.splitext(folderName)[1] != ''):
+    if(os.path.splitext(videoFolderName)[1] != ''):
         continue
 
-    folder = os.listdir(args.main_folder_Path+folderName)
+    folder = os.listdir(args.main_folder_Path+videoFolderName)
 
     # wordList => list that acumulate the name of all files of all folders.
     # The acumulated names will have some modification made by
@@ -75,7 +75,7 @@ for folderName in foldersToLoad:
 
         word = file.split('_')[0]
 
-        fileData = pd.read_pickle(args.main_folder_Path+folderName+'/'+file)
+        fileData = pd.read_pickle(args.main_folder_Path+videoFolderName+'/'+file)
 
         if word in timeStepDict:
             timeStepDict[word] = timeStepDict[word] + [len(fileData)]
@@ -101,12 +101,12 @@ wordTrends = Counter(wordList)
 # the Counter
 
 topWords = wordTrends.most_common(args.words)
-print(topWords)
+print("Top Words: ",topWords)
 x_timeSteps = {}
 
 for word, value in topWords:
     x_timeSteps[word] = timeStepDict[word]
-print(x_timeSteps)
+print("Time steps distribution: ",x_timeSteps)
 topWordList = [key for (key, value) in topWords]
 
 wordLabels = list(range(len(topWordList)))
@@ -124,13 +124,13 @@ y_oneHot = []
 foldersToLoad = os.listdir(args.main_folder_Path)
 
 # folders
-for folderName in foldersToLoad:
+for videoFolderName in foldersToLoad:
 
     # if the file have extension then that file will be omited
-    if(os.path.splitext(folderName)[1] != ''):
+    if(os.path.splitext(videoFolderName)[1] != ''):
         continue
 
-    folderList = os.listdir(args.main_folder_Path+folderName)
+    folderList = os.listdir(args.main_folder_Path+videoFolderName)
 
     # file => instance
     for file in folderList:
@@ -141,7 +141,7 @@ for folderName in foldersToLoad:
         if word not in topWordList:
             continue
 
-        fileData = pd.read_pickle(args.main_folder_Path+folderName+'/'+file)
+        fileData = pd.read_pickle(args.main_folder_Path+videoFolderName+'/'+file)
 
         timeStepSize = len(fileData)
 
