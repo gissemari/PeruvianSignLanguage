@@ -48,7 +48,7 @@ def getData(is3D=True):
 
 
 def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
-              balancedTest=False,doShuffle=False, augmentation=False):
+              balancedTest=False, fixed=True, fixedTest=2,doShuffle=False, augmentation=False):
 
     # to count repeated targets in y
     targetDict = dict(Counter(y))
@@ -66,7 +66,11 @@ def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
         minValue = int(value*split)
 
         if(balancedTest):
-            minTest = value - minValue
+            minTest = value - minValue - 1
+        if(fixed):
+            minTest = fixedTest
+            minValue = value - fixedTest
+
     if(augmentation):
         for key, ts in x_timeSteps.items():
             augmentSize.append(sum([val-timeStepSize for val in ts if val > timeStepSize]))
@@ -82,6 +86,8 @@ def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
             pivot[key] = minValue
             if(balancedTest):
                 end[key] = minTest
+            if(fixed):
+                end[key] = fixedTest
         else:
             pivot[key] = int(targetDict[key]*split)
 
@@ -136,23 +142,27 @@ def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
 
             pivot[y[pos]] = pivot[y[pos]] - 1
         
+        #TEST (balanced)
         elif(leastValue and balancedTest):
+
             if(end[y[pos]]):
+                
                 if(timeStepSize < len(x[pos])):
                     diff = len(x[pos]) - timeStepSize
                     if(augmentation and augmentDict[y[pos]]):
+                        
                         for start in range(diff):
                             if(not augmentDict[y[pos]]): continue
-                            x_train.append(x[pos][start:start+timeStepSize])
-                            x_train.append(y[pos])
+                            x_test.append(x[pos][start:start+timeStepSize])
+                            y_test.append(y[pos])
                             augmentDict[y[pos]] = augmentDict[y[pos]] - 1
                     else:
                         start = random.Random(52).choice(range(diff))
-                        x_train.append(x[pos][start:start+timeStepSize])
-                        x_train.append(y[pos])
+                        x_test.append(x[pos][start:start+timeStepSize])
+                        y_test.append(y[pos])
                 else:
-                    x_train.append(x[pos])
-                    x_train.append(y[pos])
+                    x_test.append(x[pos])
+                    y_test.append(y[pos])
 
                 end[y[pos]] = end[y[pos]] - 1
 
