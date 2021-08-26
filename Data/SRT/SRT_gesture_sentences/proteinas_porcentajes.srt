@@ -530,3 +530,151 @@ Ahora que regresamos, pide ayuda a un adulto para conseguir una hoja cuadriculad
 00:10:24,127 --> 00:10:25,675
 Vamos, yo te espero
 
+134
+00:10:35,350 --> 00:10:39,031
+Chicos y yo trajimos los materiales
+
+135
+00:10:39,124 --> 00:10:50,031
+¿Pensaste cómo hallar cuántos gramos de presa son proteína?
+
+136
+00:10:50,093 --> 00:10:52,406
+Está un poco difícil
+
+137
+00:10:52,460 --> 00:10:55,287
+No te preocupes, hagámoslo juntos
+
+138
+00:10:55,319 --> 00:10:58,208
+Usemos una hoja cuadriculada
+
+139
+00:10:58,235 --> 00:11:06,263
+Dibuja un cuadrado grande y divide y cien partes iguales
+
+140
+00:11:06,319 --> 00:11:17,666
+Este cuadrado grande se llama todo y representa el cien por ciento porque cien por ciento es el todo
+
+141
+00:11:17,700 --> 00:11:28,471
+Si todo el cuadrado representa el cien por ciento. Pregunta, ¿cada cuadradito cuánto representa?
+
+142
+00:11:28,486 --> 00:11:30,416
+Uno por ciento
+
+143
+00:11:30,450 --> 00:11:33,150
+Sí, uno por ciento
+
+144
+00:11:33,194 --> 00:11:35,060
+Ustedes que respondieron?
+
+145
+00:11:35,109 --> 00:11:39,621
+Cada cuadradito representa uno por ciento
+
+146
+00:11:39,682 --> 00:11:48,426
+Si pintamos todos los cuadraditos pintamos cien que representa el cien por ciento del cuadrado grande
+
+147
+00:11:56,011 --> 00:12:01,621
+Si yo pinto dos cuadraditos, ¿cuánto representa?
+
+148
+00:12:01,655 --> 00:12:02,999
+Dos por ciento
+
+149
+00:12:03,019 --> 00:12:04,001
+Muy bien
+
+150
+00:12:04,023 --> 00:12:08,722
+Un cuadradito, dos cuadraditos representan dos por ciento
+
+151
+00:12:08,742 --> 00:12:14,598
+Ahora ¿qué pasa con la carne de pollo de doscientos gramos?
+
+152
+00:12:14,605 --> 00:12:15,916
+¿cómo lo podemos representar?
+
+153
+00:12:15,931 --> 00:12:21,007
+Ah! Pienso que el cuadrado completo reprsenta los doscientos gramos o el todo
+
+154
+00:12:21,022 --> 00:12:22,484
+Muy bien
+
+155
+00:12:32,224 --> 00:12:34,675
+Ahí, mira
+
+156
+00:13:10,190 --> 00:13:18,506
+Yo pienso que podemos repartir los doscientos gramos entre los cien cuadraditos que representan un todo
+
+157
+00:13:18,527 --> 00:13:19,506
+Muy bien
+
+158
+00:13:25,217 --> 00:13:31,788
+A ver, doscientos entre 100 es dos, entonces es 2 gramos
+
+159
+00:13:31,809 --> 00:13:33,210
+¡Excelente!
+
+160
+00:14:14,203 --> 00:14:20,485
+Sabemos que veinte cuadraditos son el veinte por ciento que hay de proteína en el pollo
+
+161
+00:14:39,422 --> 00:14:40,401
+Sumar
+
+162
+00:14:41,766 --> 00:14:42,464
+Sí
+
+163
+00:14:42,485 --> 00:14:47,013
+Sí, sumar dos gramos veinte veces
+
+164
+00:15:17,994 --> 00:15:26,995
+Si nosotros comemos una presa de pollo de doscientos gramos, ¿estamos comiendo 40 gramos de proteína?
+
+165
+00:15:27,027 --> 00:15:27,759
+Así es
+
+166
+00:15:31,207 --> 00:15:38,489
+Recuerda, ¿cuántos gramos de proteína debemos comer al día?
+
+167
+00:15:38,513 --> 00:15:41,745
+Debemos comer cincuenta gramos de proteína al día
+
+168
+00:15:41,764 --> 00:15:43,393
+Exactamente
+
+169
+00:15:43,400 --> 00:15:51,529
+Si comemos doscientos gramos de pollo al día estaremos comiendo 40 gramos de proteína
+
+170
+00:16:00,014 --> 00:16:03,605
+Ala, no era tan difícil calcular como yo creía
+
