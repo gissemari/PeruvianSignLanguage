@@ -9,7 +9,7 @@
 
   * "--rawVideoPath PATH"   	'PATH' is the directory that points to the file that groups all the raw videos
   * "--srtPath PATH"		'PATH' is the directory that points to the file that groups all the SRT gestures
-  * "--outputVideoPath PATH"   'PATH' is the directory where you want to save all the Segmented gestures videos
+  * "--outputVideoPath PATH"   'PATH' is the directory where you want to save all the Segmented gestures videos (needed for the next step)
   * "--flgGesture #"           '#' is the number of frames per second for the output file
 
 2. run "python 3.Translation/FrameToKeypoint/ConvertVideoToKeypoint.py" with this command line options:
