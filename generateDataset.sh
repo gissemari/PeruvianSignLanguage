@@ -10,7 +10,9 @@ python 3.Translation/FrameToKeypoint/ConvertVideoToKeypoint.py --holistic
 rm -r 2.Segmentation/utils
 rm -r 3.Translation/FrameToKeypoint/utils
 
-python 1.Preprocessing/DatasetXY/Dataset_Preparator.py --words 10 --timesteps 17 --is3D --main_folder_Path ./Data/Keypoints/pkl/Segmented_gestures/ --output_Path ./Data/Dataset/
+python 4.Preparation/SampleModelFormat.py --words 10 --main_folder_Path ./Data/Keypoints/pkl/Segmented_gestures/ --output_Path ./Data/Dataset/readyToRun/
+
+python 4.Models/Classification.py --timesteps 17 --input_Path ./Data/Dataset/toReshape/ --output_Path ./Data/Dataset/readyToRun/
 
 echo "Press ENTER to exit:"
 read ENTER

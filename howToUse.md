@@ -35,10 +35,10 @@
 4. run "python 4.Preparation/SampleModelFormat.py"  with this command line options:
 
   * "--timesteps #"       '#' is the number of timesteps 
-  * "input_Path PATH"     'PATH' is the directory that points to the dataset sample file
-  * "--output_Path PATH"  'PATH' is the directory output you want to have the dataset sample
+  * "--input_Path PATH"     'PATH' is the directory that points to the dataset sample file
+  * "--output_Path PATH"  'PATH' is the directory output you want to have the dataset sample formated
 
-5. "python 4.Models/Classification.py" with this command line options:
+5. run "python 4.Models/Classification.py" with this command line options:
 
   * "--wandb"  		To connect the model with wandb (some files are needed to make wandb work - please read wandb documentation)
 

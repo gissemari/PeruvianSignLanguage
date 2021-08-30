@@ -28,9 +28,9 @@ parser.add_argument('--main_folder_Path', type=str,
 
 # Path to the output folder
 parser.add_argument('--output_Path', type=str,
-                    default="./Data/Dataset/",
+                    default="./Data/Dataset/toReshape/",
                     help='relative path of dataset output.' +
-                    ' Default: ./Data/Dataset/')
+                    ' Default: ./Data/Dataset/toReshape/')
 
 # Number of top words
 parser.add_argument("--words", type=int, default=10,
@@ -166,23 +166,23 @@ weight = [dict_weight[w]/total_weight for w in range(args.words)]
 weight = np.asarray(weight)
 print("weight shape: ", weight.shape)
 
-filePath = "toReshape/"
-uv.createFolder(args.output_Path+filePath)
 
-with open(args.output_Path+filePath+'X.data', 'wb') as f:
+uv.createFolder(args.output_Path)
+
+with open(args.output_Path+'X.data', 'wb') as f:
     pkl.dump(x, f)
-
-with open(args.output_Path+filePath+'Y.data', 'wb') as f:
+toReshape/
+with open(args.output_Path+'Y.data', 'wb') as f:
     pkl.dump(y, f)
 
-with open(args.output_Path+filePath+'weight.data', 'wb') as f:
+with open(args.output_Path+'weight.data', 'wb') as f:
     pkl.dump(weight, f)
 
-with open(args.output_Path+filePath+'Y_oneHot.data', 'wb') as f:
+with open(args.output_Path+'Y_oneHot.data', 'wb') as f:
     pkl.dump(y_oneHot, f)
 
-with open(args.output_Path+filePath+'Y_meaning.data', 'wb') as f:
+with open(args.output_Path+'Y_meaning.data', 'wb') as f:
     pkl.dump(y_meaning, f)
 
-with open(args.output_Path+filePath+'X_timeSteps.data', 'wb') as f:
+with open(args.output_Path+'X_timeSteps.data', 'wb') as f:
     pkl.dump(x_timeSteps, f)
