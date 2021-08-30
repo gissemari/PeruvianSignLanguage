@@ -92,4 +92,6 @@ with open(args.output_Path+'weight.data', 'wb') as f:
 
 with open(args.output_Path+'Y_meaning.data', 'wb') as f:
     pkl.dump(y_meaning, f)
+    
+print("Data Formated and saved in: ", args.output_Path)
         

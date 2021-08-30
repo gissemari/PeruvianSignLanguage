@@ -171,7 +171,7 @@ uv.createFolder(args.output_Path)
 
 with open(args.output_Path+'X.data', 'wb') as f:
     pkl.dump(x, f)
-toReshape/
+
 with open(args.output_Path+'Y.data', 'wb') as f:
     pkl.dump(y, f)
 

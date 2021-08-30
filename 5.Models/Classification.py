@@ -165,7 +165,7 @@ def main():
     num_layers = 3
     num_classes = dataXY.outputSize
     batch_size = 6
-    nEpoch = 10000
+    nEpoch = 2000
     lrn_rate = 0.0001
     weight_decay = 0
     epsilon = 1e-3
