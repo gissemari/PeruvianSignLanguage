@@ -38,7 +38,7 @@ import utils.backupModel as bckmod
 import utils.classificationPlotAndPrint as pp
 
 torch.cuda.empty_cache()
-device = torch.device("cuda")
+device = torch.device("cpu")
 print("############ ", device, " ############")
 
 parser = argparse.ArgumentParser(description='Classification')
@@ -166,10 +166,10 @@ def main():
     num_classes = dataXY.outputSize
     batch_size = 6
     nEpoch = 10000
-    lrn_rate = 0.00008
-    weight_decay = 1e-7
+    lrn_rate = 0.0001
+    weight_decay = 0
     epsilon = 1e-3
-    hidden_size = 28
+    hidden_size = 10
     # sequence_length = 40
 
     if args.wandb:

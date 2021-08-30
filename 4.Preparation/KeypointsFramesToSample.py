@@ -15,12 +15,10 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-parser = argparse.ArgumentParser(description='X and Y Dataset generator')
+# Local imports
+import utils.video as uv  # for folder creation
 
-
-# 3D boolean
-parser.add_argument('--is3D', action="store_true",
-                    help='To have dataset x in 3 dimentions')
+parser = argparse.ArgumentParser(description='X and Y Dataset distribution')
 
 # Path to folder with videos
 parser.add_argument('--main_folder_Path', type=str,
@@ -37,12 +35,6 @@ parser.add_argument('--output_Path', type=str,
 # Number of top words
 parser.add_argument("--words", type=int, default=10,
                     help="Number of top words")
-
-
-# Number of Time steps
-parser.add_argument("--timesteps", type=int, default=20,
-                    help="Max number of timestep allowed")
-
 
 args = parser.parse_args()
 
@@ -101,11 +93,13 @@ wordTrends = Counter(wordList)
 # the Counter
 
 topWords = wordTrends.most_common(args.words)
+
 print("Top Words: ",topWords)
 x_timeSteps = {}
 
 for word, value in topWords:
     x_timeSteps[word] = timeStepDict[word]
+
 print("Time steps distribution: ",x_timeSteps)
 topWordList = [key for (key, value) in topWords]
 
@@ -145,12 +139,6 @@ for videoFolderName in foldersToLoad:
 
         timeStepSize = len(fileData)
 
-        # if is in 2D
-        if not args.is3D:
-            fileData = fileData.flatten()
-            for _ in range(args.timesteps - timeStepSize):
-                fileData = np.append(fileData, np.zeros(len(fileData[0])))
-
         oneHot = np.zeros(args.words)
         oneHot[topWordDict[word]] = 1
 
@@ -178,25 +166,23 @@ weight = [dict_weight[w]/total_weight for w in range(args.words)]
 weight = np.asarray(weight)
 print("weight shape: ", weight.shape)
 
-if(args.is3D):
-    shapePath = '3D/'
-else:
-    shapePath = '2D/'
+filePath = "toReshape/"
+uv.createFolder(args.output_Path+filePath)
 
-with open(args.output_Path+shapePath+'X.data', 'wb') as f:
+with open(args.output_Path+filePath+'X.data', 'wb') as f:
     pkl.dump(x, f)
 
-with open(args.output_Path+shapePath+'Y.data', 'wb') as f:
+with open(args.output_Path+filePath+'Y.data', 'wb') as f:
     pkl.dump(y, f)
 
-with open(args.output_Path+shapePath+'weight.data', 'wb') as f:
+with open(args.output_Path+filePath+'weight.data', 'wb') as f:
     pkl.dump(weight, f)
 
-with open(args.output_Path+shapePath+'Y_oneHot.data', 'wb') as f:
+with open(args.output_Path+filePath+'Y_oneHot.data', 'wb') as f:
     pkl.dump(y_oneHot, f)
 
-with open(args.output_Path+shapePath+'Y_meaning.data', 'wb') as f:
+with open(args.output_Path+filePath+'Y_meaning.data', 'wb') as f:
     pkl.dump(y_meaning, f)
 
-with open(args.output_Path+shapePath+'X_timeSteps.data', 'wb') as f:
+with open(args.output_Path+filePath+'X_timeSteps.data', 'wb') as f:
     pkl.dump(x_timeSteps, f)

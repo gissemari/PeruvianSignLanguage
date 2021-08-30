@@ -23,7 +23,7 @@ import pickle
 def getData(is3D=True):
 
     if is3D:
-        dimPath = '3D/'
+        dimPath = 'readyToRun/'
     else:
         dimPath = '2D/'
 
@@ -41,8 +41,6 @@ def getData(is3D=True):
 
     with open('./Data/Dataset/'+dimPath+'Y_meaning.data', 'rb') as f:
         y_meaning = pickle.load(f)
-        
-
 
     return X, Y, weight, y_meaning, X_timeSteps
 
@@ -74,11 +72,11 @@ def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
     if(augmentation):
         for key, ts in x_timeSteps.items():
             augmentSize.append(sum([val-timeStepSize for val in ts if val > timeStepSize]))
-            
+
         minAugSize = min(augmentSize)
 
-        augmentDict = {k: minAugSize for k in range(0,len(targetDict.keys()))}
-      
+        augmentDict = {k: minAugSize for k in range(0, len(targetDict.keys()))}
+
     # to prepare pivot dictionary to use it in the split separator
     for key in targetDict:
 
@@ -112,7 +110,7 @@ def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
 
             # repeat the last frame
             x[pos] = np.append(x[pos], [x[pos][-1]], axis=0) 
-        
+
         #TRAIN
         if(pivot[y[pos]]>=0):
             
