@@ -21,6 +21,11 @@ parser = argparse.ArgumentParser(description='X and Y Dataset reshaper')
 parser.add_argument("--timesteps", type=int, default=17,
                     help="Max number of timestep allowed")
 
+parser.add_argument('--input_Path', type=str,
+                    default="./Data/Dataset/",
+                    help='relative path of sample input.' +
+                    ' Default: ./Data/Dataset/')
+
 # Path to the output folder
 parser.add_argument('--output_Path', type=str,
                     default="./Data/Dataset/",
@@ -35,19 +40,19 @@ import pickle
 
 fileName = "toReshape/"
 
-with open('./Data/Dataset/'+fileName+'X.data', 'rb') as f:
+with open(args.input_Path+fileName+'X.data', 'rb') as f:
     X = pickle.load(f)
 
-with open('./Data/Dataset/'+fileName+'X_timeSteps.data', 'rb') as f:
+with open(args.input_Path+fileName+'X_timeSteps.data', 'rb') as f:
     X_timeSteps = pickle.load(f)
 
-with open('./Data/Dataset/'+fileName+'Y.data', 'rb') as f:
+with open(args.input_Path+fileName+'Y.data', 'rb') as f:
     Y = pickle.load(f)
 
-with open('./Data/Dataset/'+fileName+'weight.data', 'rb') as f:
+with open(args.input_Path+fileName+'weight.data', 'rb') as f:
     weight = pickle.load(f)
 
-with open('./Data/Dataset/'+fileName+'Y_meaning.data', 'rb') as f:
+with open(args.input_Path+fileName+'Y_meaning.data', 'rb') as f:
     y_meaning = pickle.load(f)
 
 for ind in range(len(Y)):
