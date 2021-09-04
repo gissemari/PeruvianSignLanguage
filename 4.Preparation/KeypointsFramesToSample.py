@@ -7,7 +7,6 @@ Created on Sun Feb  7 14:04:44 2021
 # Standard library imports
 import argparse
 import os
-import random
 from collections import Counter
 
 # Third party imports
@@ -32,11 +31,18 @@ parser.add_argument('--output_Path', type=str,
                     help='relative path of dataset output.' +
                     ' Default: ./Data/Dataset/toReshape/')
 
+parser.add_argument('--wordList', '--names-list', nargs='+', default=[])
+
 # Number of top words
 parser.add_argument("--words", type=int, default=10,
                     help="Number of top words")
 
 args = parser.parse_args()
+
+if(args.wordList):
+    print(args.wordList)
+else:
+    print(args.words)
 
 # return a list of 2D tuple
 foldersToLoad = os.listdir(args.main_folder_Path)
@@ -66,6 +72,9 @@ for videoFolderName in foldersToLoad:
     for file in folder:
 
         word = file.split('_')[0]
+        
+        if args.wordList and word not in args.wordList:
+            continue
 
         fileData = pd.read_pickle(args.main_folder_Path+videoFolderName+'/'+file)
 
@@ -84,7 +93,6 @@ for videoFolderName in foldersToLoad:
 # the output will be like {'ENTONCES':2,'HOY':3,'MAL':2, ...}
 wordTrends = Counter(wordList)
 
-
 #sortedTimeStepRank = sorted(timeStepRank.items(), key=lambda x: x[1], reverse=True)
 #print(sortedTimeStepRank[0:10])
 
@@ -95,6 +103,9 @@ wordTrends = Counter(wordList)
 topWords = wordTrends.most_common(args.words)
 
 print("Top Words: ",topWords)
+
+
+
 x_timeSteps = {}
 
 for word, value in topWords:
