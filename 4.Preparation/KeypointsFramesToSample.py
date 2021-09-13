@@ -40,9 +40,9 @@ parser.add_argument("--words", type=int, default=10,
 args = parser.parse_args()
 
 if(args.wordList):
-    print(args.wordList)
+    print("WordList: ", args.wordList)
 else:
-    print(args.words)
+    print("Number of words: ",args.words)
 
 # return a list of 2D tuple
 foldersToLoad = os.listdir(args.main_folder_Path)
@@ -102,16 +102,18 @@ wordTrends = Counter(wordList)
 
 topWords = wordTrends.most_common(args.words)
 
-print("Top Words: ",topWords)
+print("\nTOP WORDS")
+for pos, top in enumerate(topWords):
+    print("%2d)%15s - %d timesteps"%(pos+1, top[0], top[1]))
 
-
-
+print("\nTimesteps size distribution : ")
+print()
 x_timeSteps = {}
-
 for word, value in topWords:
     x_timeSteps[word] = timeStepDict[word]
+    print(word,timeStepDict[word])
+    print()
 
-print("Time steps distribution: ",x_timeSteps)
 topWordList = [key for (key, value) in topWords]
 
 wordLabels = list(range(len(topWordList)))
@@ -176,7 +178,7 @@ weight = [dict_weight[w]/total_weight for w in range(args.words)]
 
 weight = np.asarray(weight)
 print("weight shape: ", weight.shape)
-
+print("\nData saved in: ", args.output_Path)
 
 uv.createFolder(args.output_Path)
 
