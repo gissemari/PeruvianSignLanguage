@@ -65,7 +65,7 @@ class SignLanguageDataset(torch.utils.data.Dataset):
                                                               leastValue=True,
                                                               balancedTest=True,
                                                               fixed=False,
-                                                              fixedTest=2,
+                                                              fixedTest=0,
                                                               doShuffle=True)
 
         self.inputSize = len(x[0][0])
@@ -161,16 +161,16 @@ def main():
     # variables
     minimun = True
     split = 0.8
-    dropout = 0.25
-    num_layers = 1
+    dropout = 0.0
+    num_layers = 4
     num_classes = dataXY.outputSize
     batch_size = 6
     nEpoch = 2000
-    lrn_rate = 0.001
+    lrn_rate = 0.00001
     weight_decay = 0
-    epsilon = 1e-3
-    hidden_size = 100
-    # sequence_length = 40
+    epsilon = 1e-8
+    hidden_size = 40
+
 
     if args.wandb:
         wandbF.initConfigWandb(num_layers, num_classes, batch_size, nEpoch,
