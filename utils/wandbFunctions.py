@@ -12,6 +12,8 @@ def initConfigWandb(num_layers, num_classes, batch_size,
                     weight_decay, epsilon):
 
     wandb.init(project='sign-language', entity='joenatan30')
+    run = wandb.init()
+
     config = wandb.config
     
     config["num_layers"] = num_layers
