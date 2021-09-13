@@ -43,9 +43,6 @@ parser = argparse.ArgumentParser(description='Mediapipe models ' +
                                  '(FaceMesh, Hands, Pose)')
 
 # Models
-parser.add_argument('--face_mesh', action="store_true", help='Use face mesh model')
-parser.add_argument('--hands', action="store_true", help='Use hands model')
-parser.add_argument('--pose', action="store_true", help='Use pose model')
 parser.add_argument('--holistic', action="store_true", help='Use holistic model: face, hands and pose')
 
 # File paths
@@ -72,28 +69,12 @@ args = parser.parse_args()
 
 
 #########################
-# MODELS(Mediapipe) - Notice that this given orden is important
-#                     to manage file name results.
-#                     (check counter variable in FOLDER LIST LOOP)
-#  1-FaceMesh
-#  2-Hands
-#  3-Pose
-#  4-Holistic
+# MODELS(Mediapipe) - 
+#
+# -Holistic
 ##############
-print()
-print("model (using):")
-if(args.face_mesh):
-    print(" - faceMesh")
-    mp_face_mesh = mp.solutions.face_mesh
-if(args.hands):
-    print(" - hands")
-    mp_hands = mp.solutions.hands
-if(args.pose):
-    print(" - pose")
-    mp_pose = mp.solutions.pose
-if(args.holistic):
-    print(" - holistic")
-    mp_holistic = mp.solutions.holistic
+print("Holistic Model")
+mp_holistic = mp.solutions.holistic
 
 
 #########################
@@ -101,31 +82,15 @@ if(args.holistic):
 ##############
 
 # FACE MESH parameters.
-if(args.face_mesh):
-    face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True,
-                                      max_num_faces=1,
-                                      min_detection_confidence=0.5)
 
-# HANDS parameters.
-if(args.hands):
-    hands = mp_hands.Hands(static_image_mode=True,
-                           max_num_hands=2,
-                           min_detection_confidence=0.7)
-
-# POSE parameters.
-if(args.pose):
-    pose = mp_pose.Pose(static_image_mode=True,
-                        min_detection_confidence=0.5)
-
-if (args.holistic):
-    if args.withLineFeature:
-        print("   + with Line Feature")
-        holistic = mp_holistic.Holistic(upper_body_only=True,
-                                        min_detection_confidence=0.5,
-                                        min_tracking_confidence=0.5)
-    else:
-        holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
-                                        min_tracking_confidence=0.5)
+if args.withLineFeature:
+    print("   + with Line Feature")
+    holistic = mp_holistic.Holistic(upper_body_only=True,
+                                    min_detection_confidence=0.5,
+                                    min_tracking_confidence=0.5)
+else:
+    holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
+                                    min_tracking_confidence=0.5)
 #########################
 # UTILS
 ##############
@@ -207,94 +172,69 @@ for videoFolderName in folder_list:
             annotated_image.flags.writeable = True
 
             # Process
-            if(args.face_mesh):
-                faceResults = face_mesh.process(imageBGR)
 
-                for data_point in faceResults.multi_face_landmarks[0].landmark:
+            
+            holisResults = holistic.process(imageBGR)
+            # Pose_landmark might already be enough
+            # for data_point in faceResults.landmarkS:
+            #     list_X.append(data_point.landmark.x)
+            #     list_Y.append(data_point.landmark.y)
+
+            # for data_point in holisResults.left_hand_landmarks.landmark:
+            #     list_X.append(data_point.landmark.x)
+            #     list_Y.append(data_point.landmark.y)
+
+            # for data_point in holisResults.right_hand_landmarks.landmark:
+            #     list_X.append(data_point.landmark.x)
+            #     list_Y.append(data_point.landmark.y)
+
+            for posi,  data_point in enumerate(holisResults.pose_landmarks.landmark):
+                list_X.append(data_point.x)
+                list_Y.append(data_point.y)
+                
+            if(holisResults.left_hand_landmarks):
+                for posi,  data_point in enumerate(holisResults.left_hand_landmarks.landmark):
                     list_X.append(data_point.x)
                     list_Y.append(data_point.y)
-                    # list_Z.append(data_point.z)
+            else:
+                for _ in range(0,21): # 21 is the number of points taken in hands model
+                    list_X.append(0.0)
+                    list_Y.append(0.0)
 
-                mp_drawing.draw_landmarks(
-                            image=annotated_image,
-                            landmark_list=faceResults.multi_face_landmarks[0],
-                            connections=mp_face_mesh.FACE_CONNECTIONS,
-                            landmark_drawing_spec=drawing_spec,
-                            connection_drawing_spec=drawing_spec)
-
-            if(args.hands):
-                handsResults = hands.process(imageBGR)
-
-                # For each hand
-                for hand_landmarks in handsResults.multi_hand_landmarks:
-                    for data_point in hand_landmarks.landmark:
-                        list_X.append(data_point.x)
-                        list_Y.append(data_point.y)
-                        # list_Z.append(data_point.z)
-
-                for hand_landmarks in handsResults.multi_hand_landmarks:
-                    # Add landmarks into the image
-                    mp_drawing.draw_landmarks(
-                                    image=annotated_image,
-                                    landmark_list=hand_landmarks,
-                                    connections=mp_hands.HAND_CONNECTIONS)
-
-            if(args.pose):
-                poseResults = pose.process(imageBGR)
-
-                for hand_landmarks in poseResults.pose_landmarks.landmark:
-
-                    list_X.append(hand_landmarks.x)
-                    list_Y.append(hand_landmarks.y)
-                    # list_Z.append(hand_landmarks.z)
-
-                # Add landmarks into the image
-                mp_drawing.draw_landmarks(
-                                image=annotated_image,
-                                landmark_list=poseResults.pose_landmarks,
-                                connections=mp_pose.POSE_CONNECTIONS)
-            if(args.holistic):
-                holisResults = holistic.process(imageBGR)
-                # Pose_landmark might already be enough
-                # for data_point in faceResults.landmarkS:
-                #     list_X.append(data_point.landmark.x)
-                #     list_Y.append(data_point.landmark.y)
-
-                # for data_point in holisResults.left_hand_landmarks.landmark:
-                #     list_X.append(data_point.landmark.x)
-                #     list_Y.append(data_point.landmark.y)
-
-                # for data_point in holisResults.right_hand_landmarks.landmark:
-                #     list_X.append(data_point.landmark.x)
-                #     list_Y.append(data_point.landmark.y)
-
-                for posi,  data_point in enumerate(holisResults.pose_landmarks.landmark):
+            if(holisResults.right_hand_landmarks):
+                for posi,  data_point in enumerate(holisResults.right_hand_landmarks.landmark):
                     list_X.append(data_point.x)
                     list_Y.append(data_point.y)
+            else:
+                for _ in range(0,21):
+                    list_X.append(0.0)
+                    list_Y.append(0.0)
 
-                if(args.withLineFeature):
-                    for conections in LineFeatureConect:
-                        p1 = holisResults.pose_landmarks.landmark[conections[0]]
-                        p2 = holisResults.pose_landmarks.landmark[conections[1]]
+            if(args.withLineFeature):
+                for conections in LineFeatureConect:
+                    p1 = holisResults.pose_landmarks.landmark[conections[0]]
+                    p2 = holisResults.pose_landmarks.landmark[conections[1]]
 
-                        lineX = p2.x - p1.x
-                        lineY = p2.y - p1.y
+                    lineX = p2.x - p1.x
+                    lineY = p2.y - p1.y
 
-                        list_X.append(lineX)
-                        list_Y.append(lineY)
+                    list_X.append(lineX)
+                    list_Y.append(lineY)
 
-                #mp_drawing.draw_landmarks(annotated_image, holisResults.face_landmarks, mp_holistic.FACE_CONNECTIONS)
-                #mp_drawing.draw_landmarks(annotated_image, holisResults.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-                #mp_drawing.draw_landmarks(annotated_image, holisResults.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-
-                if(args.withLineFeature):
-                    mp_drawing.draw_landmarks(annotated_image,
-                                              holisResults.pose_landmarks,
-                                              mp_holistic.UPPER_BODY_POSE_CONNECTIONS)
-                else:
-                    mp_drawing.draw_landmarks(annotated_image,
-                                              holisResults.pose_landmarks,
-                                              mp_holistic.POSE_CONNECTIONS)
+            if(args.withLineFeature):
+                mp_drawing.draw_landmarks(annotated_image,
+                                          holisResults.pose_landmarks,
+                                          mp_holistic.UPPER_BODY_POSE_CONNECTIONS)
+            else:
+                mp_drawing.draw_landmarks(annotated_image,
+                                          holisResults.pose_landmarks,
+                                          mp_holistic.POSE_CONNECTIONS)
+                mp_drawing.draw_landmarks(annotated_image,
+                                          holisResults.left_hand_landmarks,
+                                          mp_holistic.HAND_CONNECTIONS)
+                mp_drawing.draw_landmarks(annotated_image,
+                                          holisResults.right_hand_landmarks,
+                                          mp_holistic.HAND_CONNECTIONS)
 
             list_seq.append([list_X, list_Y])
 
@@ -313,8 +253,11 @@ for videoFolderName in folder_list:
             # 25 (points) + 13(lines) * 2 (x and y axes)
             new3D = np.asarray(list_seq).reshape((-1, (25+13)*2))
         else:
-            # 33 (points) * 2 (x and y axes)
-            new3D = np.asarray(list_seq).reshape((-1, 33*2))
+            # 33 (pose points)
+            # 21 (left hand points)
+            # 21 (right hand points)
+            # * 2 (x and y axes)
+            new3D = np.asarray(list_seq).reshape((-1, (33+21+21)*2))
 
         print(videoFolderName, videoFile, new3D.shape)
 
@@ -331,10 +274,4 @@ for videoFolderName in folder_list:
 #########################
 # CLOSE MODELS
 ##############
-
-if(args.face_mesh):
-    face_mesh.close()
-if(args.hands):
-    hands.close()
-if(args.pose):
-    pose.close()
+holistic.close()
