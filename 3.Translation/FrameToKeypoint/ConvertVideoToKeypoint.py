@@ -69,7 +69,7 @@ args = parser.parse_args()
 
 
 #########################
-# MODELS(Mediapipe) - 
+# MODELS(Mediapipe)
 #
 # -Holistic
 ##############
@@ -160,7 +160,7 @@ for videoFolderName in folder_list:
             # temporal variables
             list_X = []
             list_Y = []
-            #list_Z = []
+            # list_Z = []
 
             # Convert the BGR image to RGB before processing.
             imageBGR = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -173,7 +173,6 @@ for videoFolderName in folder_list:
 
             # Process
 
-            
             holisResults = holistic.process(imageBGR)
             # Pose_landmark might already be enough
             # for data_point in faceResults.landmarkS:
@@ -188,27 +187,33 @@ for videoFolderName in folder_list:
             #     list_X.append(data_point.landmark.x)
             #     list_Y.append(data_point.landmark.y)
 
-            for posi,  data_point in enumerate(holisResults.pose_landmarks.landmark):
+            for posi, data_point in enumerate(holisResults.pose_landmarks.landmark):
                 list_X.append(data_point.x)
                 list_Y.append(data_point.y)
-                
+
             if(holisResults.left_hand_landmarks):
-                for posi,  data_point in enumerate(holisResults.left_hand_landmarks.landmark):
+                for posi, data_point in enumerate(holisResults.left_hand_landmarks.landmark):
                     list_X.append(data_point.x)
                     list_Y.append(data_point.y)
             else:
-                for _ in range(0,21): # 21 is the number of points taken in hands model
+                for _ in range(0, 21): # 21 is the number of points taken in hands model
                     list_X.append(0.0)
                     list_Y.append(0.0)
 
             if(holisResults.right_hand_landmarks):
-                for posi,  data_point in enumerate(holisResults.right_hand_landmarks.landmark):
+                for posi, data_point in enumerate(holisResults.right_hand_landmarks.landmark):
                     list_X.append(data_point.x)
                     list_Y.append(data_point.y)
             else:
-                for _ in range(0,21):
+                for _ in range(0, 21):
                     list_X.append(0.0)
                     list_Y.append(0.0)
+
+            if(holisResults.face_landmarks.landmark):
+
+                for posi, data_point in enumerate(holisResults.face_landmarks.landmark):
+                    list_X.append(data_point.x)
+                    list_Y.append(data_point.y)
 
             if(args.withLineFeature):
                 for conections in LineFeatureConect:
@@ -235,7 +240,9 @@ for videoFolderName in folder_list:
                 mp_drawing.draw_landmarks(annotated_image,
                                           holisResults.right_hand_landmarks,
                                           mp_holistic.HAND_CONNECTIONS)
-
+                mp_drawing.draw_landmarks(annotated_image,
+                                          holisResults.face_landmarks,
+                                          mp_holistic.FACE_CONNECTIONS)
             list_seq.append([list_X, list_Y])
 
             cv2.imwrite("%s.png" % (imgFolder+'/'+str(idx)), annotated_image)
@@ -256,8 +263,9 @@ for videoFolderName in folder_list:
             # 33 (pose points)
             # 21 (left hand points)
             # 21 (right hand points)
+            # 468 (face mesh points)
             # * 2 (x and y axes)
-            new3D = np.asarray(list_seq).reshape((-1, (33+21+21)*2))
+            new3D = np.asarray(list_seq).reshape((-1, (33+21+21+468)*2))
 
         print(videoFolderName, videoFile, new3D.shape)
 
