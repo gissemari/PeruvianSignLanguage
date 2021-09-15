@@ -174,23 +174,13 @@ for videoFolderName in folder_list:
             # Process
 
             holisResults = holistic.process(imageBGR)
-            # Pose_landmark might already be enough
-            # for data_point in faceResults.landmarkS:
-            #     list_X.append(data_point.landmark.x)
-            #     list_Y.append(data_point.landmark.y)
-
-            # for data_point in holisResults.left_hand_landmarks.landmark:
-            #     list_X.append(data_point.landmark.x)
-            #     list_Y.append(data_point.landmark.y)
-
-            # for data_point in holisResults.right_hand_landmarks.landmark:
-            #     list_X.append(data_point.landmark.x)
-            #     list_Y.append(data_point.landmark.y)
-
+            
+            # POSE
             for posi, data_point in enumerate(holisResults.pose_landmarks.landmark):
                 list_X.append(data_point.x)
                 list_Y.append(data_point.y)
 
+            # Left hand
             if(holisResults.left_hand_landmarks):
                 for posi, data_point in enumerate(holisResults.left_hand_landmarks.landmark):
                     list_X.append(data_point.x)
@@ -200,6 +190,7 @@ for videoFolderName in folder_list:
                     list_X.append(0.0)
                     list_Y.append(0.0)
 
+            # Right hand
             if(holisResults.right_hand_landmarks):
                 for posi, data_point in enumerate(holisResults.right_hand_landmarks.landmark):
                     list_X.append(data_point.x)
@@ -209,11 +200,15 @@ for videoFolderName in folder_list:
                     list_X.append(0.0)
                     list_Y.append(0.0)
 
-            if(holisResults.face_landmarks.landmark):
-
+            # Face mesh
+            if(holisResults.face_landmarks):
                 for posi, data_point in enumerate(holisResults.face_landmarks.landmark):
                     list_X.append(data_point.x)
                     list_Y.append(data_point.y)
+            else:
+                for _ in range(0, 468):
+                    list_X.append(0.0)
+                    list_Y.append(0.0)
 
             if(args.withLineFeature):
                 for conections in LineFeatureConect:
