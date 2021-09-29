@@ -447,7 +447,7 @@ Hoy nos vamos a enfocar en las proteínas
 ¿qué tiene la carne de un pollo?
 
 113
-00:08:16,235 --> 00:08:31,627
+00:08:16,235 --> 00:08:31,900
 Setenta por ciento es agua, el diez por ciento es grasa, el veinte por ciento es proteína, el cero por ciento son C-A-R-B-O-H-I-D-R-A-T-O-S
 
 114
@@ -463,11 +463,11 @@ La carne de pollo tiene veinte por ciento de proteína
 ¡Excelente!
 
 117
-00:08:48,761 --> 00:08:55,564
+00:08:48,761 --> 00:08:54,000
 Conocemos aproximadamente los componentes de la carne de pollo
 
 118
-00:08:55,604 --> 00:09:01,457
+00:08:54,050 --> 00:09:01,457
 Sumando todos los porcentajes tenemos cien por ciento
 
 119
@@ -503,11 +503,11 @@ Tranquila, yo te ayudo a repasar los datos
 doscientos gramos
 
 127
-00:09:46,606 --> 00:09:51,015
+00:09:46,606 --> 00:09:51,800
 ¿cuánto porcentaje hay en la carne de pollo, cuánto porcentaje?
 
 128
-00:09:51,072 --> 00:09:54,384
+00:09:52,072 --> 00:09:54,384
 veinte por ciento de proteína
 
 129
@@ -519,7 +519,7 @@ veinte por ciento de proteína
 Tú intenta una solución al regreso del corte comercial
 
 131
-00:10:07,628 --> 00:10:14,499
+00:10:07,628 --> 00:10:14,570
 Al regreso, trae una hoja cuadriculada, lapiz, colores y una regla
 
 132
@@ -529,4 +529,248 @@ Ahora que regresamos, pide ayuda a un adulto para conseguir una hoja cuadriculad
 133
 00:10:24,127 --> 00:10:25,675
 Vamos, yo te espero
+
+134
+00:10:35,350 --> 00:10:39,031
+Chicos y yo trajimos los materiales
+
+135
+00:10:39,124 --> 00:10:50,031
+¿Pensaste cómo hallar cuántos gramos de presa son proteína?
+
+136
+00:10:50,093 --> 00:10:52,406
+Está un poco difícil
+
+137
+00:10:52,460 --> 00:10:55,287
+No te preocupes, hagámoslo juntos
+
+138
+00:10:55,319 --> 00:10:58,440
+Usemos una hoja cuadriculada
+
+139
+00:10:58,450 --> 00:11:06,263
+Dibuja un cuadrado grande y divide y cien partes iguales
+
+140
+00:11:06,319 --> 00:11:17,940
+Este cuadrado grande se llama todo y representa el cien por ciento porque cien por ciento es el todo
+
+141
+00:11:17,950 --> 00:11:28,471
+Si todo el cuadrado representa el cien por ciento. Pregunta, ¿cada cuadradito cuánto representa?
+
+142
+00:11:28,486 --> 00:11:30,416
+Uno por ciento
+
+143
+00:11:30,450 --> 00:11:33,150
+Sí, uno por ciento
+
+144
+00:11:33,194 --> 00:11:35,060
+Ustedes que respondieron?
+
+145
+00:11:35,109 --> 00:11:39,621
+Cada cuadradito representa uno por ciento
+
+146
+00:11:39,682 --> 00:11:48,426
+Si pintamos todos los cuadraditos pintamos cien que representa el cien por ciento del cuadrado grande
+
+147
+00:11:56,011 --> 00:12:01,621
+Si yo pinto dos cuadraditos, ¿cuánto representa?
+
+148
+00:12:01,655 --> 00:12:02,999
+Dos por ciento
+
+149
+00:12:03,019 --> 00:12:04,190
+Muy bien
+
+150
+00:12:04,200 --> 00:12:08,722
+Un cuadradito, dos cuadraditos representan dos por ciento
+
+151
+00:12:08,742 --> 00:12:14,598
+Ahora ¿qué pasa con la carne de pollo de doscientos gramos?
+
+152
+00:12:14,605 --> 00:12:15,916
+¿cómo lo podemos representar?
+
+153
+00:12:15,931 --> 00:12:21,007
+Ah! Pienso que el cuadrado completo reprsenta los doscientos gramos o el todo
+
+154
+00:12:21,022 --> 00:12:22,484
+Muy bien
+
+155
+00:12:32,224 --> 00:12:34,675
+Ahí, mira
+
+156
+00:13:10,190 --> 00:13:18,506
+Yo pienso que podemos repartir los doscientos gramos entre los cien cuadraditos que representan un todo
+
+157
+00:13:18,527 --> 00:13:19,506
+Muy bien
+
+158
+00:13:25,217 --> 00:13:31,788
+A ver, doscientos entre 100 es dos, entonces es 2 gramos
+
+159
+00:13:31,809 --> 00:13:33,210
+¡Excelente!
+
+160
+00:14:14,203 --> 00:14:20,485
+Sabemos que veinte cuadraditos son el veinte por ciento que hay de proteína en el pollo
+
+161
+00:14:39,422 --> 00:14:40,401
+Sumar
+
+162
+00:14:41,766 --> 00:14:42,464
+Sí
+
+163
+00:14:42,485 --> 00:14:47,013
+Sí, sumar dos gramos veinte veces
+
+164
+00:15:08,421 --> 00:15:17,721
+Podemos decir que el veinte por ciento de proteína en doscientos gramos de carne de pollo es cuarenta gramos de proteína
+
+165
+00:15:17,994 --> 00:15:26,995
+Si nosotros comemos una presa de pollo de doscientos gramos, ¿estamos comiendo 40 gramos de proteína?
+
+166
+00:15:27,027 --> 00:15:28,000
+Así es
+
+167
+00:15:31,207 --> 00:15:38,489
+Recuerda, ¿cuántos gramos de proteína debemos comer al día?
+
+168
+00:15:38,513 --> 00:15:41,745
+Debemos comer cincuenta gramos de proteína al día
+
+169
+00:15:41,764 --> 00:15:43,393
+Exactamente
+
+170
+00:15:43,400 --> 00:15:51,529
+Si comemos doscientos gramos de pollo al día estaremos comiendo 40 gramos de proteína
+
+171
+00:15:51,770 --> 00:15:59,931
+solo  necesitan consumir diez gramos más para llegar a los cincuenta gramos que necesita por día
+
+172
+00:16:00,014 --> 00:16:03,605
+Ala, no era tan difícil calcular como yo creía
+
+173
+00:16:05,993 --> 00:16:09,471
+Ya entiendo cómo calcular porcentajes
+
+174
+00:16:09,585 --> 00:16:18,487
+tú hablaste hoy de los alimentos ancestrales y germinados
+
+175
+00:16:18,528 --> 00:16:21,822
+yo no sabía cuánto porcentaje de proteína tienen los germinados
+
+176
+00:16:21,850 --> 00:16:28,872
+yo investigué que las lentejas germinadas tiene 9 por ciento aproximado de proteínas
+
+177
+00:16:28,891 --> 00:16:36,125
+¿cuántos gramos de proteína hay en las lentejas germinadas?
+
+178
+00:16:43,647 --> 00:16:47,872
+¿qué hacemos para saber?
+
+179
+00:16:47,915 --> 00:16:49,816
+Investiguemos juntos
+
+180
+00:16:49,854 --> 00:16:52,994
+Esperen ustedes niños y niñas que están en sus casas
+
+181
+00:16:53,071 --> 00:17:01,215
+Recuerden
+
+182
+00:17:01,261 --> 00:17:06,981
+Podemos decir
+
+183
+00:17:18,015 --> 00:17:19,700
+Sí, tenemos que dividir
+
+184
+00:17:19,723 --> 00:17:21,103
+Muy bien
+
+185
+00:17:21,162 --> 00:17:22,682
+Nosotros dividimos
+
+186
+00:17:22,900 --> 00:17:28,139
+Tenemos que dividir trescientos gramos entre cien
+
+187
+00:18:11,016 --> 00:18:18,511
+Ahora, ¿cómo hacemos para saber?
+
+188
+00:18:18,685 --> 00:18:20,396
+¿qué dicen?
+
+189
+00:19:18,008 --> 00:19:21,520
+Finalmente comunicamos y analizamos los resultados
+
+190
+00:19:21,575 --> 00:19:29,593
+si en el almuerzo como trescientos gramos de germinado de lentejas obtengo veinte y siete gramos de proteínas
+
+191
+00:19:29,620 --> 00:19:37,395
+como necesito cincuenta gramos al día, tendría que complementar mi alimentación con otros alimentos que tengan proteína
+
+192
+00:19:46,512 --> 00:19:56,764
+Viendo la proteína que nos aporta el germinado de lentejas, escucho sobre la quinua germinada, ¿cuánta proteína aporta?
+
+193
+00:19:56,832 --> 00:19:57,808
+Claro
+
+194
+00:19:57,911 --> 00:20:03,308
+Nosotros tenemos que saber cuál es su porcentaje de proteína
 
