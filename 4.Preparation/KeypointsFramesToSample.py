@@ -47,7 +47,7 @@ else:
 # return a list of 2D tuple
 foldersToLoad = os.listdir(args.main_folder_Path)
 
-wordList = []
+temporalList = []
 timeStepDict = {}
 
 for videoFolderName in foldersToLoad:
@@ -58,7 +58,7 @@ for videoFolderName in foldersToLoad:
 
     folder = os.listdir(args.main_folder_Path+videoFolderName)
 
-    # wordList => list that acumulate the name of all files of all folders.
+    # temporalList => list that acumulate the name of all files of all folders.
     # The acumulated names will have some modification made by
     # file.split('_')[0]
     #
@@ -72,15 +72,15 @@ for videoFolderName in foldersToLoad:
     for file in folder:
 
         word = file.split('_')[0]
-        
+
         if args.wordList and word not in args.wordList:
             continue
 
         fileData = pd.read_pickle(args.main_folder_Path+videoFolderName+'/'+file)
-
+        
         if word in timeStepDict:
             timeStepDict[word] = timeStepDict[word] + [len(fileData)]
-            wordList = wordList + [word]
+            temporalList = temporalList + [word]
         else:
             timeStepDict.update({word: [len(fileData)]})
 
@@ -91,7 +91,7 @@ for videoFolderName in foldersToLoad:
 
 # Convert the given list into dictionary
 # the output will be like {'ENTONCES':2,'HOY':3,'MAL':2, ...}
-wordTrends = Counter(wordList)
+wordTrends = Counter(temporalList)
 
 #sortedTimeStepRank = sorted(timeStepRank.items(), key=lambda x: x[1], reverse=True)
 #print(sortedTimeStepRank[0:10])
@@ -104,7 +104,7 @@ topWords = wordTrends.most_common(args.words)
 
 print("\nTOP WORDS")
 for pos, top in enumerate(topWords):
-    print("%2d)%15s - %d timesteps"%(pos+1, top[0], top[1]))
+    print("%2d)%15s - %d instances"%(pos+1, top[0], top[1]))
 
 print("\nTimesteps size distribution : ")
 print()
@@ -150,7 +150,6 @@ for videoFolderName in foldersToLoad:
 
         fileData = pd.read_pickle(args.main_folder_Path+videoFolderName+'/'+file)
 
-        timeStepSize = len(fileData)
 
         oneHot = np.zeros(args.words)
         oneHot[topWordDict[word]] = 1
@@ -158,7 +157,6 @@ for videoFolderName in foldersToLoad:
         x = x + [list(fileData)]
         y = y + [topWordDict[word]]
         y_oneHot = y_oneHot + [oneHot]
-
 
 x = np.asarray(x, dtype="object")
 print("X shape: ", x.shape)

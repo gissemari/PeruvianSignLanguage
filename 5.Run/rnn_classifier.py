@@ -36,12 +36,18 @@ import utils.video as uv
 import utils.wandbFunctions as wandbF
 import utils.backupModel as bckmod
 import utils.classificationPlotAndPrint as pp
+import models.rnn as rnn
 
 torch.cuda.empty_cache()
-device = torch.device("cuda")
+device = torch.device("cpu")
 print("############ ", device, " ############")
 
 parser = argparse.ArgumentParser(description='Classification')
+
+parser.add_argument('--keys_input_Path', type=str,
+                    default="./Data/Dataset/readyToRun/",
+                    help='relative path of keypoints input.'
+                    ' Default: ./Data/Dataset/keypoints/')
 
 # 3D boolean
 parser.add_argument('--wandb', action="store_true",
@@ -57,7 +63,7 @@ class SignLanguageDataset(torch.utils.data.Dataset):
 
     def __init__(self, src_file, split=0.8):
 
-        x, y, weight, y_labels, x_timeSteps = LoadData.getData()
+        x, y, weight, y_labels, x_timeSteps = LoadData.getData(args.keys_input_Path)
 
         x_train, y_train, x_test, y_test = LoadData.splitData(x, y,
                                                               x_timeSteps,
@@ -92,37 +98,6 @@ class SignLanguageDataset(torch.utils.data.Dataset):
             'predictors': preds,
             'targets': trgts}
         return sample
-
-
-# ----------------------------------------------------
-# 2. create neural network
-class Net(torch.nn.Module):
-
-    def __init__(self, inputSize, hiddenSize, numLayers, outputSize, dropout=0):
-
-        super(Net, self).__init__()
-
-        self.hiddenSize = hiddenSize
-        self.numLayers = numLayers
-
-        if(dropout):
-            self.rnn = torch.nn.RNN(
-                inputSize, hiddenSize, numLayers, dropout=dropout, batch_first=True, nonlinearity="relu")
-        else:
-            self.rnn = torch.nn.RNN(
-                inputSize, hiddenSize, numLayers, batch_first=True, nonlinearity="relu")
-
-        self.fc = torch.nn.Linear(hiddenSize, outputSize)
-
-    def forward(self, x):
-
-        h0 = torch.zeros(self.numLayers, x.size(
-            0), self.hiddenSize).to(device=device)
-        out, hidden = self.rnn(x, h0)
-
-        out = self.fc(out[:, -1, :])
-
-        return out, hidden
 
 
 def accuracy_quick(yPred, yTarget):
@@ -162,14 +137,14 @@ def main():
     minimun = True
     split = 0.8
     dropout = 0.0
-    num_layers = 4
+    num_layers = 1
     num_classes = dataXY.outputSize
-    batch_size = 6
+    batch_size = 30
     nEpoch = 2000
-    lrn_rate = 0.00001
+    lrn_rate = 0.001
     weight_decay = 0
     epsilon = 1e-8
-    hidden_size = 40
+    hidden_size = 80
 
 
     if args.wandb:
@@ -180,6 +155,7 @@ def main():
     print("minimun sizes of data: %s" % minimun)
     print("data train split at: %2.2f" % split)
     print("hidden size: %d" % hidden_size)
+    print("dropout: %3.2f" % dropout)
     print("batch_size: %d" % batch_size)
     print("number of epoch: %d" % nEpoch)
     print("learning rate: %f" % lrn_rate)
@@ -189,7 +165,7 @@ def main():
 
     ##################################################
     # 2. create neural network
-    net = Net(dataXY.inputSize, hidden_size,
+    net = rnn.Net(dataXY.inputSize, hidden_size,
               num_layers, dataXY.outputSize, dropout).to(device)
 
     print('The number of parameter is: %d' % count_parameters(net))
@@ -312,16 +288,11 @@ def main():
 
     # Prepare folders
     uv.createFolder("./evaluation/classes_%d" % num_classes)
-    uv.createFolder("./evaluation/classes_%d/layers_%d" %
-                    (num_classes, num_layers))
-    uv.createFolder("./evaluation/classes_%d/layers_%d/lrnRt_%f" %
-                    (num_classes, num_layers, lrn_rate))
-    uv.createFolder("./evaluation/classes_%d/layers_%d/lrnRt_%f/batch-%d" %
-                    (num_classes, num_layers, lrn_rate, batch_size))
-    pltSavePath = "./evaluation/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (
-        num_classes, num_layers, lrn_rate, batch_size)
-    plt.savefig(pltSavePath + '/LOSS_lrnRt-%f_batch-%d_nEpoch-%d_hidden-%d.png' %
-                (lrn_rate, batch_size, nEpoch, hidden_size))
+    uv.createFolder("./evaluation/classes_%d/layers_%d" % (num_classes, num_layers))
+    uv.createFolder("./evaluation/classes_%d/layers_%d/lrnRt_%f" % (num_classes, num_layers, lrn_rate))
+    uv.createFolder("./evaluation/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (num_classes, num_layers, lrn_rate, batch_size))
+    pltSavePath = "./evaluation/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (num_classes, num_layers, lrn_rate, batch_size)
+    plt.savefig(pltSavePath + '/LOSS_lrnRt-%f_batch-%d_nEpoch-%d_hidden-%d.png' % (lrn_rate, batch_size, nEpoch, hidden_size))
 
     ##################################################
     # 4. evaluate model
@@ -419,7 +390,7 @@ def main():
     ##################################################
     # 6. make a prediction
 
-    model = Net(dataXY.inputSize, hidden_size,
+    model = rnn.Net(dataXY.inputSize, hidden_size,
                 num_layers, dataXY.outputSize, dropout).to(device)
     path = ".\\trainedModels\\20WordsStateDictModel.pth"
     model.load_state_dict(torch.load(path))
