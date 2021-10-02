@@ -8,11 +8,10 @@ Created on Fri Jan 22 23:40:24 2021
 import os
 from collections import Counter
 import random
-from random import shuffle
+
 
 # Third party imports
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 
@@ -20,29 +19,29 @@ import pickle
 #
 
 
-def getData(is3D=True):
+def getData(path):
 
-    if is3D:
-        dimPath = 'readyToRun/'
-    else:
-        dimPath = '2D/'
-
-    with open('./Data/Dataset/'+dimPath+'X.data', 'rb') as f:
+    with open(path+'X.data', 'rb') as f:
         X = pickle.load(f)
 
-    with open('./Data/Dataset/'+dimPath+'X_timeSteps.data', 'rb') as f:
+    with open(path+'X_timeSteps.data', 'rb') as f:
         X_timeSteps = pickle.load(f)
 
-    with open('./Data/Dataset/'+dimPath+'Y.data', 'rb') as f:
+    with open(path+'Y.data', 'rb') as f:
         Y = pickle.load(f)
 
-    with open('./Data/Dataset/'+dimPath+'weight.data', 'rb') as f:
+    with open(path+'weight.data', 'rb') as f:
         weight = pickle.load(f)
 
-    with open('./Data/Dataset/'+dimPath+'Y_meaning.data', 'rb') as f:
+    with open(path+'Y_meaning.data', 'rb') as f:
         y_meaning = pickle.load(f)
 
     return X, Y, weight, y_meaning, X_timeSteps
+
+def getXInfo(src, pos):
+
+    fileData = pd.read_pickle(src + str(pos) + '.pkl')
+    return fileData
 
 
 def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
@@ -50,9 +49,6 @@ def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
 
     # to count repeated targets in y
     targetDict = dict(Counter(y))
-
-    augmentSize = []
-    augmentDict = {}
 
     pivot = targetDict.copy()
     end = targetDict.copy()
@@ -68,14 +64,6 @@ def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
         if(fixed):
             minTest = fixedTest
             minValue = value - fixedTest
-
-    if(augmentation):
-        for key, ts in x_timeSteps.items():
-            augmentSize.append(sum([val-timeStepSize for val in ts if val > timeStepSize]))
-
-        minAugSize = min(augmentSize)
-
-        augmentDict = {k: minAugSize for k in range(0, len(targetDict.keys()))}
 
     # to prepare pivot dictionary to use it in the split separator
     for key in targetDict:
@@ -96,75 +84,58 @@ def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
     y_test = []
 
     if(doShuffle):
-        newOrder= list(range(len(y)))
+        newOrder = list(range(len(y)))
         random.Random(52).shuffle(newOrder)
     count = 1
-    countAug = 1
 
     for pos in newOrder:
-        
+
         # To complete timesteps if it have less than timeStepSize
         for _ in range(timeStepSize - len(x[pos])):
             # Add zeros
             # fileData = np.append(fileData, [np.zeros(len(fileData[0]))], axis=0)
 
             # repeat the last frame
-            x[pos] = np.append(x[pos], [x[pos][-1]], axis=0) 
+            x[pos] = np.append(x[pos], [x[pos][-1]], axis=0)
 
-        #TRAIN
-        if(pivot[y[pos]]>=0):
-            
+        # TRAIN
+        if(pivot[y[pos]] >= 0):
+
             # if have more timesteps than timeStepSize
             if(timeStepSize < len(x[pos])):
                 diff = len(x[pos]) - timeStepSize
-                if(augmentation and augmentDict[y[pos]]):
-                    for start in range(diff):
 
-                        if(not augmentDict[y[pos]]): continue
-                        x_train.append(x[pos][start:start+timeStepSize])
-                        y_train.append(y[pos])
-                        augmentDict[y[pos]] = augmentDict[y[pos]] - 1
-                        #print("countAug: %d for %d:%d"%(count,y[pos], augmentDict[y[pos]]))
-                        count+=1
-                else:
-                    start = random.Random(52).choice(range(diff))
-                    x_train.append(x[pos][start:start+timeStepSize])
-                    y_train.append(y[pos])
-                    #print("count: %d"%(count), "at zero")
-                    count+=1
+                start = random.Random(52).choice(range(diff))
+                x_train.append(x[pos][start:start+timeStepSize])
+                y_train.append(y[pos])
+                # print("count: %d"%(count), "at zero")
+                count += 1
             else:
                 x_train.append(x[pos])
                 y_train.append(y[pos])
-                #print("count: %d"%(count))
-                count+=1
+                # print("count: %d"%(count))
+                count += 1
 
             pivot[y[pos]] = pivot[y[pos]] - 1
-        
-        #TEST (balanced)
+
+        # TEST (balanced)
         elif(leastValue and balancedTest):
 
             if(end[y[pos]]):
-                
+
                 if(timeStepSize < len(x[pos])):
                     diff = len(x[pos]) - timeStepSize
-                    if(augmentation and augmentDict[y[pos]]):
-                        
-                        for start in range(diff):
-                            if(not augmentDict[y[pos]]): continue
-                            x_test.append(x[pos][start:start+timeStepSize])
-                            y_test.append(y[pos])
-                            augmentDict[y[pos]] = augmentDict[y[pos]] - 1
-                    else:
-                        start = random.Random(52).choice(range(diff))
-                        x_test.append(x[pos][start:start+timeStepSize])
-                        y_test.append(y[pos])
+
+                    start = random.Random(52).choice(range(diff))
+                    x_test.append(x[pos][start:start+timeStepSize])
+                    y_test.append(y[pos])
                 else:
                     x_test.append(x[pos])
                     y_test.append(y[pos])
 
                 end[y[pos]] = end[y[pos]] - 1
 
-        #TEST
+        # TEST
         else:
             if(timeStepSize < len(x[pos])):
                 diff = len(x[pos]) - timeStepSize
