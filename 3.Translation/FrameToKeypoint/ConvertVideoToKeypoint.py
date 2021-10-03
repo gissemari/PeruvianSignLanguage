@@ -187,8 +187,8 @@ for videoFolderName in folder_list:
                     list_Y.append(data_point.y)
             else:
                 for _ in range(0, 21): # 21 is the number of points taken in hands model
-                    list_X.append(0.0)
-                    list_Y.append(0.0)
+                    list_X.append(1.0)
+                    list_Y.append(1.0)
 
             # Right hand
             if(holisResults.right_hand_landmarks):
@@ -197,8 +197,8 @@ for videoFolderName in folder_list:
                     list_Y.append(data_point.y)
             else:
                 for _ in range(0, 21):
-                    list_X.append(0.0)
-                    list_Y.append(0.0)
+                    list_X.append(1.0)
+                    list_Y.append(1.0)
 
             # Face mesh
             if(holisResults.face_landmarks):
@@ -207,8 +207,8 @@ for videoFolderName in folder_list:
                     list_Y.append(data_point.y)
             else:
                 for _ in range(0, 468):
-                    list_X.append(0.0)
-                    list_Y.append(0.0)
+                    list_X.append(1.0)
+                    list_Y.append(1.0)
 
             if(args.withLineFeature):
                 for conections in LineFeatureConect:
