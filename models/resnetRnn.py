@@ -12,10 +12,13 @@ import torch
 
 
 # Local imports
-from models.rnn import Net as rnn
+from models.gru import Net as gru
 from models.resnet import ResNet as resnet
 from models.resnet import BasicBlock as basicBlock
 
+RENET_OUTPUT_SIZE = 512
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class resnet_rnn(torch.nn.Module):
 
@@ -23,8 +26,8 @@ class resnet_rnn(torch.nn.Module):
 
         super(resnet_rnn, self).__init__()   
         self.resnet = resnet(basicBlock, [2, 2, 2, 2], num_classes=num_classes, with_fc=False)
-        self.rnn = rnn(inputSize+512, hiddenSize, rnnLayers, outputSize=num_classes, dropout=dropout)
-        self.fc = torch.nn.Linear(512 + hiddenSize, num_classes)
+        self.gru = gru(inputSize+RENET_OUTPUT_SIZE, hiddenSize, rnnLayers, outputSize=num_classes, dropout=dropout)
+        self.fc = torch.nn.Linear(RENET_OUTPUT_SIZE + hiddenSize, num_classes)
 
     def forward(self, x_img, x_kp):
         
@@ -36,7 +39,7 @@ class resnet_rnn(torch.nn.Module):
         x_resnet = torch.stack(resnetOut)
         x = torch.cat((x_kp, x_resnet),dim=-1)
 
-        out_2, _ = self.rnn(x)
+        out_2, _ = self.gru(x)
 
 
         return out_2
@@ -45,10 +48,10 @@ class resnet_rnn(torch.nn.Module):
 class dataset(torch.utils.data.Dataset):
     def __init__(self, nSamples):
 
-        x_img = torch.randn(nSamples, 17, 3, 220, 220)
-        x_kp = torch.randn(nSamples, 17, 1086)
+        x_img = torch.randn(nSamples, 17, 3, 220, 220).to(device)
+        x_kp = torch.randn(nSamples, 17, 1086).to(device)
 
-        y = torch.randint(0, 2, (nSamples,))
+        y = torch.randint(0, 2, (nSamples,)).to(device)
 
         self.inputSize = len(x_kp[0][0])
         """
@@ -57,18 +60,18 @@ class dataset(torch.utils.data.Dataset):
 
         self.y_data = torch.tensor(y, dtype=torch.int64).to("cpu")
         """
-        self.x_img = x_img.clone().detach().to("cpu")
-        self.x_kp = x_kp.clone().detach().to("cpu")
+        self.x_img = x_img.clone().detach().to(device)
+        self.x_kp = x_kp.clone().detach().to(device)
 
-        self.y_data = y.clone().detach().to("cpu")
+        self.y_data = y.clone().detach().to(device)
 
     def __len__(self):
         return len(self.y_data)
 
     def __getitem__(self, index):
-        image = self.x_img[index]
-        keypoint = self.x_kp[index]
-        trgts = self.y_data[index]
+        image = self.x_img[index].to(device)
+        keypoint = self.x_kp[index].to(device)
+        trgts = self.y_data[index].to(device)
 
         sample = {
             'image': image,
@@ -106,11 +109,15 @@ def test():
             x_img = batch['image']  # inputs
             x_kp = batch['keypoint']  # inputs
             y = batch['targets']
+            
+            x_img = x_img.to(device)
+            x_kp = x_kp.to(device)
+            y = y.to(device, dtype=torch.int64)
 
-            net.train()
+            net.train().to(device)
             optimizer.zero_grad()
 
-            output = net(x_img, x_kp).to("cpu")
+            output = net(x_img, x_kp).to(device)
             print(y.shape)
             loss_val = loss_func(output, y)
 

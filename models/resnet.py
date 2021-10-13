@@ -13,6 +13,9 @@ import torch
 # Local imports
 
 
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
     return torch.nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -164,8 +167,8 @@ class dataset(torch.utils.data.Dataset):
         x = torch.randn(20, 8, 3, 220, 220)
         y = torch.randint(1, 3, (20,))
 
-        self.x_data = torch.tensor(x, dtype=torch.float32).to("cpu")
-        self.y_data = torch.tensor(y, dtype=torch.int64).to("cpu")
+        self.x_data = torch.tensor(x, dtype=torch.float32).to(device)
+        self.y_data = torch.tensor(y, dtype=torch.int64).to(device)
         print(self.x_data.shape, self.y_data.shape)
     
     def __len__(self):
@@ -210,7 +213,7 @@ def test():
                 net.train()
                 optimizer.zero_grad()
         
-                output = net(d).to("cpu")
+                output = net(d).to(device)
 
                 loss_val = loss_func(output, t)
                 
