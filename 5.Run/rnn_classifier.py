@@ -22,13 +22,14 @@ conda: 4.9.2
 # -*- coding: utf-8 -*-
 
 # Standard library imports
+import argparse
 import time
 
 # Third party imports
 import numpy as np
 import torch
-import argparse
 import matplotlib.pyplot as plt
+from sklearn.model_selection  import train_test_split
 
 # Local imports
 from utils import LoadData
@@ -39,7 +40,7 @@ import utils.classificationPlotAndPrint as pp
 import models.rnn as rnn
 
 torch.cuda.empty_cache()
-device = torch.device("cpu")
+device = torch.device("cuda")
 print("############ ", device, " ############")
 
 parser = argparse.ArgumentParser(description='Classification')
@@ -47,6 +48,11 @@ parser = argparse.ArgumentParser(description='Classification')
 parser.add_argument('--keys_input_Path', type=str,
                     default="./Data/Dataset/readyToRun/",
                     help='relative path of keypoints input.'
+                    ' Default: ./Data/Dataset/keypoints/')
+
+parser.add_argument('--keypoints_input_Path', type=str,
+                    default="./Data/Dataset/keypoints/",
+                    help='relative path of keypoints input.' +
                     ' Default: ./Data/Dataset/keypoints/')
 
 # 3D boolean
@@ -61,42 +67,52 @@ args = parser.parse_args()
 
 class SignLanguageDataset(torch.utils.data.Dataset):
 
-    def __init__(self, src_file, split=0.8):
+    def __init__(self, src_file, datasetType="train", split=0.8):
 
         x, y, weight, y_labels, x_timeSteps = LoadData.getData(args.keys_input_Path)
 
-        x_train, y_train, x_test, y_test = LoadData.splitData(x, y,
-                                                              x_timeSteps,
-                                                              split=split,
-                                                              leastValue=True,
-                                                              balancedTest=True,
-                                                              fixed=False,
-                                                              fixedTest=0,
-                                                              doShuffle=True)
+        X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=split , random_state=42, stratify=y)
+        
+        X_train = LoadData.getDatafromId(args.keypoints_input_Path, X_train)
+        X_test = LoadData.getDatafromId(args.keypoints_input_Path, X_test)
 
-        self.inputSize = len(x[0][0])
+        self.datasetType = datasetType
+
+        if self.datasetType == "train":
+            self.X_train = torch.tensor(X_train,dtype=torch.float32).to(device)
+            self.y_train = torch.tensor(y_train,dtype=torch.float32).to(device)
+            self.inputSize = len(X_train[0][0])
+            print("Train: ",self.X_train.shape, self.y_train.shape)
+        else:
+            self.X_test = torch.tensor(X_test,dtype=torch.float32).to(device)
+            self.y_test = torch.tensor(y_test,dtype=torch.float32).to(device)
+            self.inputSize = len(X_test[0][0])
+            print("Train: ",self.X_test.shape, self.y_test.shape)
+
         self.outputSize = len(y_labels)
 
         self.weight = torch.tensor(weight, dtype=torch.float32).to(device)
         self.y_labels = y_labels
 
-        self.x_data_Test = torch.tensor(x_test, dtype=torch.float32).to(device)
-        self.y_data_Test = torch.tensor(y_test, dtype=torch.int64).to(device)
-
-        self.x_data = torch.tensor(x_train, dtype=torch.float32).to(device)
-        self.y_data = torch.tensor(y_train, dtype=torch.int64).to(device)
-        print(self.x_data.shape, self.y_data.shape)
-
     def __len__(self):
-        return len(self.y_data)
+        if self.datasetType == "train":
+            return len(self.y_train)
+        else:
+            return len(self.y_test)
 
     def __getitem__(self, index):
-        preds = self.x_data[index]
-        trgts = self.y_data[index]
+        
+        if self.datasetType == "train":
+            preds = self.X_train[index]
+            trgts = self.y_train[index]
+        else:
+            preds = self.X_test[index]
+            trgts = self.y_test[index]
 
         sample = {
             'predictors': preds,
             'targets': trgts}
+
         return sample
 
 
@@ -116,6 +132,31 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
+def compute_loss_and_acc(loss_func, net, dataloader):
+    "compute average loss over the a dataset"
+    net.eval()
+
+    y_acum = torch.tensor([], dtype=torch.int64).to(device)
+    output_acum = torch.tensor([], dtype=torch.float32).to(device)
+
+    for (batch_idx, batch) in enumerate(dataloader):
+
+        # Get data train batch
+        X_kp = batch['predictors']  # inputs
+        Y = batch['targets']
+        Y = Y.to(device, dtype=torch.int64)
+
+        with torch.no_grad():
+            output, _ = net(X_kp)
+
+        y_acum = torch.cat((y_acum, Y))
+        output_acum = torch.cat((output_acum, output))
+
+    lossMean = loss_func(output_acum, y_acum)
+    accMean = accuracy_quick(output_acum, y_acum)
+
+    return lossMean.to("cpu").numpy(), accMean
+
 def main():
 
     ##################################################
@@ -127,7 +168,8 @@ def main():
     # with open(args.output_Path+'3D/X.data','rb') as f: new_data = pkl.load(f)
 
     src = "./Data/Keypoints/pkl/Segmented_gestures/"
-    dataXY = SignLanguageDataset(src)
+    dataTrainXY = SignLanguageDataset(src, datasetType="train")
+    dataTestXY = SignLanguageDataset(src, datasetType="test")
 
     print("Begin predict sign language")
     np.random.seed(1)
@@ -138,13 +180,13 @@ def main():
     split = 0.8
     dropout = 0.0
     num_layers = 1
-    num_classes = dataXY.outputSize
+    num_classes = dataTrainXY.outputSize
     batch_size = 30
     nEpoch = 2000
     lrn_rate = 0.001
     weight_decay = 0
     epsilon = 1e-8
-    hidden_size = 80
+    hidden_size = 150
 
 
     if args.wandb:
@@ -161,12 +203,13 @@ def main():
     print("learning rate: %f" % lrn_rate)
     print("Number of layers: %d" % num_layers)
 
-    dataTrain = torch.utils.data.DataLoader(dataXY, batch_size=batch_size)
+    dataTrain = torch.utils.data.DataLoader(dataTrainXY, batch_size=batch_size)
+    dataTest = torch.utils.data.DataLoader(dataTestXY, batch_size=batch_size)
 
     ##################################################
     # 2. create neural network
-    net = rnn.Net(dataXY.inputSize, hidden_size,
-              num_layers, dataXY.outputSize, dropout).to(device)
+    net = rnn.Net(dataTrainXY.inputSize, hidden_size,
+              num_layers, num_classes, dropout).to(device)
 
     print('The number of parameter is: %d' % count_parameters(net))
 
@@ -197,17 +240,12 @@ def main():
     fig, axs = pp.interactivePlotConf()
 
     start_time = time.time()
+    start_bach_time = time.time()
 
     for epoch in range(0, nEpoch):
-        # T.manual_seed(1 + epoch)  # recovery reproducibility
-
-        epoch_loss = 0.0  # sum avg loss per item
-        epoch_acc = 0.0
-
-        epoch_loss_test = 0.0
-        epoch_acc_test = 0.0
-
-        start_bach_time = time.time()
+        # T.manual_seed(1 + epoch)  # recovery reproducibility  
+        
+        net.train()
 
         for (batch_idx, batch) in enumerate(dataTrain):
 
@@ -215,85 +253,69 @@ def main():
             X = batch['predictors']  # inputs
             Y = batch['targets']
             XTrain = X.to(device)
-            YTrain = Y.to(device)
-
-            # Test evaluation
-            net.train()
+            YTrain = Y.to(device, dtype=torch.int64)
 
             optimizer.zero_grad()
 
             output, hidden = net(XTrain)
 
             loss_val = loss_func(output, YTrain)
-            epoch_loss += loss_val.item()  # a sum of averages
-            train_acc = accuracy_quick(output, YTrain)
-            epoch_acc += train_acc
-
-            # Get data from test
-            xTest = dataXY.x_data_Test.to(device)
-            yTest = dataXY.y_data_Test.to(device)
-
+            
             # Backward
             loss_val.backward()
 
             # Step
             optimizer.step()
 
-            # Test evaluation
-            net.eval()
-
-            with torch.no_grad():
-                ouptTest, _ = net(xTest)
-
-            loss_val_test = loss_func(ouptTest, yTest)
-            epoch_loss_test += loss_val_test.item()
-
-            test_acc = accuracy_quick(ouptTest, yTest)
-            epoch_acc_test += test_acc
+        
 
         # if you need to save checkpoint of the model
         # chkPntPath=""
         # bckmod.saveCheckPoint(chkPntPath, net, optimizer, nEpoch)
 
-        lossEpoch = epoch_loss/len(dataTrain)
-        accEpoch = epoch_acc / len(dataTrain)
-        lossEpochAcum.append(lossEpoch)
-        accEpochAcum.append(accEpoch)
+        train_loss, train_acc = compute_loss_and_acc(loss_func, net, dataTrain)
+        test_loss, test_acc = compute_loss_and_acc(loss_func, net, dataTest)
 
-        lossTestEpoch = epoch_loss_test/len(dataTrain)
-        accTestEpoch = epoch_acc_test / len(dataTrain)
-        lossTestEpochAcum.append(lossTestEpoch)
-        accTestEpochAcum.append(accTestEpoch)
+
+        lossEpochAcum.append(train_loss)
+        accEpochAcum.append(train_acc)
+
+        lossTestEpochAcum.append(test_loss)
+        accTestEpochAcum.append(test_acc)
 
         if(epoch % 1 == 0):
 
             #Log in wandb
             if args.wandb:
-                wandbF.wandbLog(lossEpoch, accEpoch,
-                                lossTestEpoch, accTestEpoch)
+                wandbF.wandbLog(train_loss, train_acc,
+                                test_loss, test_acc)
 
             # print epoch evaluation
-            pp.printEpochEval(epoch, lossEpoch, accEpoch, lossTestEpoch,
-                              accTestEpoch, start_bach_time)
+            pp.printEpochEval(epoch, train_loss, train_acc, test_loss,
+                              test_acc, start_bach_time)
 
             pp.plotEpochEval(fig, plt, axs, epoch, lossEpochAcum, lossTestEpochAcum,
                              accEpochAcum, accTestEpochAcum, num_layers, num_classes,
                              batch_size, nEpoch, lrn_rate, hidden_size)
+            
+            start_bach_time = time.time()
 
     print("Done ")
     print("Total time: %0.4f seconds" % (time.time() - start_time))
     ########################
     # END of the training section
     ##################################################
-
+    
     # Prepare folders
-    uv.createFolder("./evaluation/classes_%d" % num_classes)
-    uv.createFolder("./evaluation/classes_%d/layers_%d" % (num_classes, num_layers))
-    uv.createFolder("./evaluation/classes_%d/layers_%d/lrnRt_%f" % (num_classes, num_layers, lrn_rate))
-    uv.createFolder("./evaluation/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (num_classes, num_layers, lrn_rate, batch_size))
-    pltSavePath = "./evaluation/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (num_classes, num_layers, lrn_rate, batch_size)
-    plt.savefig(pltSavePath + '/LOSS_lrnRt-%f_batch-%d_nEpoch-%d_hidden-%d.png' % (lrn_rate, batch_size, nEpoch, hidden_size))
-
+    uv.createFolder("./evaluation")
+    uv.createFolder("./evaluation/rnn/")
+    uv.createFolder("./evaluation/rnn/classes_%d" % num_classes)
+    uv.createFolder("./evaluation/rnn/classes_%d/layers_%d" % (num_classes, num_layers))
+    uv.createFolder("./evaluation/rnn/classes_%d/layers_%d/lrnRt_%f" % (num_classes, num_layers, lrn_rate))
+    uv.createFolder("./evaluation/rnn/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (num_classes, num_layers, lrn_rate, batch_size))
+    pltSavePath = "./evaluation/rnn/classes_%d/layers_%d/lrnRt_%f/batch-%d" % (num_classes, num_layers, lrn_rate, batch_size)
+    plt.savefig(pltSavePath + '/rnn-LOSS_lrnRt-%f_batch-%d_nEpoch-%d_hidden-%d.png' % (lrn_rate, batch_size, nEpoch, hidden_size))
+    
     ##################################################
     # 4. evaluate model
 
@@ -308,8 +330,8 @@ def main():
     ###
     # Test Accuracy ###
 
-    X_test = dataXY.x_data_Test.to(device)
-    Y_test = dataXY.y_data_Test.to(device)
+    X_test = dataTestXY.X_test
+    Y_test = dataTestXY.y_test
 
     with torch.no_grad():
         ouptTest, _ = net(X_test)
@@ -323,11 +345,11 @@ def main():
 
     confusion_matrix_test = torch.zeros(num_classes, num_classes)
     confusion_matrix_train = torch.zeros(num_classes, num_classes)
-
+    
     with torch.no_grad():
         # CM Test
-        inputsTest = dataXY.x_data_Test.to(device)
-        targetTest = dataXY.y_data_Test.to(device)
+        inputsTest = dataTestXY.X_test.to(device)
+        targetTest = dataTestXY.y_test.to(device)
 
         outputsTest, _ = net(inputsTest)
 
@@ -337,8 +359,8 @@ def main():
             confusion_matrix_test[t.long(), p.long()] += 1
 
         # CM Train
-        inputsTrain = dataXY.x_data.to(device)
-        targetTrain = dataXY.y_data.to(device)
+        inputsTrain = dataTrainXY.X_train.to(device)
+        targetTrain = dataTrainXY.y_train.to(device)
 
         outputsTrain, _ = net(inputsTrain)
 
@@ -355,7 +377,7 @@ def main():
 
     confusion_matrix_test = confusion_matrix_test.to("cpu").numpy()
 
-    pp.plotConfusionMatrixTest(plt, dataXY, pltSavePath, confusion_matrix_test,
+    pp.plotConfusionMatrixTest(plt, dataTestXY, pltSavePath, confusion_matrix_test,
                                num_layers, num_classes, batch_size, nEpoch,
                                lrn_rate, hidden_size)
 
@@ -364,7 +386,7 @@ def main():
 
     confusion_matrix_train = confusion_matrix_train.to("cpu").numpy()
 
-    pp.plotConfusionMatrixTrain(plt, dataXY, pltSavePath, confusion_matrix_train,
+    pp.plotConfusionMatrixTrain(plt, dataTrainXY, pltSavePath, confusion_matrix_train,
                                 num_layers, num_classes, batch_size, nEpoch,
                                 lrn_rate, hidden_size)
 
@@ -372,16 +394,16 @@ def main():
     if args.wandb:
         wandbF.sendConfusionMatrix(targetTest.to("cpu").numpy(),
                                    predsTest.to("cpu").numpy(),
-                                   list(dataXY.y_labels.values()),
+                                   list(dataTrain.y_labels.values()),
                                    cmTrain=False)
 
     # Send confusion matrix Train to Wandb
     if args.wandb:
         wandbF.sendConfusionMatrix(targetTrain.to("cpu").numpy(),
                                    predsTrain.to("cpu").numpy(),
-                                   list(dataXY.y_labels.values()),
+                                   list(dataTrain.y_labels.values()),
                                    cmTrain=True)
-
+    '''
     ##################################################
     # 5. save model
 
@@ -389,11 +411,12 @@ def main():
 
     ##################################################
     # 6. make a prediction
-
-    model = rnn.Net(dataXY.inputSize, hidden_size,
-                num_layers, dataXY.outputSize, dropout).to(device)
+    '''
+    model = rnn.Net(dataTrainXY.inputSize, hidden_size,
+                num_layers, dataTrainXY.outputSize, dropout).to(device)
     path = ".\\trainedModels\\20WordsStateDictModel.pth"
     model.load_state_dict(torch.load(path))
+    
     if args.wandb:
         wandbF.finishWandb()
 
