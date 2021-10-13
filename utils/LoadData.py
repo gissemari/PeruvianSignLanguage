@@ -39,9 +39,19 @@ def getData(path):
     return X, Y, weight, y_meaning, X_timeSteps
 
 def getXInfo(src, pos):
-
     fileData = pd.read_pickle(src + str(pos) + '.pkl')
     return fileData
+
+
+def getDatafromId(src, idList):
+    
+    data = []
+    
+    for pos in idList:
+        fileData = pd.read_pickle(src + str(pos) + '.pkl')
+        data.append(fileData)
+    
+    return data
 
 
 def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
