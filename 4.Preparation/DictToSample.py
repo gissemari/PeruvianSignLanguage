@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(description='X and Y of keypoints and image Dat
 parser.add_argument('--dict_Path', type=str,
                     default="./Data/Dataset/dict/dict.json",
                     help='relative path of keypoints input.' +
-                    ' Default: ./Data/Keypoints/pkl/Segmented_gestures/')
+                    ' Default: ./Data/Dataset/dict/dict.json')
 
 parser.add_argument('--shuffle', action="store_true",
                     help='to shuffle dataset order')
@@ -39,19 +39,6 @@ parser.add_argument('--output_Path', type=str,
                     default="./Data/Dataset/readyToRun/",
                     help='relative path of dataset output.' +
                     ' Default: ./Data/Dataset/readyToRun/')
-
-parser.add_argument('--keypoints_Path', type=str,
-                    default="./Data/Dataset/keypoints/",
-                    help='relative path of keypoints input.' +
-                    ' Default: ./Data/Dataset/keypoints/')
-
-parser.add_argument('--image_Path', type=str,
-                    default="./Data/Dataset/img/",
-                    help='relative path of keypoints input.' +
-                    ' Default: ./Data/Dataset/keypoints/')
-
-parser.add_argument("--timeStepSize", type=int, default=17,
-                    help="Number of timestep size you want")
 
 parser.add_argument('--wordList', '--names-list', nargs='+', default=[])
 
@@ -99,12 +86,13 @@ print("\nTOP WORDS")
 for pos, top in enumerate(topWords):
     print("%2d)%15s - %d instances"%(pos+1, top[0], top[1]))
 
-print("\nTimesteps size distribution (with timeStepSize as default): ")
+print("\nInstance and timesteps size distribution: ")
 print()
 x_timeSteps = {}
 for word, value in topWords:
     x_timeSteps[word] = timeStepDict[word]
     print(word,timeStepDict[word])
+    print("Instance size of %d" % len(timeStepDict[word]))
     print()
 
 topWordList = [key for (key, value) in topWords]
@@ -174,41 +162,7 @@ if(args.leastValue):
     x = new_x
     y = new_y
     
-if(args.timeStepSize > 1):
-    for pos in x:
-        dataKP = pd.read_pickle(args.keypoints_Path + str(pos) + '.pkl')
-        dataIMG = pd.read_pickle(args.image_Path + str(pos) + '.pkl')
-
-        if len(dataKP) == args.timeStepSize:
-            continue
-        # To complete the number of timesteps if it is less than requiered
-        elif len(dataKP) < args.timeStepSize:
-    
-            for _ in range(args.timeStepSize - len(dataKP)):
-                dataKP = np.append(dataKP, [dataKP[-1]], axis=0)
-                dataIMG = np.append(dataIMG, [dataIMG[-1]], axis=0)
-        # More than the number of timesteps
-        else:
-    
-            toSkip = len(dataKP) - args.timeStepSize
-            interval = len(dataKP) // toSkip
-    
-            # Generate an interval of index
-            a = [val for val in range(0, len(dataKP)) if val % interval == 0]
-    
-            # from the list of index, we erase only the number of index we want to skip
-            dataKP = np.delete(dataKP, a[-toSkip:], axis=0)
-            dataIMG = np.delete(dataIMG, a[-toSkip:], axis=0)
-
-        with open(args.keypoints_Path + str(pos) + '.pkl', 'wb') as pickle_file:
-                pkl.dump(dataKP, pickle_file)
-
-        with open(args.image_Path + str(pos) + '.pkl', 'wb') as pickle_file:
-                pkl.dump(dataIMG, pickle_file)
-    print()
-    print("TimeStepSize of %d -> Now, All timesteps have size %d" % (args.timeStepSize, args.timeStepSize))
-        
-
+    print("leastValue is active, so all the distribution have the size of the least instance size:", topWords[-1])
 
 # to get weights for all topwords selected
 dict_weight = Counter(y)
