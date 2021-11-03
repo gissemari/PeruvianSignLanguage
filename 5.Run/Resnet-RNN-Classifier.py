@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct  1 10:15:22 2021
@@ -77,10 +78,10 @@ class SignLanguageDataset(torch.utils.data.Dataset):
         
         if self.dataType == "train":
             self.x_train = X_train
-            self.y_train = torch.tensor(y_train, dtype=torch.float32).to(device)
+            self.y_train = torch.tensor(y_train, dtype=torch.int64).to(device)
         else:
             self.x_test = X_test
-            self.y_test = torch.tensor(y_test, dtype=torch.float32).to(device)
+            self.y_test = torch.tensor(y_test, dtype=torch.int64).to(device)
 
     def __len__(self):
 
@@ -167,15 +168,15 @@ def main():
     torch.manual_seed(1)
 
     # variables
-    dropout = 0.5
+    dropout = 0.0
     gruLayers = 1
     num_classes = data_train.outputSize
     batch_size = 7
-    nEpoch = 5
+    nEpoch = 2000
     lrn_rate = 0.00005
     weight_decay = 0
     epsilon = 1e-8
-    hidden_size = 180
+    hidden_size = 250
 
     print("data train split at: %2.2f" % split)
     print("hidden size: %d" % hidden_size)
