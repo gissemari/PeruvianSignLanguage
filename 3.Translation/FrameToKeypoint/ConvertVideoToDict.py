@@ -28,16 +28,6 @@ import utils.video as uv  # for folder creation
 parser = argparse.ArgumentParser(description='Mediapipe models ' +
                                  '(FaceMesh, Hands, Pose)')
 
-# Models
-parser.add_argument('--face', action="store_true",
-                    help='Use holistic model: face')
-
-parser.add_argument('--hands', action="store_true",
-                    help='Use holistic model: hands')
-
-parser.add_argument('--pose', action="store_true",
-                    help='Use holistic model: pose')
-
 parser.add_argument('--image', action="store_true",
                     help='to get image data in pkl')
 
@@ -54,16 +44,11 @@ parser.add_argument('--dict_output', type=str, default="./Data/Dataset/dict/",
 parser.add_argument('--keypoints_output', type=str, default="./Data/Dataset/keypoints/",
                     help='relative path of csv output set of landmarks.' + ' Default: ./Data/Dataset/keypoints/')
 
-parser.add_argument("--timeStepSize", type=int, default=17,
-                    help="Number of timestep size you want")
-
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
 
 args = parser.parse_args()
 
-if not (args.image or args.face or args.hands or args.pose):
-    print("NO MODEL WAS SELECTED")
 #########################
 # MODELS(Mediapipe)
 #
@@ -118,7 +103,7 @@ for videoFolderName in folder_list:
 
         word = videoFile.split('_')[0]
 
-        list_seq = []
+        keypointsDict = []
 
         videoSegFolderName = videoFolderPath+'/'+videoFile[:-4]
 
@@ -146,8 +131,7 @@ for videoFolderName in folder_list:
             idx += 1  # Frame count starts at 1
 
             # temporal variables
-            list_X = []
-            list_Y = []
+            kpDict = {}
 
             # Convert the BGR image to RGB before processing.
             imageBGR = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -158,82 +142,92 @@ for videoFolderName in folder_list:
             holisResults = holistic.process(imageBGR)
 
             # POSE
-            if(args.pose):
-                for posi, data_point in enumerate(holisResults.pose_landmarks.landmark):
-                    list_X.append(data_point.x)
-                    list_Y.append(data_point.y)
+
             
+            kpDict["pose"]={}
+
+            if holisResults.pose_landmarks.landmark:
+
+                kpDict["pose"]["x"] = [point.x for point in holisResults.pose_landmarks.landmark]
+                kpDict["pose"]["y"] = [point.y for point in holisResults.pose_landmarks.landmark]
+
+            else:
+                kpDict["left_hand"]["x"] = [1.0 for point in range(0, 33)]
+                kpDict["left_hand"]["y"] = [1.0 for point in range(0, 33)]
+        
             # HANDS
-            if(args.hands):
-                # Left hand
-                if(holisResults.left_hand_landmarks):
-                    for posi, data_point in enumerate(holisResults.left_hand_landmarks.landmark):
-                        list_X.append(data_point.x)
-                        list_Y.append(data_point.y)
-                else:
-                    for _ in range(0, 21): # 21 is the number of points taken in hands model
-                        list_X.append(1.0)
-                        list_Y.append(1.0)
-    
-                # Right hand
-                if(holisResults.right_hand_landmarks):
-                    for posi, data_point in enumerate(holisResults.right_hand_landmarks.landmark):
-                        list_X.append(data_point.x)
-                        list_Y.append(data_point.y)
-                else:
-                    for _ in range(0, 21):
-                        list_X.append(1.0)
-                        list_Y.append(1.0)
+
+            # Left hand
+            kpDict["left_hand"]={}
+            if(holisResults.left_hand_landmarks):
+
+                kpDict["left_hand"]["x"] = [point.x for point in holisResults.left_hand_landmarks.landmark]
+                kpDict["left_hand"]["y"] = [point.y for point in holisResults.left_hand_landmarks.landmark]
+
+            else:
+                kpDict["left_hand"]["x"] = [1.0 for point in range(0, 21)]
+                kpDict["left_hand"]["y"] = [1.0 for point in range(0, 21)]
+
+            # Right hand
+            kpDict["right_hand"]={}
+            if(holisResults.right_hand_landmarks):
+                kpDict["right_hand"]["x"] = [point.x for point in holisResults.right_hand_landmarks.landmark]
+                kpDict["right_hand"]["y"] = [point.y for point in holisResults.right_hand_landmarks.landmark]
+
+            else:
+                kpDict["right_hand"]["x"] = [1.0 for point in range(0, 21)]
+                kpDict["right_hand"]["y"] = [1.0 for point in range(0, 21)]
 
             # Face mesh
-            if args.face:
-                
-                if(holisResults.face_landmarks):
 
-                    # nose points = [1,5,6,218,438]
-                    # mouth points = [0,37,39,40,61,185,267,269,270,291,409, 
-                    #                 12,38,41,42,62,183,268,271,272,292,407,
-                    #                 15,86,89,96,179,316,319,325,403,
-                    #                 17,84,91,146,181,314,321,375,405]
-                    # left eyes points = [33,133,157,158,159,160,161,173,246,
-                    #                     7,144,145,153,154,155,163]
-                    # left eyebrow points = [63,66,70,105,107,
-                    #                        46,52,53,55,65]
-                    # right eyes points = [263,362,384,385,386,387,388,398,466,
-                    #                      249,373,374,380,381,382,390]
-                    # right eyebrow points = [293,296,300,334,336,
-                    #                         276,282,283,285,295]
-                    #  
-                    #There are 97 points
-                    exclusivePoints = [1,5,6,218,438,
-                                      0,37,39,40,61,185,267,269,270,291,409, 
-                                      12,38,41,42,62,183,268,271,272,292,407,
-                                      15,86,89,96,179,316,319,325,403,
-                                      17,84,91,146,181,314,321,375,405,
-                                      33,133,157,158,159,160,161,173,246,
-                                      7,144,145,153,154,155,163,
-                                      63,66,70,105,107,
-                                      46,52,53,55,65,
-                                      263,362,384,385,386,387,388,398,466,
-                                      249,373,374,380,381,382,390,
-                                      293,296,300,334,336,
-                                      276,282,283,285,295]
-                    
-                    for posi, data_point in enumerate(holisResults.face_landmarks.landmark):
-                        if posi in exclusivePoints:
-                            list_X.append(data_point.x)
-                            list_Y.append(data_point.y)
-                else:
-                    for _ in range(0, len(exclusivePoints)):
-                        list_X.append(1.0)
-                        list_Y.append(1.0)
+            kpDict["face"]={}
 
+            if(holisResults.face_landmarks):
+                '''
+                nose_points = [1,5,6,218,438]
+                mouth_points = [78,191,80,81,82,13,312,311,310,415,308,
+                                95,88,178,87,14,317,402,318,324,
+                                61,185,40,39,37,0,267,269,270,409,291,
+                                146,91,181,84,17,314,405,321,375]
+                #mouth_points = [0,37,39,40,61,185,267,269,270,291,409, 
+                #                12,38,41,42,62,183,268,271,272,292,407,
+                #                15,86,89,96,179,316,319,325,403,
+                #                17,84,91,146,181,314,321,375,405]
+                left_eyes_points = [33,133,157,158,159,160,161,173,246,
+                                    7,144,145,153,154,155,163]
+                left_eyebrow_points = [63,66,70,105,107]
+                                       #46,52,53,55,65]
+                right_eyes_points = [263,362,384,385,386,387,388,398,466,
+                                     249,373,374,380,381,382,390]
+                right_eyebrow_points = [293,296,300,334,336]
+                                        #276,282,283,285,295]
+  
+                #There are 97 points
+                exclusivePoints = nose_points
+                exclusivePoints = exclusivePoints + mouth_points
+                exclusivePoints = exclusivePoints + left_eyes_points
+                exclusivePoints = exclusivePoints + left_eyebrow_points
+                exclusivePoints = exclusivePoints + right_eyes_points
+                exclusivePoints = exclusivePoints + right_eyebrow_points
+                '''
+
+                kpDict["face"]["x"] = [point.x for point in holisResults.face_landmarks.landmark]
+                kpDict["face"]["y"] = [point.y for point in holisResults.face_landmarks.landmark]
+
+                '''
+                for posi, data_point in enumerate(holisResults.face_landmarks.landmark):
+                    if posi in exclusivePoints:
+                        list_X.append(data_point.x)
+                        list_Y.append(data_point.y)
+                '''
+            else:
+                kpDict["face"]["x"] = [1.0 for point in range(0, 468)]
+                kpDict["face"]["y"] = [1.0 for point in range(0, 468)]
+        
+            keypointsDict.append(kpDict)
             if args.image:
                 # acumulate image frame as a data
                 image_data_acum.append(imageBGR)
-
-            # union of x and y keypoints axes
-            list_seq.append([list_X, list_Y])
 
             # Next frame
             ret, frame = cap.read()
@@ -280,7 +274,7 @@ for videoFolderName in folder_list:
         # 33 (pose points)
         # 21 (left hand points)
         # 21 (right hand points)
-        # 97 (face mesh points)
+        # 87 (face mesh points)
         # * 2 (x and y axes)
         #
         # order = ‘F’ means to read / write the elements using Fortran-like index order
@@ -289,7 +283,7 @@ for videoFolderName in folder_list:
         # to => (x0,y0,x1,y1,.., Xn,Yn)
         # That means that features will have the following order: 
         # [Pose, Hand left, Hand right, face] with its corresponding size
-        keypointsData = np.asarray(list_seq).reshape(-1, (33+21+21+97)*2, order="F")
+        # keypointsData = np.asarray(list_seq).reshape(-1, (33+21+21+0)*2, order="F")
 
         if args.image:
             imageData = np.asarray(image_data_acum)
@@ -300,44 +294,19 @@ for videoFolderName in folder_list:
             imageData = np.moveaxis(imageData, -1, 1)
             # image s
             imageData = imageData/255
-        
-        if(args.timeStepSize > 1):
 
-            if len(keypointsData) == args.timeStepSize:
-                continue
-            # To complete the number of timesteps if it is less than requiered
-            elif len(keypointsData) < args.timeStepSize:
-                for _ in range(args.timeStepSize - len(keypointsData)):
-                    keypointsData = np.append(keypointsData, [keypointsData[-1]], axis=0)
-                    if args.image:
-                        imageData = np.append(imageData, [imageData[-1]], axis=0)
+        print(videoFolderName, videoFile, "\nkeypoints path:", pklKeypointsPath)
 
-            # More than the number of timesteps
-            else:
-                toSkip = len(keypointsData) - args.timeStepSize
-                interval = len(keypointsData) // toSkip
-
-                # Generate an interval of index
-                a = [val for val in range(0, len(keypointsData)) if val % interval == 0]
-    
-                # from the list of index, we erase only the number of index we want to skip
-                keypointsData = np.delete(keypointsData, a[-toSkip:], axis=0)
-                if args.image:
-                    imageData = np.delete(imageData, a[-toSkip:], axis=0)
-
-            LSP[glossPos]["instances"][-1]["frame_end"] = args.timeStepSize
-        
-        print(videoFolderName, videoFile, "\nkeypoints shape:", keypointsData.shape)
         if args.image:
             print("Image shape:", imageData.shape)
-        
+
         # Save Pickle
 
         with open(pklKeypointsPath, 'wb') as pickle_file:
-            pkl.dump(keypointsData, pickle_file)
+            pkl.dump(keypointsDict, pickle_file)
 
         if args.image:
-            print(pklImagePath)
+            print("Image path:",pklImagePath)
             with open(pklImagePath, 'wb') as pickle_file:
                 pkl.dump(imageData, pickle_file)
         print()
@@ -348,10 +317,13 @@ for videoFolderName in folder_list:
         
         # Id of each instance
         IdCount += 1
-        
-print("\nErrors founded in:\n")
-for error in video_errors:
-    print(error)
+
+if not video_errors:
+    print("No errors founded in any videos")
+else:
+    print("\nErrors founded in:\n")
+    for error in video_errors:
+        print(error)
 
 
 #########################

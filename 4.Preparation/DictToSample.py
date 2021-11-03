@@ -21,7 +21,6 @@ SEED = 52
 
 parser = argparse.ArgumentParser(description='X and Y of keypoints and image Dataset distribution')
 
-
 # Path to folder with videos
 parser.add_argument('--dict_Path', type=str,
                     default="./Data/Dataset/dict/dict.json",
@@ -48,12 +47,11 @@ parser.add_argument("--words", type=int, default=10,
 
 args = parser.parse_args()
 
-
 if(args.wordList):
     print("WordList: ", args.wordList)
     args.words = len(args.wordList)
 else:
-    print("Number of words: ",args.words)
+    print("Number of top words taken: ",args.words)
 
 temporalList = []
 timeStepDict = {}
@@ -66,7 +64,7 @@ for glossIndex in glossList:
 
     if args.wordList and word not in args.wordList:
         continue
-
+    
     for pos, _ in enumerate(glossList[glossIndex]["instances"]):
         temporalList = temporalList + [word]
         timestep = glossList[glossIndex]["instances"][pos]["frame_end"]
@@ -88,6 +86,7 @@ for pos, top in enumerate(topWords):
 
 print("\nInstance and timesteps size distribution: ")
 print()
+
 x_timeSteps = {}
 for word, value in topWords:
     x_timeSteps[word] = timeStepDict[word]
@@ -128,7 +127,6 @@ for glossIndex in glossList:
         y.append(topWordDict[word])
 
 
-
 if(args.shuffle):
     newOrder = list(range(len(y)))
     random.Random(SEED).shuffle(newOrder)
@@ -142,6 +140,7 @@ if(args.shuffle):
 
     x = new_x
     y = new_y
+
 
 if(args.leastValue):
     
@@ -163,6 +162,7 @@ if(args.leastValue):
     y = new_y
     
     print("leastValue is active, so all the distribution have the size of the least instance size:", topWords[-1])
+
 
 # to get weights for all topwords selected
 dict_weight = Counter(y)
