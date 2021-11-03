@@ -10,7 +10,6 @@ Created on Tue Sep 21 11:44:04 2021
 import torch
 
 # Local imports
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Net(torch.nn.Module):
@@ -22,7 +21,6 @@ class Net(torch.nn.Module):
         self.hiddenSize = hiddenSize
         self.numLayers = numLayers
         self.dropoutValue = dropout
-
         if(dropout and numLayers>1):
             self.rnn = torch.nn.RNN(
                 inputSize, hiddenSize, numLayers, dropout=dropout, batch_first=True,nonlinearity="relu")
@@ -33,7 +31,7 @@ class Net(torch.nn.Module):
         else:
             self.rnn = torch.nn.RNN(
                 inputSize, hiddenSize, numLayers, batch_first=True,nonlinearity="relu")
-
+        self.layerNorm = torch.nn.LayerNorm(hiddenSize)
         self.fc = torch.nn.Linear(hiddenSize, outputSize)
 
     def forward(self, x):
@@ -44,6 +42,8 @@ class Net(torch.nn.Module):
         
         if(self.dropoutValue and self.numLayers==1):
             out = self.dropout(out)
+
+        #out = self.layerNorm(out)
 
         out = self.fc(out[:, -1, :])
 
