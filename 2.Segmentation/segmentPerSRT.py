@@ -17,15 +17,15 @@ import utils.video as uv
 
 parser = argparse.ArgumentParser(description='The Embedded Topic Model')
 parser.add_argument('--rawVideoPath', type=str,
-                    default='./../Data/Videos/RawVideo/',
+                    default='./Data/Videos/RawVideo/',
                     help='Path where per-line files are located')
 parser.add_argument('--srtPath', type=str,
-                    default='./../Data/SRT/SRT_gestures/',
+                    default='./Data/SRT/SRT_gestures/',
                     help='Path where per-line files are located')
 parser.add_argument('--inputName', type=str, default='',
                     help='Input File Name')
 parser.add_argument('--outputVideoPath', type=str,
-                    default='./../Data/Videos/Segmented_gestures/',
+                    default='./Data/Videos/Segmented_gestures/',
                     help='Path where per-line files are located')
 # parser.add_argument('--fpsOutput', type=int, default=25, metavar='fpsO', help='Frames per second for the output file')
 parser.add_argument('--flgGesture',
