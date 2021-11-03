@@ -18,7 +18,6 @@ import pickle
 # Local imports
 #
 
-
 def getData(path):
 
     with open(path+'X.data', 'rb') as f:
@@ -38,126 +37,138 @@ def getData(path):
 
     return X, Y, weight, y_meaning, X_timeSteps
 
-def getXInfo(src, pos):
+
+def timeStepFormat(fileData, timeStepSize):
+
+    # if it has the desired size
+    if len(fileData) == timeStepSize:
+        return fileData
+    
+    # To complete the number of timesteps if it is less than requiered
+    elif len(fileData) < timeStepSize:
+        for _ in range(timeStepSize - len(fileData)):
+            fileData = np.append(fileData, [fileData[-1]], axis=0)
+        return fileData
+    # More than the number of timesteps
+    else:
+
+        toSkip = len(fileData) - timeStepSize
+        interval = len(fileData) // toSkip
+
+        # Generate an interval of index
+        a = [val for val in range(0, len(fileData)) if val % interval == 0]
+
+        # from the list of index, we erase only the number of index we want to skip
+        fileData = np.delete(fileData, a[-toSkip:], axis=0)
+
+        return fileData
+
+def extratXYFromBodyPart(fileData, bodyName, exclusivePoints=[]):
+
+    if exclusivePoints:
+        x = [item for pos, item in enumerate(fileData[bodyName]["x"]) if pos in exclusivePoints]
+        y = [item for pos, item in enumerate(fileData[bodyName]["y"]) if pos in exclusivePoints]
+    else:
+        
+        x = fileData[bodyName]["x"]
+        y = fileData[bodyName]["y"]
+
+    return [item for sublist in zip(x,y) for item in sublist][:-1]
+
+
+def getXInfo(src, pos, timeStepSize=-1):
     fileData = pd.read_pickle(src + str(pos) + '.pkl')
+
+    if timeStepSize == -1:
+        return fileData
+    
+    fileData = timeStepFormat(fileData, timeStepSize)
     return fileData
 
 
-def getDatafromId(src, idList):
+def keypointsFormat(fileData, bodyPart):
+    
+    dataList = []
+    
+    for pos in range(len(fileData)):
+        data = []
+
+        for bodyName in bodyPart:
+            if(bodyName == "pose"):
+                data = data + extratXYFromBodyPart(fileData[pos],"pose")
+            elif(bodyName == "hands"):
+                data = data + extratXYFromBodyPart(fileData[pos],"left_hand")
+                data = data + extratXYFromBodyPart(fileData[pos],"right_hand")
+
+            elif(bodyName == "face"):
+
+                nose_points = [1,5,6,218,438]
+                mouth_points = [78,191,80,81,82,13,312,311,310,415,308,
+                                95,88,178,87,14,317,402,318,324,
+                                61,185,40,39,37,0,267,269,270,409,291,
+                                146,91,181,84,17,314,405,321,375]
+                #mouth_points = [0,37,39,40,61,185,267,269,270,291,409, 
+                #                12,38,41,42,62,183,268,271,272,292,407,
+                #                15,86,89,96,179,316,319,325,403,
+                #                17,84,91,146,181,314,321,375,405]
+                left_eyes_points = [33,133,157,158,159,160,161,173,246,
+                                    7,144,145,153,154,155,163]
+                left_eyebrow_points = [63,66,70,105,107]
+                                       #46,52,53,55,65]
+                right_eyes_points = [263,362,384,385,386,387,388,398,466,
+                                     249,373,374,380,381,382,390]
+                right_eyebrow_points = [293,296,300,334,336]
+                                        #276,282,283,285,295]
+  
+                #There are 97 points
+                exclusivePoints = nose_points
+                exclusivePoints = exclusivePoints + mouth_points
+                exclusivePoints = exclusivePoints + left_eyes_points
+                exclusivePoints = exclusivePoints + left_eyebrow_points
+                exclusivePoints = exclusivePoints + right_eyes_points
+                exclusivePoints = exclusivePoints + right_eyebrow_points
+                
+                data = data + extratXYFromBodyPart(fileData[pos],"face",exclusivePoints)
+        dataList.append(np.asarray(data))
+    return np.asarray(dataList)
+
+def getKeypointsfromIdList(src, idList, bodyPart=["pose","face","hands"] , timeStepSize=-1):
+    
+    data = []
+    
+    for pos in idList:
+
+        fileData = pd.read_pickle(src + str(pos) + '.pkl')
+
+        fileData = keypointsFormat(fileData, bodyPart)
+
+        #without format timeStep
+        if timeStepSize == -1:
+            data.append(fileData)
+            continue
+        
+        fileData = timeStepFormat(fileData, timeStepSize)
+        data.append(fileData)
+
+    return np.asarray(data)
+
+def getImagefromIdList(src, idList, timeStepSize=-1):
     
     data = []
     
     for pos in idList:
         fileData = pd.read_pickle(src + str(pos) + '.pkl')
+
+        #without format timeStep
+        if timeStepSize == -1:
+            data.append(fileData)
+            continue
+
+        fileData = timeStepFormat(fileData, timeStepSize)
+
         data.append(fileData)
     
     return data
-
-
-def splitData(x, y, x_timeSteps, split=0.8, timeStepSize=17, leastValue=False,
-              balancedTest=False, fixed=True, fixedTest=2,doShuffle=False, augmentation=False):
-
-    # to count repeated targets in y
-    targetDict = dict(Counter(y))
-
-    pivot = targetDict.copy()
-    end = targetDict.copy()
-
-    #To select the least value which will be use to split all the data
-    if leastValue:
-
-        value = min([val for val in targetDict.values()])
-        minValue = int(value*split)
-
-        if(balancedTest):
-            minTest = value - minValue - 1
-        if(fixed):
-            minTest = fixedTest
-            minValue = value - fixedTest
-
-    # to prepare pivot dictionary to use it in the split separator
-    for key in targetDict:
-
-        if leastValue:
-            pivot[key] = minValue
-            if(balancedTest):
-                end[key] = minTest
-            if(fixed):
-                end[key] = fixedTest
-        else:
-            pivot[key] = int(targetDict[key]*split)
-
-    x_train = []
-    y_train = []
-
-    x_test = []
-    y_test = []
-
-    if(doShuffle):
-        newOrder = list(range(len(y)))
-        random.Random(52).shuffle(newOrder)
-    count = 1
-
-    for pos in newOrder:
-
-        # To complete timesteps if it have less than timeStepSize
-        for _ in range(timeStepSize - len(x[pos])):
-            # Add zeros
-            # fileData = np.append(fileData, [np.zeros(len(fileData[0]))], axis=0)
-
-            # repeat the last frame
-            x[pos] = np.append(x[pos], [x[pos][-1]], axis=0)
-
-        # TRAIN
-        if(pivot[y[pos]] >= 0):
-
-            # if have more timesteps than timeStepSize
-            if(timeStepSize < len(x[pos])):
-                diff = len(x[pos]) - timeStepSize
-
-                start = random.Random(52).choice(range(diff))
-                x_train.append(x[pos][start:start+timeStepSize])
-                y_train.append(y[pos])
-                # print("count: %d"%(count), "at zero")
-                count += 1
-            else:
-                x_train.append(x[pos])
-                y_train.append(y[pos])
-                # print("count: %d"%(count))
-                count += 1
-
-            pivot[y[pos]] = pivot[y[pos]] - 1
-
-        # TEST (balanced)
-        elif(leastValue and balancedTest):
-
-            if(end[y[pos]]):
-
-                if(timeStepSize < len(x[pos])):
-                    diff = len(x[pos]) - timeStepSize
-
-                    start = random.Random(52).choice(range(diff))
-                    x_test.append(x[pos][start:start+timeStepSize])
-                    y_test.append(y[pos])
-                else:
-                    x_test.append(x[pos])
-                    y_test.append(y[pos])
-
-                end[y[pos]] = end[y[pos]] - 1
-
-        # TEST
-        else:
-            if(timeStepSize < len(x[pos])):
-                diff = len(x[pos]) - timeStepSize
-                start = random.Random(52).choice(range(diff))
-                x_test.append(x[pos][start:start+timeStepSize])
-                y_test.append(y[pos])
-            else:
-                x_test.append(x[pos])
-                y_test.append(y[pos])
-
-    return x_train, y_train, x_test, y_test
-
 
 def ReduceDataToMinimunSize(x, y):
 

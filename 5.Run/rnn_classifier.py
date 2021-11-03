@@ -45,6 +45,15 @@ print("############ ", device, " ############")
 
 parser = argparse.ArgumentParser(description='Classification')
 
+parser.add_argument('--face', action="store_true",
+                    help='Use holistic model: face')
+
+parser.add_argument('--hands', action="store_true",
+                    help='Use holistic model: hands')
+
+parser.add_argument('--pose', action="store_true",
+                    help='Use holistic model: pose')
+
 parser.add_argument('--keys_input_Path', type=str,
                     default="./Data/Dataset/readyToRun/",
                     help='relative path of keypoints input.'
@@ -61,37 +70,40 @@ parser.add_argument('--wandb', action="store_true",
 
 args = parser.parse_args()
 
+bodyParts = []
+if(args.pose):
+    bodyParts = bodyParts + ["pose"]
+if(args.hands):
+    bodyParts = bodyParts + ["hands"]
+if(args.face):
+    bodyParts = bodyParts + ["face"]
+
 # ----------------------------------------------------
 # 1. create Dataset and DataLoader objects
 
 
 class SignLanguageDataset(torch.utils.data.Dataset):
 
-    def __init__(self, src_file, datasetType="train", split=0.8):
-
-        x, y, weight, y_labels, x_timeSteps = LoadData.getData(args.keys_input_Path)
-
-        X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=split , random_state=42, stratify=y)
-        
-        X_train = LoadData.getDatafromId(args.keypoints_input_Path, X_train)
-        X_test = LoadData.getDatafromId(args.keypoints_input_Path, X_test)
+    def __init__(self, src_file, x, y, y_labels, timestepSize=17, datasetType="train", split=0.8):
 
         self.datasetType = datasetType
 
         if self.datasetType == "train":
+            X_train = LoadData.getKeypointsfromIdList(args.keypoints_input_Path, x, bodyParts, timestepSize)
             self.X_train = torch.tensor(X_train,dtype=torch.float32).to(device)
-            self.y_train = torch.tensor(y_train,dtype=torch.float32).to(device)
-            self.inputSize = len(X_train[0][0])
+            self.y_train = torch.tensor(y,dtype=torch.int64).to(device)
+            self.inputSize = X_train.shape[2]
             print("Train: ",self.X_train.shape, self.y_train.shape)
         else:
+            X_test = LoadData.getKeypointsfromIdList(args.keypoints_input_Path, x, bodyParts, timestepSize)
             self.X_test = torch.tensor(X_test,dtype=torch.float32).to(device)
-            self.y_test = torch.tensor(y_test,dtype=torch.float32).to(device)
-            self.inputSize = len(X_test[0][0])
-            print("Train: ",self.X_test.shape, self.y_test.shape)
+            self.y_test = torch.tensor(y,dtype=torch.int64).to(device)
+            self.inputSize = X_test.shape[2]
+            print("Test: ",self.X_test.shape, self.y_test.shape)
 
         self.outputSize = len(y_labels)
 
-        self.weight = torch.tensor(weight, dtype=torch.float32).to(device)
+        #self.weight = torch.tensor(weight, dtype=torch.float32).to(device)
         self.y_labels = y_labels
 
     def __len__(self):
@@ -168,33 +180,38 @@ def main():
     # with open(args.output_Path+'3D/X.data','rb') as f: new_data = pkl.load(f)
 
     src = "./Data/Keypoints/pkl/Segmented_gestures/"
-    dataTrainXY = SignLanguageDataset(src, datasetType="train")
-    dataTestXY = SignLanguageDataset(src, datasetType="test")
+    
+    # Dataset variables
+    timestepSize = 17
+    split = 0.8
+    
+    x, y, weight, y_labels, x_timeSteps = LoadData.getData(args.keys_input_Path)
+
+    X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=split , random_state=42, stratify=y)
+
+    dataTrainXY = SignLanguageDataset(src, X_train, y_train, y_labels, timestepSize=timestepSize, datasetType="train",split=split)
+    dataTestXY = SignLanguageDataset(src, X_test, y_test, y_labels, timestepSize=timestepSize,datasetType="test",split=split)
 
     print("Begin predict sign language")
     np.random.seed(1)
     torch.manual_seed(1)
 
     # variables
-    minimun = True
-    split = 0.8
     dropout = 0.0
     num_layers = 1
     num_classes = dataTrainXY.outputSize
-    batch_size = 30
-    nEpoch = 2000
-    lrn_rate = 0.001
+    batch_size = 32
+    nEpoch = 200
+    lrn_rate = 0.0004
     weight_decay = 0
     epsilon = 1e-8
-    hidden_size = 150
-
+    hidden_size = 100
 
     if args.wandb:
         wandbF.initConfigWandb(num_layers, num_classes, batch_size, nEpoch,
                                lrn_rate, hidden_size, dropout, weight_decay, epsilon)
-     
 
-    print("minimun sizes of data: %s" % minimun)
+
     print("data train split at: %2.2f" % split)
     print("hidden size: %d" % hidden_size)
     print("dropout: %3.2f" % dropout)
@@ -244,7 +261,7 @@ def main():
 
     for epoch in range(0, nEpoch):
         # T.manual_seed(1 + epoch)  # recovery reproducibility  
-        
+
         net.train()
 
         for (batch_idx, batch) in enumerate(dataTrain):
@@ -253,21 +270,20 @@ def main():
             X = batch['predictors']  # inputs
             Y = batch['targets']
             XTrain = X.to(device)
-            YTrain = Y.to(device, dtype=torch.int64)
+            YTrain = Y.to(device)
 
             optimizer.zero_grad()
 
             output, hidden = net(XTrain)
+            
 
             loss_val = loss_func(output, YTrain)
-            
+
             # Backward
             loss_val.backward()
 
             # Step
             optimizer.step()
-
-        
 
         # if you need to save checkpoint of the model
         # chkPntPath=""
@@ -275,7 +291,6 @@ def main():
 
         train_loss, train_acc = compute_loss_and_acc(loss_func, net, dataTrain)
         test_loss, test_acc = compute_loss_and_acc(loss_func, net, dataTest)
-
 
         lossEpochAcum.append(train_loss)
         accEpochAcum.append(train_acc)
@@ -297,7 +312,7 @@ def main():
             pp.plotEpochEval(fig, plt, axs, epoch, lossEpochAcum, lossTestEpochAcum,
                              accEpochAcum, accTestEpochAcum, num_layers, num_classes,
                              batch_size, nEpoch, lrn_rate, hidden_size)
-            
+
             start_bach_time = time.time()
 
     print("Done ")
@@ -411,12 +426,12 @@ def main():
 
     ##################################################
     # 6. make a prediction
-    '''
+
     model = rnn.Net(dataTrainXY.inputSize, hidden_size,
                 num_layers, dataTrainXY.outputSize, dropout).to(device)
     path = ".\\trainedModels\\20WordsStateDictModel.pth"
     model.load_state_dict(torch.load(path))
-    
+    '''
     if args.wandb:
         wandbF.finishWandb()
 
