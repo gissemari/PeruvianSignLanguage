@@ -64,6 +64,9 @@ parser.add_argument('--keypoints_input_Path', type=str,
                     help='relative path of keypoints input.' +
                     ' Default: ./Data/Dataset/keypoints/')
 
+parser.add_argument("--timesteps", type=int, default=17,
+                    help="Number of top words")
+
 # 3D boolean
 parser.add_argument('--wandb', action="store_true",
                     help='To activate wandb')
@@ -182,7 +185,7 @@ def main():
     src = "./Data/Keypoints/pkl/Segmented_gestures/"
     
     # Dataset variables
-    timestepSize = 17
+    timestepSize = args.timesteps
     split = 0.8
     
     x, y, weight, y_labels, x_timeSteps = LoadData.getData(args.keys_input_Path)
