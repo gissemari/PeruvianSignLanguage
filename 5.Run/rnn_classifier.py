@@ -67,9 +67,11 @@ parser.add_argument('--keypoints_input_Path', type=str,
 parser.add_argument("--timesteps", type=int, default=17,
                     help="Number of top words")
 
-# 3D boolean
 parser.add_argument('--wandb', action="store_true",
                     help='To activate wandb')
+
+parser.add_argument('--plot', action="store_true",
+                    help='To activate plot from matplotlib')
 
 args = parser.parse_args()
 
@@ -257,7 +259,8 @@ def main():
     accTestEpochAcum = []
     lossTestEpochAcum = []
 
-    fig, axs = pp.interactivePlotConf()
+    if args.plot:
+        fig, axs = pp.interactivePlotConf()
 
     start_time = time.time()
     start_bach_time = time.time()
@@ -311,10 +314,10 @@ def main():
             # print epoch evaluation
             pp.printEpochEval(epoch, train_loss, train_acc, test_loss,
                               test_acc, start_bach_time)
-
-            pp.plotEpochEval(fig, plt, axs, epoch, lossEpochAcum, lossTestEpochAcum,
-                             accEpochAcum, accTestEpochAcum, num_layers, num_classes,
-                             batch_size, nEpoch, lrn_rate, hidden_size)
+            if args.plot:
+                pp.plotEpochEval(fig, plt, axs, epoch, lossEpochAcum, lossTestEpochAcum,
+                                accEpochAcum, accTestEpochAcum, num_layers, num_classes,
+                                batch_size, nEpoch, lrn_rate, hidden_size)
 
             start_bach_time = time.time()
 
@@ -394,19 +397,20 @@ def main():
     # Plot CM Test ###
 
     confusion_matrix_test = confusion_matrix_test.to("cpu").numpy()
-
-    pp.plotConfusionMatrixTest(plt, dataTestXY, pltSavePath, confusion_matrix_test,
-                               num_layers, num_classes, batch_size, nEpoch,
-                               lrn_rate, hidden_size)
+    if args.plot:
+        pp.plotConfusionMatrixTest(plt, dataTestXY, pltSavePath, confusion_matrix_test,
+                                    num_layers, num_classes, batch_size, nEpoch,
+                                    lrn_rate, hidden_size)
 
     ###
     # Plot CM Train ###
 
     confusion_matrix_train = confusion_matrix_train.to("cpu").numpy()
 
-    pp.plotConfusionMatrixTrain(plt, dataTrainXY, pltSavePath, confusion_matrix_train,
-                                num_layers, num_classes, batch_size, nEpoch,
-                                lrn_rate, hidden_size)
+    if args.plot:
+        pp.plotConfusionMatrixTrain(plt, dataTrainXY, pltSavePath, confusion_matrix_train,
+                                    num_layers, num_classes, batch_size, nEpoch,
+                                    lrn_rate, hidden_size)
 
     # Send confusion matrix Test to Wandb
     if args.wandb:
