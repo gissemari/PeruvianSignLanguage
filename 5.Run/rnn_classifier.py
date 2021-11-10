@@ -40,7 +40,7 @@ import utils.classificationPlotAndPrint as pp
 import models.rnn as rnn
 
 torch.cuda.empty_cache()
-device = torch.device("cuda")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("############ ", device, " ############")
 
 parser = argparse.ArgumentParser(description='Classification')
@@ -67,9 +67,11 @@ parser.add_argument('--keypoints_input_Path', type=str,
 parser.add_argument("--timesteps", type=int, default=17,
                     help="Number of top words")
 
-# 3D boolean
 parser.add_argument('--wandb', action="store_true",
                     help='To activate wandb')
+
+parser.add_argument('--plot', action="store_true",
+                    help='To activate plot from matplotlib')
 
 args = parser.parse_args()
 
@@ -204,11 +206,11 @@ def main():
     num_layers = 1
     num_classes = dataTrainXY.outputSize
     batch_size = 32
-    nEpoch = 200
+    nEpoch = 2000
     lrn_rate = 0.0004
     weight_decay = 0
     epsilon = 1e-8
-    hidden_size = 100
+    hidden_size = 200
 
     if args.wandb:
         wandbF.initConfigWandb(num_layers, num_classes, batch_size, nEpoch,
@@ -228,8 +230,7 @@ def main():
 
     ##################################################
     # 2. create neural network
-    net = rnn.Net(dataTrainXY.inputSize, hidden_size,
-              num_layers, num_classes, dropout).to(device)
+    net = rnn.Net(dataTrainXY.inputSize, hidden_size, num_layers, num_classes, dropout).to(device)
 
     print('The number of parameter is: %d' % count_parameters(net))
 
@@ -257,7 +258,8 @@ def main():
     accTestEpochAcum = []
     lossTestEpochAcum = []
 
-    fig, axs = pp.interactivePlotConf()
+    if args.plot:
+        fig, axs = pp.interactivePlotConf()
 
     start_time = time.time()
     start_bach_time = time.time()
@@ -278,7 +280,6 @@ def main():
             optimizer.zero_grad()
 
             output, hidden = net(XTrain)
-            
 
             loss_val = loss_func(output, YTrain)
 
@@ -307,14 +308,14 @@ def main():
             if args.wandb:
                 wandbF.wandbLog(train_loss, train_acc,
                                 test_loss, test_acc)
-
+        if(epoch % 100 == 0):
             # print epoch evaluation
             pp.printEpochEval(epoch, train_loss, train_acc, test_loss,
                               test_acc, start_bach_time)
-
-            pp.plotEpochEval(fig, plt, axs, epoch, lossEpochAcum, lossTestEpochAcum,
-                             accEpochAcum, accTestEpochAcum, num_layers, num_classes,
-                             batch_size, nEpoch, lrn_rate, hidden_size)
+            if args.plot:
+                pp.plotEpochEval(fig, plt, axs, epoch, lossEpochAcum, lossTestEpochAcum,
+                                accEpochAcum, accTestEpochAcum, num_layers, num_classes,
+                                batch_size, nEpoch, lrn_rate, hidden_size)
 
             start_bach_time = time.time()
 
@@ -394,19 +395,20 @@ def main():
     # Plot CM Test ###
 
     confusion_matrix_test = confusion_matrix_test.to("cpu").numpy()
-
-    pp.plotConfusionMatrixTest(plt, dataTestXY, pltSavePath, confusion_matrix_test,
-                               num_layers, num_classes, batch_size, nEpoch,
-                               lrn_rate, hidden_size)
+    if args.plot:
+        pp.plotConfusionMatrixTest(plt, dataTestXY, pltSavePath, confusion_matrix_test,
+                                    num_layers, num_classes, batch_size, nEpoch,
+                                    lrn_rate, hidden_size)
 
     ###
     # Plot CM Train ###
 
     confusion_matrix_train = confusion_matrix_train.to("cpu").numpy()
 
-    pp.plotConfusionMatrixTrain(plt, dataTrainXY, pltSavePath, confusion_matrix_train,
-                                num_layers, num_classes, batch_size, nEpoch,
-                                lrn_rate, hidden_size)
+    if args.plot:
+        pp.plotConfusionMatrixTrain(plt, dataTrainXY, pltSavePath, confusion_matrix_train,
+                                    num_layers, num_classes, batch_size, nEpoch,
+                                    lrn_rate, hidden_size)
 
     # Send confusion matrix Test to Wandb
     if args.wandb:

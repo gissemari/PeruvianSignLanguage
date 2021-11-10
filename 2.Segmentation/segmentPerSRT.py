@@ -76,7 +76,7 @@ for filePath in listFile:
     inputName = os.path.basename(filePath)
     inputName = os.path.splitext(inputName)[0]
     outputFolder = outputVideoPath+inputName
-    if uv.createFolder(outputFolder):
+    if uv.createFolder(outputFolder, createFullPath=True):
         print('Created folder :', filePath, inputName)
     else:
         print('Folder existed :', filePath, inputName)

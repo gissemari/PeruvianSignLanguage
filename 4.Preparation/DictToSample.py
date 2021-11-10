@@ -16,6 +16,7 @@ import pickle as pkl
 import numpy as np
 
 # Local imports
+import utils.video as uv
 
 SEED = 52
 
@@ -172,6 +173,8 @@ weight = [dict_weight[w]/total_weight for w in range(args.words)]
 
 # to switch key and values to have y number meaning
 y_meaning = {_y: _x for _x, _y in topWordDict.items()}
+
+uv.createFolder(args.output_Path)
 
 with open(args.output_Path+'X.data', 'wb') as f:
     pkl.dump(x, f)

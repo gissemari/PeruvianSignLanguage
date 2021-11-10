@@ -24,14 +24,20 @@ import utils.classificationPlotAndPrint as pp
 import utils.video as uv
 
 torch.cuda.empty_cache()
-device = torch.device("cuda")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 print("############ ", device, " ############")
 
 parser = argparse.ArgumentParser(description='Classification')
 
-# 3D boolean
-parser.add_argument('--wandb', action="store_true",
-                    help='To activate wandb')
+parser.add_argument('--face', action="store_true",
+                    help='Use holistic model: face')
+
+parser.add_argument('--hands', action="store_true",
+                    help='Use holistic model: hands')
+
+parser.add_argument('--pose', action="store_true",
+                    help='Use holistic model: pose')
 
 parser.add_argument('--keys_input_Path', type=str,
                     default="./Data/Dataset/readyToRun/",
@@ -48,18 +54,31 @@ parser.add_argument('--keypoints_input_Path', type=str,
                     help='relative path of keypoints input.' +
                     ' Default: ./Data/Dataset/keypoints/')
 
+parser.add_argument("--timesteps", type=int, default=17,
+                    help="Number of top words")
+
+parser.add_argument('--wandb', action="store_true",
+                    help='To activate wandb')
+
+parser.add_argument('--plot', action="store_true",
+                    help='To activate plot from matplotlib')
+
 args = parser.parse_args()
+
+bodyParts = []
+if(args.pose):
+    bodyParts = bodyParts + ["pose"]
+if(args.hands):
+    bodyParts = bodyParts + ["hands"]
+if(args.face):
+    bodyParts = bodyParts + ["face"]
 
 # ----------------------------------------------------
 # 1. create Dataset and DataLoader objects
 
 class SignLanguageDataset(torch.utils.data.Dataset):
 
-    def __init__(self, dataType="train", split=0.8):
-
-        x, y, weight, y_labels, x_timeSteps = LoadData.getData(args.keys_input_Path)
-
-        X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=split , random_state=42, stratify=y)
+    def __init__(self, src_file, x, y, y_labels, timestepSize=17, dataType="train", split=0.8):
 
         self.dataType = dataType
         self.y_labels = y_labels
@@ -71,17 +90,17 @@ class SignLanguageDataset(torch.utils.data.Dataset):
             print("There are no instances to train the model, please check the input path")
 
         self.gru_input_size = len(fileData[0])
-        self.trainSize = len(y_train)
-        self.testSize = len(y_test)
 
         self.outputSize = len(y_labels)
         
         if self.dataType == "train":
-            self.x_train = X_train
-            self.y_train = torch.tensor(y_train, dtype=torch.int64).to(device)
+            self.trainSize = len(y)
+            self.x_train = x
+            self.y_train = torch.tensor(y, dtype=torch.int64).to(device)
         else:
-            self.x_test = X_test
-            self.y_test = torch.tensor(y_test, dtype=torch.int64).to(device)
+            self.testSize = len(y)
+            self.x_test = x
+            self.y_test = torch.tensor(y, dtype=torch.int64).to(device)
 
     def __len__(self):
 
@@ -159,10 +178,19 @@ def compute_loss_and_acc(loss_func, net, dataloader):
 
 def main():
     
+    src = "./Data/Keypoints/pkl/Segmented_gestures/"
+    
+    # Dataset variables
+    timestepSize = args.timesteps
     split = 0.8
+    
+    x, y, weight, y_labels, x_timeSteps = LoadData.getData(args.keys_input_Path)
 
-    data_train = SignLanguageDataset(split=split)
-    data_test = SignLanguageDataset(dataType="test")
+    X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=split , random_state=42, stratify=y)
+
+    data_train = SignLanguageDataset(src, X_train, y_train, y_labels, timestepSize=timestepSize, dataType="train",split=split)
+    data_test = SignLanguageDataset(src, X_test, y_test, y_labels, timestepSize=timestepSize,dataType="test",split=split)
+
 
     print("Begin predict sign language")
     torch.manual_seed(1)
@@ -213,7 +241,8 @@ def main():
     accTestEpochAcum = []
     lossTestEpochAcum = []
 
-    fig, axs = pp.interactivePlotConf()
+    if args.plot:
+        fig, axs = pp.interactivePlotConf()
 
     start_time = time.time()
     
@@ -268,7 +297,7 @@ def main():
             # print epoch evaluation
             pp.printEpochEval(epoch, train_loss, train_acc, test_loss,
                               test_acc, start_bach_time)
-
+        if args.plot:
             pp.plotEpochEval(fig, plt, axs, epoch, lossEpochAcum, lossTestEpochAcum,
                              accEpochAcum, accTestEpochAcum, gruLayers, num_classes,
                              batch_size, nEpoch, lrn_rate, hidden_size)
@@ -333,10 +362,10 @@ def main():
     # Plot CM Test ###
     
     confusion_matrix_test = confusion_matrix_test.to("cpu").numpy()
-    
-    pp.plotConfusionMatrixTest(plt, data_test, pltSavePath, confusion_matrix_test,
-                               gruLayers, num_classes, batch_size, nEpoch,
-                               lrn_rate, hidden_size)
+    if args.plot:
+        pp.plotConfusionMatrixTest(plt, data_test, pltSavePath, confusion_matrix_test,
+                                   gruLayers, num_classes, batch_size, nEpoch,
+                                   lrn_rate, hidden_size)
     # Send confusion matrix Test to Wandb
     if args.wandb:
         wandbF.sendConfusionMatrix(target_acum.to("cpu").numpy(),
@@ -378,11 +407,11 @@ def main():
     # Plot CM Train ###
     
     confusion_matrix_train = confusion_matrix_train.to("cpu").numpy()
-    
-    pp.plotConfusionMatrixTrain(plt, data_train, pltSavePath, confusion_matrix_train,
-                                gruLayers, num_classes, batch_size, nEpoch,
-                                lrn_rate, hidden_size)
-    
+    if args.plot:
+        pp.plotConfusionMatrixTrain(plt, data_train, pltSavePath, confusion_matrix_train,
+                                    gruLayers, num_classes, batch_size, nEpoch,
+                                    lrn_rate, hidden_size)
+        
     # Send confusion matrix Train to Wandb
     if args.wandb:
         wandbF.sendConfusionMatrix(target_acum.to("cpu").numpy(),
