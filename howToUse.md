@@ -1,3 +1,5 @@
+The dataset is available at: https://drive.google.com/drive/u/2/folders/1xWPBmm3qHMl2z4Hz_Iu4m-qBaN4dKb3y
+
 # Steps to prepare dataset and Run the model - Easy mode
 
 1. run "./generateDataset.sh" 
