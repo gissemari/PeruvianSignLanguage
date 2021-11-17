@@ -85,7 +85,9 @@ class SignLanguageDataset(torch.utils.data.Dataset):
         
         try:
             fileData = read_pickle(args.keypoints_input_Path + str(x[0]) + '.pkl')
-           
+            fileData = LoadData.keypointsFormat(fileData, bodyParts)
+            fileData = LoadData.timeStepFormat(fileData, args.timesteps)
+
         except:
             print("There are no instances to train the model, please check the input path")
 
@@ -113,13 +115,19 @@ class SignLanguageDataset(torch.utils.data.Dataset):
 
         if self.dataType == "train":
             img = LoadData.getXInfo(args.image_input_Path, self.x_train[index])
+            img = LoadData.timeStepFormat(img, args.timesteps)
             kps = LoadData.getXInfo(args.keypoints_input_Path, self.x_train[index])
+            kps = LoadData.keypointsFormat(kps, bodyParts)
+            kps = LoadData.timeStepFormat(kps, args.timesteps)
             trgts = self.y_train[index]
         else:
             img = LoadData.getXInfo(args.image_input_Path, self.x_test[index])
+            img = LoadData.timeStepFormat(img, args.timesteps)
             kps = LoadData.getXInfo(args.keypoints_input_Path, self.x_test[index])
+            kps = LoadData.keypointsFormat(kps, bodyParts)
+            kps = LoadData.timeStepFormat(kps, args.timesteps)
             trgts = self.y_test[index]
-        
+
         image = torch.tensor(img, dtype=torch.float32).to(device)
         keypoints = torch.tensor(kps, dtype=torch.float32).to(device)
 
