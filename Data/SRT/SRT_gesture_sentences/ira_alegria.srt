@@ -210,3 +210,7 @@ La primera es la alegría, la segunda es la ira
 00:05:26,978 --> 00:05:32,517
 Las otras emociones son la tristeza, el miedo y la sorpresa
 
+54
+00:05:32,962 --> 00:05:36,819
+Muy bien, tú has estado atenta antes
+
