@@ -3,10 +3,8 @@ import glob
 import json
 import math
 import os
-import pandas as pd
 from collections import defaultdict
-from collections import Counter
-import pickle
+
 import numpy as np
 
 
@@ -76,46 +74,27 @@ def normalize(poses):
         assert math.isclose(np.linalg.norm(upper_neck - head_top), 1)
     return poses
 
-def reshapeKP(kp):
-    x = []
-    y = []
-    for i in range(len(kp)):
-        if(i % 2 == 0):
-            x.append(kp[i])
-        else:
-            y.append(kp[i])
-    return np.stack((x, y), axis=1)
 
-def main(args):
-    
-    with open(args.input_dir+"/readyToRun/"+'X.data', 'rb') as f:
-        X = pickle.load(f)
-    with open(args.input_dir+"/readyToRun/"+'Y.data', 'rb') as f:
-        Y = pickle.load(f)
-    with open(args.input_dir+"/readyToRun/"+'Y_meaning.data', 'rb') as f:
-        y_meaning = pickle.load(f)
-        
-    output_dir = args.input_dir+'/kpflow2/'
-    os.makedirs(output_dir, exist_ok=True)
-
+def main():
+    input_path = 'project/data/kp'
+    input_dirs = sorted(glob.glob(os.path.join(input_path, '*', '*_color.kp')))
     input_dir_index = 0
-    total = len(X)
-
-    
-    for ind in X:
+    total = len(input_dirs)
+    for input_dir in input_dirs:
         print(f'{input_dir_index}/{total}')
         input_dir_index += 1
 
-        with open(args.input_dir+'/keypoints/'+str(ind)+'.pkl', 'rb') as f:
-            keypoints = pickle.load(f)
+        output_dir = input_dir.replace('kp', 'kpflow2')
+        os.makedirs(output_dir, exist_ok=True)
+
+        kp_files = sorted(glob.glob(os.path.join(input_dir, '*.json')))
 
         # 1. Collect all keypoint files and pre-process them
         poses = []
-        for i in range(len(keypoints)):
-            poses.append(reshapeKP(keypoints[i]))
+        for i in range(len(kp_files)):
+            poses.append(read_pose(kp_files[i]))
         poses = np.stack(poses)
-
-        #poses = impute_missing_keypoints(poses)
+        poses = impute_missing_keypoints(poses)
         #poses = normalize(poses)
 
         # import matplotlib.pyplot as plt
@@ -127,18 +106,12 @@ def main(args):
 
         # 2. Compute pose flow
         prev = poses[0]
-        flows = []
         for i in range(1, poses.shape[0]):
             next = poses[i]
             flow = calc_pose_flow(prev, next)
-            flows.append(flow)
+            np.save(os.path.join(output_dir, 'flow_{:05d}'.format(i - 1)), flow)
             prev = next
-
-        np.save(os.path.join(output_dir, 'flow_{:d}'.format(ind)), flows)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--input_dir', type=str)
-    args = parser.parse_args()
-    main(args)
+    main()

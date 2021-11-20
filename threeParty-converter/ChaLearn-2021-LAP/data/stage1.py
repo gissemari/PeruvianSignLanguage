@@ -6,9 +6,10 @@ from collections import Counter, defaultdict
 
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
+import pandas as pd
 
-ORIG_FILE = '/home/mcdcoste/Documents/research/data/chalearn21/train_labels.csv'
-NEW_FILE = '/home/mcdcoste/Documents/research/data/chalearn21/train_val_labels_STAGE1.csv'
+ORIG_FILE = 'train_labels.csv'
+NEW_FILE = 'train_val_labels_STAGE1.csv'
 
 
 # Source: https://www.kaggle.com/jakubwasikowski/stratified-group-k-fold-cross-validation
@@ -57,7 +58,7 @@ def stratified_group_k_fold(X, y, groups, k, seed=None):
         yield train_indices, test_indices
 
 
-with open(ORIG_FILE) as orig_file:
+with open(ORIG_FILE, encoding='utf-8') as orig_file:
     signers = []
     samples = []
     labels = []
@@ -79,6 +80,5 @@ with open(ORIG_FILE) as orig_file:
         else:
             new_samples.append((samples[i], labels[i], 'val'))
 
-    with open(NEW_FILE, 'w') as new_file:
-        writer = csv.writer(new_file)
-        writer.writerows(new_samples)
+    df = pd.DataFrame(new_samples)
+    df.to_csv(NEW_FILE, index=False, header=False)

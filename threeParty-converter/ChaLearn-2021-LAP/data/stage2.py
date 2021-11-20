@@ -1,14 +1,14 @@
-import csv
 
-with open('train_labels.csv') as tlf:
-    with open('val_labels.csv') as vlf:
-        with open('train_val_labels_STAGE2.csv', 'w') as olf:
-            train_reader = csv.reader(tlf)
-            val_reader = csv.reader(vlf)
-            out_writer = csv.writer(olf)
+import pandas as pd
 
-            for row in train_reader:
-                out_writer.writerow([*row, 'train'])
-            
-            for row in val_reader:
-                out_writer.writerow([*row, 'val'])
+train_reader = pd.read_csv("train_labels.csv", encoding='utf-8')
+val_reader = pd.read_csv("val_labels.csv", encoding='utf-8')
+
+train_stage = [[name,label,'train'] for name, label in train_reader.values.tolist()]
+val_stage = [[name,label,'val'] for name, label in val_reader.values.tolist()]
+
+stage = train_stage + val_stage
+
+df = pd.DataFrame(stage)
+
+df.to_csv('train_val_labels_STAGE2.csv',index=False, header=False)
