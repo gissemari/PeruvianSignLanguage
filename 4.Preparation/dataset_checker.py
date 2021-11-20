@@ -20,8 +20,8 @@ parser = argparse.ArgumentParser(description='Classification')
 
 parser.add_argument('--keys_input_Path', type=str,
                     default="./Data/Dataset/readyToRun/",
-                    help='relative path of keypoints input.'
-                    ' Default: ./Data/Dataset/keypoints/')
+                    help='relative path of key input.'
+                    ' Default: ./Data/Dataset/readyToRun/')
 
 parser.add_argument('--dict_Path', type=str,
                     default="./Data/Dataset/dict/dict.json",
@@ -42,11 +42,11 @@ print("Test size: ", len(y_test))
 count = 0
 
 for idx, dataId in enumerate(X_train):
-    
+    print(dataId)
     indG = -1
     for pos, gloss in enumerate(dataDict):
 
-        if(dataDict[pos]["gloss"] == y_labels[y_train[idx]]):
+        if(dataDict[pos]["gloss"] == y_labels[y_train[idx]].lower().lower()):
             indG = pos
     
     toCheck = [instances["instance_id"] for instances in dataDict[indG]["instances"]]
@@ -59,7 +59,7 @@ for idx, dataId in enumerate(X_test):
     indG = -1
     for pos, gloss in enumerate(dataDict):
 
-        if(dataDict[pos]["gloss"] == y_labels[y_test[idx]]):
+        if(dataDict[pos]["gloss"] == y_labels[y_test[idx]].lower()):
             indG = pos
 
     toCheck = [instances["instance_id"] for instances in dataDict[indG]["instances"]]
