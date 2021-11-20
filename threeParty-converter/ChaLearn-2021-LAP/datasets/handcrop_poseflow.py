@@ -96,15 +96,14 @@ class ChaLearnDataset(Dataset):
         self.transform.randomize_parameters()
 
         sample = self.samples[item]
-        frames, _, _ = torchvision.io.read_video(os.path.join(self.root_path, self.job_path, sample['path']),
+        frames, _, _ = torchvision.io.read_video(os.path.join(sample['path']),
                                                  pts_unit='sec')
 
         clip = []
         poseflow_clip = []
         missing_wrists_left, missing_wrists_right = [], []
         for frame_index in sample['frames']:
-            kp_path = os.path.join(self.root_path.replace('mp4', 'kp'), self.job_path,
-                                   sample['path'].replace('mp4', 'kp'), '{}_{:012d}_keypoints.json'.format(
+            kp_path = os.path.join(sample['path'].replace('mp4', 'kp'), '{}_{:012d}_keypoints.json'.format(
                     sample['path'].split('/')[-1].replace('.mp4', ''), frame_index))
 
             with open(kp_path, 'r') as keypoints_file:
@@ -130,7 +129,7 @@ class ChaLearnDataset(Dataset):
                 poseflow[:, 0] /= math.pi
                 # Magnitude is already normalized from the pre-processing done before calculating the flow
             else:
-                poseflow = np.zeros((135, 2))
+                poseflow = np.zeros((33, 2))
 
             frame = frames[frame_index]
 
@@ -182,11 +181,7 @@ class ChaLearnDataset(Dataset):
             crops = torch.stack((left_hand_crop, right_hand_crop), dim=0)
 
             clip.append(crops)
-
-            pose_transform = Compose(DeleteFlowKeypoints(list(range(65, 135))),
-                                     DeleteFlowKeypoints(list(range(19, 25))),
-                                     DeleteFlowKeypoints(list(range(11, 17))),
-                                     ToFloatTensor())
+            pose_transform = Compose(ToFloatTensor())
 
             poseflow = pose_transform(poseflow).view(-1)
             poseflow_clip.append(poseflow)

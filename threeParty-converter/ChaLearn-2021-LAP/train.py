@@ -43,7 +43,7 @@ if __name__ == '__main__':
     pl.seed_everything(args.seed)
 
     trainer = pl.Trainer(callbacks=[
-        EarlyStopping(monitor='val_loss', mode='min', verbose=True, patience=10),
+        EarlyStopping(monitor='val_loss', mode='min', verbose=True, patience=50),
         LearningRateMonitor(logging_interval='epoch')
     ], logger=TensorBoardLogger(args.log_dir, name=args.model),
         fast_dev_run=args.fast_dev_run,
