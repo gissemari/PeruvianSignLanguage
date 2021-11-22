@@ -3,7 +3,7 @@ The dataset is available at: https://drive.google.com/drive/u/2/folders/1xWPBmm3
 # Steps to prepare dataset and Run the model - Easy mode
 
 1. run "./generateDataset.sh" 
-2. run "./runClassifier.sh"
+2. run "./rnn_classifier.sh"
 
 # Steps to prepare dataset and Run the model - Advance mode
 
@@ -11,38 +11,38 @@ The dataset is available at: https://drive.google.com/drive/u/2/folders/1xWPBmm3
 
   * "--rawVideoPath PATH"   	'PATH' is the directory that points to the group of all the raw videos files
   * "--srtPath PATH"		'PATH' is the directory that points to the group of all the SRT gestures files
+  * "--inputName PATH" 
   * "--outputVideoPath PATH"   'PATH' is the directory where you want to save all the Segmented gestures videos (needed for the next step)
   * "--flgGesture #"           '#' is the number of frames per second for the output file
 
-2. run "python 3.Translation/FrameToKeypoint/ConvertVideoToKeypoint.py" with this command line options:
+2. run "python 3.Translation/FrameToKeypoint/ConvertVideoToDict.py" with this command line options:
 
-  * "--holistic" 		To use Mediapipe holistic model
-  * "--Pose"			To use Mediapipe Pose model
-  * "--hands"			To use Mediapipe hands model
-  * "--face_mesh"		To use Mediapipe Face model
-  
-  *If you use --holistic, use it without (pose, hands and face mesh)*
-  
+  * "--image"
   * "--inputPath PATH"		'PATH' is the directory that points to segmented gestures videos
-  * "--img_output PATH"	'PATH' is the directory output where you want to save images that have key point and key lines added in it
-  * "--pkl_output PATH"	'PATH' is the directory output where you want to save pkl key point data in pkl (needed for the next step)
-  * "--json_output PATH"	'PATH' is the directory output where you want to save pkl key point data in json
+  * "--img_output PATH"	'PATH' is the directory output where you want to save images that have key point and key lines added in it (use it with '--image')
+  * "--keypoints_output PATH"	'PATH' is the directory output where you want to save pkl keypoint data in pkl
+  * "--dict_output PATH"	'PATH' is the directory output where you want to save all dataset information (needed in the following command)
 
-3. run "python 4.Preparation/KeypointsFramesToSample.py"  with this command line options:
 
+3. run "python 4.Preparation/DictToSample.py"  with this command line options:
+
+
+  * "--dict_Path PATH"     	'PATH' is the directory that points to the dict that have all the dataset information
+  * "--shuffle"		to shuffle instances keys
+  * "--leastValue"		to take the word with the least number of instances and cut all word instances to that value 
+  * "--wordList _"             '_' is a list of word. This has to be written like this example "--wordList WORD1 WORD2 WORD3" 
+  * "--output_Path PATH"  	'PATH' is the directory output you want to have the dataset sample formated
   * "--word #" 		'#' is the number of classes
-  * "--main_folder_Path PATH"  'PATH' is the directory that points to the file that groups all segmented gesture keypoints (pkl)
-  * "--output_Path PATH"       'PATH' is the directory output you want to have the dataset samples (without format)
 
-4. run "python 4.Preparation/SampleModelFormat.py"  with this command line options:
+4. run "python 4.Models/rnn_classifier.py" with this command line options:
 
-  * "--timesteps #"       '#' is the number of timesteps 
-  * "--input_Path PATH"     'PATH' is the directory that points to the dataset sample file
-  * "--output_Path PATH"  'PATH' is the directory output you want to have the dataset sample formated
-
-5. run "python 4.Models/Classification.py" with this command line options:
-
+  * "--face"			To consider face keypoints 
+  * "--hands"			To consider both hands keypoints
+  * "--pose"			To consider pose keypoints
+  * "--timesteps #"       	'#' is the number of timesteps to consider in the dataset
   * "--wandb"  		To connect the model with wandb (some files are needed to make wandb work - please read wandb documentation)
+  * "--keypoints_input_Path PATH" 'PATH' is the directory of keypoints inputs  
+  * "--keys_input_Path PATH"   'PATH' is the directory of the keys shuffled in the previus command (SampleModelFormat.py) 
 
 # Dataset format
 

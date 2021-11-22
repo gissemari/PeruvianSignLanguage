@@ -1,0 +1,42 @@
+program: wandb_rnn_classifier.py
+method: grid
+parameters:
+  hidden_size:
+    values:
+    - 100
+    - 400
+    - 700
+  lrn_rate:
+    values:
+    - 0.00004
+    - 0.0004
+    - 0.004
+  batch_size:
+    values:
+    - 32
+    - 64
+  bodyParts:
+    values:
+    - ["pose"]
+    - ["pose", "hands"]
+    - ["pose", "hands", "face"]
+    - ["pose", "face"]
+    - ["hands", "face"]
+    - ["hands"]
+    - ["face"]
+  num_layers:
+    distribution: constant
+    value: 1
+  dropout:
+    distribution: constant
+    value: 0
+  weight_decay:
+    distribution: constant
+    value: 0
+  epsilon:
+    distribution: constant
+    value: 0.00000008
+  epoch:
+    distribution: constant
+    value: 1000
+
