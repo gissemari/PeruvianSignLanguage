@@ -43,13 +43,14 @@ if __name__ == '__main__':
     pl.seed_everything(args.seed)
 
     trainer = pl.Trainer(callbacks=[
-        EarlyStopping(monitor='val_loss', mode='min', verbose=True, patience=50),
+        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=50),
         LearningRateMonitor(logging_interval='epoch')
     ], logger=TensorBoardLogger(args.log_dir, name=args.model),
         fast_dev_run=args.fast_dev_run,
         track_grad_norm=args.track_grad_norm,
         gradient_clip_val=args.gradient_clip_val,
         log_gpu_memory=args.log_gpu_memory,
+        log_every_n_steps=16,
         overfit_batches=args.overfit_batches,
         accumulate_grad_batches=args.accumulate_grad_batches,
         val_check_interval=args.val_check_interval,
@@ -66,3 +67,4 @@ if __name__ == '__main__':
     dm = data_module.get_datamodule(**dict_args)
 
     train_results = trainer.fit(model, dm)
+    trainer.save_checkpoint("example.ckpt")
