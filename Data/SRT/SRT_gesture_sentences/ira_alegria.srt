@@ -23,7 +23,7 @@ Esto es un lugar seguro para chicos de quinto y sexto de primaria como tú
 llamar a tu papá, a tu mamá, a tu abuelo a venir
 
 7
-00:00:51,428 --> 00:00:54,661
+00:00:51,812 --> 00:00:54,661
 Aprender juntos se siente bien
 
 8
@@ -43,11 +43,11 @@ Recuerda que ahora nosotros conocemos nuestras emociones y les hemos puesto un n
 Ahora les pregunto a ustedes si puedes manejar las emociones?
 
 12
-00:01:20,777 --> 00:01:23,632
+00:01:20,777 --> 00:01:23,598
 Si es posible, ¿cómo las manejamos?
 
 13
-00:01:23,651 --> 00:01:28,240
+00:01:23,624 --> 00:01:28,240
 Cuando sentimos tiempos difíciles, ¿cómo manejamos emociones para vivir mejor?
 
 14
@@ -60,7 +60,7 @@ Cuando sentimos tiempos difíciles, ¿cómo manejamos emociones para vivir mejor
 
 16
 00:01:52,481 --> 00:01:56,213
- Yo creí y fui entendiendo los consejos de mi mamá
+ Yo crecí y fui entendiendo los consejos de mi mamá
 
 17
 00:01:56,251 --> 00:02:00,596
@@ -123,94 +123,130 @@ Cuando sentimos tiempos difíciles, ¿cómo manejamos emociones para vivir mejor
  El objetivo hoy es elegir estrategias que nos ayuden a resolver problemas para un buen ambiente
 
 32
+00:03:03,269 --> 00:03:04,198
+¡Hola profesor!
+
+33
 00:03:04,218 --> 00:03:05,585
 Muchas gracias Pati
 
-33
+34
 00:03:05,617 --> 00:03:07,829
 Soy la profesora Andrea
 
-34
+35
 00:03:07,849 --> 00:03:11,704
 Estoy muy contenta de estar con ustedes y compartir la actividad de hoy
 
-35
+36
 00:03:11,730 --> 00:03:14,466
 ¿Estamos listos para comenzar?
 
-36
+37
 00:03:14,475 --> 00:03:15,035
 Sí
 
-37
+38
 00:03:15,039 --> 00:03:15,812
 Muy bien
 
-38
+39
 00:03:16,692 --> 00:03:18,232
 ¡Aquí vamos!
 
-39
+40
 00:03:18,310 --> 00:03:23,818
 En esta imágen hay tres niños
 
-40
+41
 00:03:31,606 --> 00:03:33,065
 ¿Tú qué piensas?
 
-41
+42
 00:03:40,631 --> 00:03:42,731
 Sí, puede ser
 
-42
+43
 00:03:57,315 --> 00:04:00,724
 Estoy segura que ustedes tienen muchas ideas
 
-43
-00:04:07,643 --> 00:04:11,722
-El día de hoy vamos a recordar lo que aprendimos sobre las emociones
-
 44
+00:04:07,643 --> 00:04:11,722
+Hoy vamos a recordar las emociones
+
+45
 00:04:39,237 --> 00:04:48,500
 Los dos están muy emocionados porque quieren mucho a su abuelo, un señor sabio y muy divertido que cuenta historias entretenidas
 
-45
+46
 00:04:48,521 --> 00:04:58,097
 Un día, antes que el abuelo llegue, los papás de los dos les dijeron que el abuelo dormiría en el cuarto de Marco
 
-46
+47
 00:04:58,113 --> 00:05:02,099
 Por eso deberán compartir el cuarto de Alex
 
-47
-00:05:05,386 --> 00:05:08,413
-¿qué emociones tienen cada uno de ellos?
-
 48
-00:05:14,036 --> 00:05:15,341
-Sí, muy bien
+00:05:02,615 --> 00:05:05,605
+Los dos reaccionaron diferente
 
 49
+00:05:05,605 --> 00:05:08,413
+¿qué emociones tienen cada uno de ellos?
+
+50
+00:05:08,958 --> 00:05:11,514
+Yo veo que Marco está feliz
+
+51
+00:05:11,696 --> 00:05:14,039
+Veo que Alex está enojado
+
+52
+00:05:14,039 --> 00:05:15,341
+Sí, muy bien
+
+53
 00:05:15,363 --> 00:05:21,231
 Has identificado dos emociones que aprendimos la semana pasada, la alegría y la ira
 
-50
+54
 00:05:21,241 --> 00:05:23,120
 ¿cuáles son las otras emociones?
 
-51
+55
 00:05:23,134 --> 00:05:24,103
 ¿Recuerdas?
 
-52
+56
 00:05:24,134 --> 00:05:26,978
 La primera es la alegría, la segunda es la ira
 
-53
+57
 00:05:26,978 --> 00:05:32,517
 Las otras emociones son la tristeza, el miedo y la sorpresa
 
-54
+58
 00:05:32,962 --> 00:05:36,819
 Muy bien, tú has estado atenta antes
+
+59
+00:11:28,213 --> 00:11:30,833
+Pero, ¿cómo sabemos que lo hacemos bien?
+
+60
+00:17:18,538 --> 00:17:22,032
+¿Cómo solucionas tú el conflicto entre los hermanos Marco y Alex?
+
+61
+00:18:47,211 --> 00:18:55,026
+Yo creo que Marco no quiere compartir su cuarto con su hermano porque quier estar solo
+
+62
+00:20:18,753 --> 00:20:25,074
+Es decir, usaron normas para compartir el cuarto y van dos semanas haciéndolo bien
+
+63
+00:23:59,909 --> 00:24:00,176
+cerrar
 

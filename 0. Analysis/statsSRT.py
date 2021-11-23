@@ -55,7 +55,7 @@ print(srtPath,inputName,listFile)
 
 dictSigns = {}
 words = []
-sentence = 0
+signNumber = 0
 
 
 for filePath in listFile:
@@ -77,11 +77,11 @@ for filePath in listFile:
         else:
             dictSigns[line.text] = 1
 
-        sentence+=1
+        signNumber+=1
 
 cnt = Counter(words)
 
-print(len(dictSigns), sentence)
+print("Unique signs ", len(dictSigns), " total signs", signNumber)
 print(cnt)
 
 plt.hist(dictSigns.values(),bins=10)
@@ -90,6 +90,6 @@ plt.ylabel("Frequency")
 plt.title("Instances per unique sign")
 plt.show()
 
-#with open('stats.csv', 'w') as f:
-#    for key in dictSigns.keys():
-#        f.write("%s,%d\n"%(key,dictSigns[key]))
+with open('stats.csv', 'w') as f:
+    for key in dictSigns.keys():
+        f.write("%s,%d\n"%(key,dictSigns[key]))
