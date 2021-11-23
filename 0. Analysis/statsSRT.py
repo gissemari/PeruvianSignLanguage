@@ -3,6 +3,7 @@ import argparse
 import pysrt
 import nltk
 import os
+import matplotlib.pyplot as plt
 from collections import Counter
 
 #from os import listdir, mkdir
@@ -82,3 +83,13 @@ cnt = Counter(words)
 
 print(len(dictSigns), sentence)
 print(cnt)
+
+plt.hist(dictSigns.values(),bins=10)
+plt.xlabel("Number of instances")
+plt.ylabel("Frequency")
+plt.title("Instances per unique sign")
+plt.show()
+
+#with open('stats.csv', 'w') as f:
+#    for key in dictSigns.keys():
+#        f.write("%s,%d\n"%(key,dictSigns[key]))
