@@ -206,24 +206,15 @@ for videoFolder in folder_list:
                 faceResults = face_mesh.process(imageBGR)
 
                 count = 0
-
-                for data_point in faceResults.multi_face_landmarks[0].landmark:
-                    faceData.append(data_point.x * 256.0)
-                    faceData.append(data_point.y * 256.0)
-                    # P value equal to 0.0 because this model doen't return probabilities
-                    faceData.append(0.0)
-
-                mp_drawing.draw_landmarks(
-                            image=annotated_image,
-                            landmark_list=faceResults.multi_face_landmarks[0],
-                            connections=mp_face_mesh.FACE_CONNECTIONS,
-                            landmark_drawing_spec=drawing_spec,
-                            connection_drawing_spec=drawing_spec)
+                if(faceResults.multi_face_landmarks):
+                    for data_point in faceResults.multi_face_landmarks[0].landmark:
+                        faceData.append(data_point.x * 256.0)
+                        faceData.append(data_point.y * 256.0)
+                        # P value equal to 0.0 because this model doen't return probabilities
+                        faceData.append(0.0)
 
             if(args.hands):
                 handsResults = hands.process(imageBGR)
-
-                
 
                 if (handsResults.multi_hand_landmarks):
                     count = 0
@@ -241,7 +232,7 @@ for videoFolder in folder_list:
                                 rightHandData.append(data_point.y * 256.0)
                                 # score is the estimated probability of the predicted handedness and is always greater than or equal to 0.5
                                 rightHandData.append(handsResults.multi_handedness[count].classification[0].score)
-    
+
                         count = count + 1
 
                     for hand_landmarks in handsResults.multi_hand_landmarks:
@@ -297,7 +288,6 @@ for videoFolder in folder_list:
                 mp_drawing.draw_landmarks(annotated_image,
                                           holisResults.pose_landmarks,
                                           mp_holistic.POSE_CONNECTIONS)
-                
 
             #POSE Corrections
             exclude = list(range(23,33))
@@ -313,44 +303,44 @@ for videoFolder in folder_list:
             y = y + [0.0, 0.0]
             p = p + [0.0, 0.0]
 
-            inter = denied & toChange        
-        
+            inter = denied & toChange
+
             inter = list(inter)
             denied = list(denied)
             toChange = list(toChange)
-    
+
             denied = [val for val in denied if val not in inter]
             toChange = [val for val in toChange if val not in inter]
-    
+
             for pos in range(len(toChange)):
                 if pos in inter:
                     continue
                 tmp = x[toChange[pos]]
                 x[toChange[pos]] = x[denied[pos]]
                 x[denied[pos]] = tmp
-                
+
                 tmp = y[toChange[pos]]
                 y[toChange[pos]] = y[denied[pos]]
                 y[denied[pos]] = tmp
-                
+
                 tmp = p[toChange[pos]]
                 p[toChange[pos]] = p[denied[pos]]
                 p[denied[pos]] = tmp
-            
+
             poseData = []
             for val in range(len(x)):
                 poseData.append(x[val])
                 poseData.append(y[val])
                 poseData.append(p[val])
-                
+
             #Hands Corrections
             if(len(rightHandData) == 0):
                 rightHandData = [0]*63
             if(len(leftHandData) == 0):
                 leftHandData = [0]*63
-            
+
             if(len(rightHandData) == 126):
-                
+
                 distance_right = hypot(rightHandData[0]-x[16], rightHandData[1],y[16])
                 distance_left = hypot(rightHandData[3*21]-x[16], rightHandData[(3*21)+1],y[16])
                 if(distance_right < distance_left):
@@ -361,7 +351,7 @@ for videoFolder in folder_list:
                     rightHandData = rightHandData[63:126]
 
             if(len(leftHandData) == 126):
-                
+
                 distance_left = hypot(leftHandData[0]-x[15], leftHandData[1],y[15])
                 distance_right = hypot(leftHandData[3*21]-x[15], leftHandData[(3*21)+1],y[15])
 

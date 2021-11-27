@@ -110,8 +110,8 @@ def run(split_file, pose_data_root, configs, save_model_to=None):
 
 if __name__ == "__main__":
 
-    root = '/home/joe/Documentos/dePrueba/WLASL'
-
+    root = os.path.abspath(os.getcwd())
+    print(root)
     subset = 'psl10'#'asl100'
 
     split_file = os.path.join(root, 'data/splits/{}.json'.format(subset))

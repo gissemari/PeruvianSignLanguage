@@ -153,8 +153,8 @@ for folderName in foldersToLoad:
             # to separate Train and Validation
             wordInstMaxSize = topWords[-1][1]
 
-            wordTrain = int(wordInstMaxSize*0.60)
-            wordVal = int(wordInstMaxSize*0.80)
+            wordTrain = int(wordInstMaxSize*0.75)
+            wordVal = int(wordInstMaxSize*0.95)
             
             if(len(bigAsl[glossPos]["instances"]) < wordTrain):
                 glossInst = {
