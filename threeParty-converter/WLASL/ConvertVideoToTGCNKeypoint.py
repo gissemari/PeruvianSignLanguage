@@ -44,9 +44,6 @@ parser = argparse.ArgumentParser(description='Mediapipe models to TGCN' +
                                  '(FaceMesh, Hands, Pose)')
 
 # Models
-parser.add_argument('--face_mesh', action="store_true", help='Use face mesh model')
-parser.add_argument('--hands', action="store_true", help='Use hands model')
-parser.add_argument('--pose', action="store_true", help='Use pose model')
 parser.add_argument('--holistic', action="store_true", help='Use holistic model: face, hands and pose')
 
 # File paths
@@ -80,50 +77,17 @@ args = parser.parse_args()
 ##############
 print()
 print("model (using):")
-if(args.face_mesh):
-    print(" - faceMesh")
-    mp_face_mesh = mp.solutions.face_mesh
-if(args.hands):
-    print(" - hands")
-    mp_hands = mp.solutions.hands
-if(args.pose):
-    print(" - pose")
-    mp_pose = mp.solutions.pose
-if(args.holistic):
-    print(" - holistic")
-    mp_holistic = mp.solutions.holistic
+
+print(" - holistic")
+mp_holistic = mp.solutions.holistic
 print()
 
 #########################
 # MODELS PARAMETERS
 ##############
 
-# FACE MESH parameters.
-if(args.face_mesh):
-    face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True,
-                                      max_num_faces=1,
-                                      min_detection_confidence=0.5)
-
-# HANDS parameters.
-if(args.hands):
-    hands = mp_hands.Hands(static_image_mode=True,
-                           max_num_hands=2,
-                           min_detection_confidence=0.7)
-
-# POSE parameters.
-if(args.pose):
-    pose = mp_pose.Pose(static_image_mode=True,
-                        min_detection_confidence=0.5)
-
-if (args.holistic):
-    if args.withLineFeature:
-        print("   + with Line Feature")
-        holistic = mp_holistic.Holistic(upper_body_only=True,
-                                        min_detection_confidence=0.5,
-                                        min_tracking_confidence=0.5)
-    else:
-        holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
-                                        min_tracking_confidence=0.5)
+holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
+                                min_tracking_confidence=0.5)
 #########################
 # UTILS
 ##############
@@ -185,6 +149,7 @@ for videoFolder in folder_list:
         ret, frame = cap.read()
         # While a frame was read
         while ret is True:
+
             # temporal variables
             faceData = []
             leftHandData = []
@@ -201,93 +166,71 @@ for videoFolder in folder_list:
             annotated_image = frame.copy()
             annotated_image.flags.writeable = True
 
-            # Process
-            if(args.face_mesh):
-                faceResults = face_mesh.process(imageBGR)
 
-                count = 0
-                if(faceResults.multi_face_landmarks):
-                    for data_point in faceResults.multi_face_landmarks[0].landmark:
-                        faceData.append(data_point.x * 256.0)
-                        faceData.append(data_point.y * 256.0)
-                        # P value equal to 0.0 because this model doen't return probabilities
-                        faceData.append(0.0)
+            holisResults = holistic.process(imageBGR)
 
-            if(args.hands):
-                handsResults = hands.process(imageBGR)
+            # POSE
 
-                if (handsResults.multi_hand_landmarks):
-                    count = 0
-                    # For each hand
-                    for hand_landmarks in handsResults.multi_hand_landmarks:
+            if holisResults.pose_landmarks.landmark:
+                for landmarks in holisResults.pose_landmarks.landmark:
 
-                        for data_point in hand_landmarks.landmark:
-                            if(handsResults.multi_handedness[count].classification[0].label == "Left"):
-                                leftHandData.append(data_point.x * 256.0)
-                                leftHandData.append(data_point.y * 256.0)
-                                # score is the estimated probability of the predicted handedness and is always greater than or equal to 0.5
-                                leftHandData.append(handsResults.multi_handedness[count].classification[0].score)
-                            else:
-                                rightHandData.append(data_point.x * 256.0)
-                                rightHandData.append(data_point.y * 256.0)
-                                # score is the estimated probability of the predicted handedness and is always greater than or equal to 0.5
-                                rightHandData.append(handsResults.multi_handedness[count].classification[0].score)
-
-                        count = count + 1
-
-                    for hand_landmarks in handsResults.multi_hand_landmarks:
-                        # Add landmarks into the image
-                        mp_drawing.draw_landmarks(
-                                        image=annotated_image,
-                                        landmark_list=hand_landmarks,
-                                        connections=mp_hands.HAND_CONNECTIONS)
-
-            if(args.pose):
-                poseResults = pose.process(imageBGR)
-
-                count = 0
-
-                for hand_landmarks in poseResults.pose_landmarks.landmark:
-
-                    poseData.append(hand_landmarks.x * 256.0)
-                    poseData.append(hand_landmarks.y * 256.0)
+                    poseData.append(landmarks.x * 256.0)
+                    poseData.append(landmarks.y * 256.0)
 
                     #visibility: A value in [0.0, 1.0] indicating the likelihood of the landmark being visible (present and not occluded) in the image.
-                    poseData.append(hand_landmarks.visibility)
+                    poseData.append(landmarks.visibility)
 
-                # Add landmarks into the image
-                mp_drawing.draw_landmarks(
-                                image=annotated_image,
-                                landmark_list=poseResults.pose_landmarks,
-                                connections=mp_pose.POSE_CONNECTIONS)
+            else:
+                for hand_landmarks in range(0, 33):
 
-            if(args.holistic):
-                holisResults = holistic.process(imageBGR)
-                # Pose_landmark might already be enough
-                # for data_point in faceResults.landmarkS:
-                #     list_X.append(data_point.landmark.x)
-                #     list_Y.append(data_point.landmark.y)
+                    poseData.append(256.0)
+                    poseData.append(256.0)
 
-                # for data_point in holisResults.left_hand_landmarks.landmark:
-                #     list_X.append(data_point.landmark.x)
-                #     list_Y.append(data_point.landmark.y)
+                    #visibility: A value in [0.0, 1.0] indicating the likelihood of the landmark being visible (present and not occluded) in the image.
+                    poseData.append(0.0)
+        
+            # HANDS
 
-                # for data_point in holisResults.right_hand_landmarks.landmark:
-                #     list_X.append(data_point.landmark.x)
-                #     list_Y.append(data_point.landmark.y)
+            # Left hand
 
-                for data_point in holisResults.pose_landmarks.landmark:
-                    holisticData.append(data_point.x * 256.0)
-                    holisticData.append(data_point.y * 256.0)
-                    holisticData.append(0.0)
+            if(holisResults.left_hand_landmarks):
+                for landmarks in holisResults.left_hand_landmarks.landmark:
 
-                #mp_drawing.draw_landmarks(annotated_image, holisResults.face_landmarks, mp_holistic.FACE_CONNECTIONS)
-                #mp_drawing.draw_landmarks(annotated_image, holisResults.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-                #mp_drawing.draw_landmarks(annotated_image, holisResults.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+                    leftHandData.append(landmarks.x * 256.0)
+                    leftHandData.append(landmarks.y * 256.0)
 
-                mp_drawing.draw_landmarks(annotated_image,
-                                          holisResults.pose_landmarks,
-                                          mp_holistic.POSE_CONNECTIONS)
+                    #visibility: A value in [0.0, 1.0] indicating the likelihood of the landmark being visible (present and not occluded) in the image.
+                    leftHandData.append(0.0)
+
+            else:
+                for hand_landmarks in range(0, 21):
+
+                    leftHandData.append(256.0)
+                    leftHandData.append(256.0)
+
+                    #visibility: A value in [0.0, 1.0] indicating the likelihood of the landmark being visible (present and not occluded) in the image.
+                    leftHandData.append(0.0)
+
+            # Right hand
+
+            if(holisResults.right_hand_landmarks):
+
+                for landmarks in holisResults.right_hand_landmarks.landmark:
+
+                    rightHandData.append(landmarks.x * 256.0)
+                    rightHandData.append(landmarks.y * 256.0)
+
+                    #visibility: A value in [0.0, 1.0] indicating the likelihood of the landmark being visible (present and not occluded) in the image.
+                    rightHandData.append(0.0)
+
+            else:
+                for hand_landmarks in range(0, 21):
+
+                    rightHandData.append(256.0)
+                    rightHandData.append(256.0)
+
+                    #visibility: A value in [0.0, 1.0] indicating the likelihood of the landmark being visible (present and not occluded) in the image.
+                    rightHandData.append(0.0)
 
             #POSE Corrections
             exclude = list(range(23,33))
