@@ -93,9 +93,11 @@ class ChaLearnDataset(Dataset):
         self.samples = self._collect_samples()
 
     def __getitem__(self, item):
+
         self.transform.randomize_parameters()
 
         sample = self.samples[item]
+
         frames, _, _ = torchvision.io.read_video(os.path.join(sample['path']),
                                                  pts_unit='sec')
 
@@ -133,10 +135,10 @@ class ChaLearnDataset(Dataset):
 
             frame = frames[frame_index]
 
-            left_wrist_index = 9
-            left_elbow_index = 7
-            right_wrist_index = 10
-            right_elbow_index = 8
+            left_wrist_index = 15
+            left_elbow_index = 13
+            right_wrist_index = 16
+            right_elbow_index = 14
 
             # Crop out both wrists and apply transform
             left_wrist = keypoints[0:2, left_wrist_index]
@@ -144,7 +146,7 @@ class ChaLearnDataset(Dataset):
             left_hand_center = left_wrist + WRIST_DELTA * (left_wrist - left_elbow)
             left_hand_center_x = left_hand_center[0]
             left_hand_center_y = left_hand_center[1]
-            shoulder_dist = np.linalg.norm(keypoints[0:2, 5] - keypoints[0:2, 6]) * SHOULDER_DIST_EPSILON
+            shoulder_dist = np.linalg.norm(keypoints[0:2, 11] - keypoints[0:2, 12]) * SHOULDER_DIST_EPSILON
             left_hand_xmin = max(0, int(left_hand_center_x - shoulder_dist // 2))
             left_hand_xmax = min(frame.size(1), int(left_hand_center_x + shoulder_dist // 2))
             left_hand_ymin = max(0, int(left_hand_center_y - shoulder_dist // 2))
