@@ -1,3 +1,5 @@
+# Special preprocessing step for PUCP_DGI_VIDEOS156. This script creates an SRT files from the EAF file
+
 import pympi
 import numpy as np
 import argparse
@@ -42,8 +44,12 @@ for eafFile in listFile:
     print(aEAFfile.tiers.keys())
     #print(aEAFfile.timeslots)
 
-    ## Reading gloss
+    ## reading file name of the video associated to this EAF
+    print(aEAFfile.media_descriptors, type(aEAFfile.media_descriptors))
+    videoFileName = aEAFfile.media_descriptors[0]['MEDIA_URL'].split('/')[-1][:-4]
+    print(videoFileName)
 
+    ## Reading gloss
     if 'GLOSA' in aEAFfile.tiers.keys():
         dictGloss = aEAFfile.tiers['GLOSA']
     elif  'GLOSADO' in aEAFfile.tiers.keys():
@@ -66,7 +72,9 @@ for eafFile in listFile:
         srtFile.append(newLine)
         newIndex +=1
 
-    srtFile.save(outputPath+eafFile[:-4]+'.srt', encoding='utf-8')
+    #srtFile.save(outputPath+eafFile[:-4]+'.srt', encoding='utf-8')
+    print(os.path.join(outputPath,videoFileName+'.srt'))
+    srtFile.save(os.path.join(outputPath,videoFileName+'.srt')) #, encoding='utf-8'
 
 print(len(vocab))
 

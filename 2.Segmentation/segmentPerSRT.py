@@ -28,10 +28,11 @@ parser.add_argument('--outputVideoPath', type=str,
                     default='./Data/Videos/Segmented_gestures/',
                     help='Path where per-line files are located')
 # parser.add_argument('--fpsOutput', type=int, default=25, metavar='fpsO', help='Frames per second for the output file')
-parser.add_argument('--flgGesture',
-                    type=int, default=1,
-                    metavar='FLGES',
-                    help='Frames per second for the output file')
+parser.add_argument('--flgGesture', type=int, default=1, metavar='FLGES', help='Frames per second for the output file')
+parser.add_argument('--width', type=int, default=220, metavar='WIDTH', help='Width of SL signer or interpreter')
+parser.add_argument('--height', type=int, default=220, metavar='HEIGHT', help='Height of SL signer or interpreter')
+parser.add_argument('--x1', type=int, default=380, metavar='X1', help='Beginning of coordinate x frame')
+parser.add_argument('--y1', type=int, default=988, metavar='Y1', help='Beginning of coordinate y frame')
 
 
 args = parser.parse_args()
@@ -45,15 +46,17 @@ flgGesture = args.flgGesture
 
 # ## When defining VideoWriter (width, height)
 # ## When cropping the frames (height, width)
-videoWidth = 220
-videoHeight = 220
+videoWidth = args.width
+videoHeight = args.height
 
 
 # ## X1,Y1 .... X2, Y1
 # ## X1,Y2 .... X2, Y2
-x1 = 380
+# AEC dataset x1 380 y1 988
+# PUCP DGI dataset ...
+x1 = args.x1
 x2 = x1 + videoHeight + 1  # 601
-y1 = 988
+y1 = args.y1
 y2 = y1 + videoWidth + 1
 
 count = 0
