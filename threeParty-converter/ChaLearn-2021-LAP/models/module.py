@@ -24,7 +24,7 @@ class Module(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters()
-        NUM_CLASSES = 226
+        NUM_CLASSES = 10
 
         if model == 'VTN_HCPF':
             self.model = VTNHCPF(NUM_CLASSES, self.hparams.num_heads, self.hparams.num_layers, self.hparams.embed_size,

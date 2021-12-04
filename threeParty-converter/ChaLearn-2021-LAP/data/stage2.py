@@ -1,4 +1,3 @@
-
 import pandas as pd
 
 train_reader = pd.read_csv("train_labels.csv", encoding='utf-8')

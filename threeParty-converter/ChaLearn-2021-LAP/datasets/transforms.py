@@ -11,7 +11,7 @@ import torch
 import torchvision
 from PIL import Image
 
-IMAGE_SIZE = 224
+IMAGE_SIZE = 256
 NORM_MEAN_IMGNET = [0.485, 0.456, 0.406]
 NORM_STD_IMGNET = [0.229, 0.224, 0.225]
 

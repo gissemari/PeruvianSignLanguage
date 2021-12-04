@@ -67,8 +67,8 @@ def normalize(poses):
     """Normalize each pose in the array to account for camera position. We normalize
     by dividing keypoints by a factor such that the length of the neck becomes 1."""
     for i in range(poses.shape[0]):
-        upper_neck = poses[i, 17]
-        head_top = poses[i, 18]
+        upper_neck = poses[i,11]
+        head_top = poses[i, 12]
         neck_length = np.linalg.norm(upper_neck - head_top)
         poses[i] /= neck_length
         assert math.isclose(np.linalg.norm(upper_neck - head_top), 1)
@@ -95,7 +95,7 @@ def main():
             poses.append(read_pose(kp_files[i]))
         poses = np.stack(poses)
         poses = impute_missing_keypoints(poses)
-        #poses = normalize(poses)
+        poses = normalize(poses)
 
         # import matplotlib.pyplot as plt
         # for i in range(poses.shape[0]):

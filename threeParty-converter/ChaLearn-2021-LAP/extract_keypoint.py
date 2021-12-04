@@ -38,15 +38,14 @@ def openPoseDict(xP, yP, xLH, yLH, xRH, yRH, xF, yF):
 def extratXYFromBodyPart(fileData, bodyName, exclusivePoints=[]):
 
     if exclusivePoints:
-        x = [item for pos, item in enumerate(fileData[bodyName]["x"]) if pos in exclusivePoints]
-        y = [item for pos, item in enumerate(fileData[bodyName]["y"]) if pos in exclusivePoints]
+        x = [item * 256.0 for pos, item in enumerate(fileData[bodyName]["x"]) if pos in exclusivePoints]
+        y = [item * 256.0 for pos, item in enumerate(fileData[bodyName]["y"]) if pos in exclusivePoints]
     else:
-        
-        x = fileData[bodyName]["x"]
-        y = fileData[bodyName]["y"]
+
+        x = [item * 256.0 for pos, item in enumerate(fileData[bodyName]["x"])]
+        y = [item * 256.0 for pos, item in enumerate(fileData[bodyName]["y"])]
 
     return x, y
-
 
 def keypointsFormat(fileData, bodyPart):
     xP, yP, xLH, yLH, xRH, yRH, xF, yF = [], [], [], [], [], [], [], []
