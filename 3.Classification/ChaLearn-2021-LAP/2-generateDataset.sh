@@ -2,11 +2,11 @@ echo ""
 echo "generating data in Peruvian Sign language project..."
 sleep 1
 cd ../..
-python 4.Preparation/DictToSample.py --words $1
+python 5.Preparation/DictToSample.py --words $1
 echo ""
 echo "generating csv in Chalearn..."
 sleep 1
-cd threeParty-converter/ChaLearn-2021-LAP/data
+cd 3.Classification/ChaLearn-2021-LAP/data
 python excel.py
 python stage2.py
 

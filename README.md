@@ -81,8 +81,13 @@ Output:
 Code:
 ./PeruvianSignLanguaje/2.Segmentation/segmentPerSRT.py
 
+###### 3. CLASSIFICATION ####
+To run the ChaLearn Model go to ./PeruvianSignLanguaje/3.Classification
+It works with a different data folder where it creates only the classes that the model is working with.
 
-###### 3.TRANSLATION ######
+
+
+###### 4.TRANSLATION ######
 
 ## VIDEO TO KEYPOINTS (aligned to interpreter) ##
 
