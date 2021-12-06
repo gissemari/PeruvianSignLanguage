@@ -8,19 +8,26 @@ Created on Thu Nov 18 16:51:59 2021
 import glob
 import pandas as pd
 import shutil
+import os
 from sys import platform
+
 
 all_files = glob.glob('./../../Data/Videos/Segmented_gestures/*/*.mp4')
 
 train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
 val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
 print(train_ids)
+
 for filePath in all_files:
+
+    
     if platform == 'linux' or platform == 'linux2':
         name = filePath.split('/')[-1]
     else:
         name = filePath.split('\\')[-1]
+    
     name = name.split('.')[0]
+
 
     isVal = False
     for valName, index in val_ids.values.tolist():
@@ -29,7 +36,7 @@ for filePath in all_files:
             print(name)
             continue
 
-    isTrain = True
+    isTrain = False
     for trainName, index in train_ids.values.tolist():
         if name == trainName:
             isTrain = True
@@ -38,7 +45,7 @@ for filePath in all_files:
 
     if isVal:
         target = './project/data/mp4/val/'+name+'_color.mp4'
-        shutil.copyfile(filePath, target)
+        shutil.copyfile(filePath.replace('\\','/'), target)
     if isTrain:
         target = './project/data/mp4/train/'+name+'_color.mp4'
-        shutil.copyfile(filePath, target)
+        shutil.copyfile(filePath.replace('\\','/'), target)

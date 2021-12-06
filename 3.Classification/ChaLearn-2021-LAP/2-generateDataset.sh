@@ -2,6 +2,7 @@ echo ""
 echo "generating data in Peruvian Sign language project..."
 sleep 1
 cd ../..
+cp -r utils 5.Preparation
 python 5.Preparation/DictToSample.py --words $1
 echo ""
 echo "generating csv in Chalearn..."
@@ -25,4 +26,6 @@ python extract_keypoint.py
 echo "extrancting poseflow..."
 sleep 1
 python extract_poseflow.py
+
+rm -r 5.Preparation/utils
 
