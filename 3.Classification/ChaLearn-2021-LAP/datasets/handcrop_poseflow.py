@@ -106,7 +106,8 @@ class ChaLearnDataset(Dataset):
         missing_wrists_left, missing_wrists_right = [], []
         for frame_index in sample['frames']:
             kp_path = os.path.join(sample['path'].replace('mp4', 'kp'), '{}_{:012d}_keypoints.json'.format(
-                    sample['path'].split('/')[-1].replace('.mp4', ''), frame_index))
+                    #sample['path'].split('/')[-1].replace('.mp4', ''), frame_index))
+                    os.path.split(sample['path'])[-1].replace('.mp4', ''), frame_index))
 
             with open(kp_path, 'r') as keypoints_file:
                 value = json.loads(keypoints_file.read())

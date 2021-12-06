@@ -29,7 +29,7 @@ def collect_samples(has_labels, root_path, job_path, sequence_length, temporal_s
             })
         return samples
     else:
-        with open(label_file_path) as label_file:
+        with open(label_file_path, encoding="utf8") as label_file:
             reader = csv.reader(label_file)
             samples = []
             for row in reader:

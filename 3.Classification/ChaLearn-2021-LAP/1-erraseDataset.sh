@@ -1,5 +1,5 @@
-rm data/*csv
-rm project/*csv
+rm data/*.csv
+rm project/*.csv
 echo "csv removed"
 rm -r project/data/kp/train/*
 rm -r project/data/kp/val/*

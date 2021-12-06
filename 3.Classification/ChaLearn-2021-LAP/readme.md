@@ -1,9 +1,8 @@
 Guide to make this model work
-According to the original model ChaLearn, we are asked to create folders:
-0. 	mkdir -p project/data/{mp4,kp,kpflow2} for Linux and 
-	mkdir -p project/data/mp4/{train,val,test} for Linux or
-	Create manually if in Windows
 
+0. According to the original model ChaLearn, we are asked to create folders. If in Windows, create manually:
+	mkdir -p project/data/{mp4,kp,kpflow2} 
+	mkdir -p project/data/mp4/{train,val,test}
 
 1. Run "sh 1-erraseDataset.sh"
 
