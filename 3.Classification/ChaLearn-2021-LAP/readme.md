@@ -8,7 +8,8 @@ Guide to make this model work
 
 2. Create or activate environment. Use the file enviroment.yml
 
-3. Run "sh 2-generateDataset.sh NUM_CLASSES" (replace NUM_CLASSES with the number of clases needed)
+3. This step takes the dataset from the folder Data and preprocess it to have it in the ChaLearn structure
+Run "sh 2-generateDataset.sh NUM_CLASSES" (replace NUM_CLASSES with the number of clases needed)
 
 4. Manually modify the line 27 of the file "module.py" in "models" folder
    NUM_CLASSES =      <-- the same value writed in step 2

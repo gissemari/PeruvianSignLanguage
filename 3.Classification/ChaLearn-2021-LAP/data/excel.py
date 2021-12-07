@@ -8,6 +8,9 @@ import pandas as pd
 import pickle
 import numpy as np
 from sklearn.model_selection  import train_test_split
+import argparse
+
+
 
 def getData(path):
 
@@ -58,12 +61,19 @@ def getLabelsDataFrame(X_train, y_train, dataDict, y_labels):
 
 def main():
 
-    dictPath = './../../../Data/Dataset/dict/dict.json'
-    keyPath = './../../../Data/Dataset/readyToRun/'
+    parser = argparse.ArgumentParser(description='Classification')
+
+    parser.add_argument('--dictPath', type=str, default='./../../../Data/Dataset/dict/dict.json', help='...')
+    parser.add_argument('--keyPath', type=str, default='./../../../Data/Dataset/readyToRun/', help='...')
+
+    args = parser.parse_args()
+
+    #dictPath = './../../../Data/Dataset/dict/dict.json'
+    #keyPath = './../../../Data/Dataset/readyToRun/'
     
-    dataDict = pd.read_json(dictPath)
+    dataDict = pd.read_json(args.dictPath)
     
-    x, y, weight, y_labels, x_timeSteps = getData(keyPath)
+    x, y, weight, y_labels, x_timeSteps = getData(args.keyPath)
     
     X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=0.8 , random_state=42, stratify=y)
     
