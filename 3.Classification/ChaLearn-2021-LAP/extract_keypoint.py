@@ -10,6 +10,8 @@ import numpy as np
 import os
 import glob
 import json
+import argparse
+
 
 def openPoseDict(xP, yP, xLH, yLH, xRH, yRH, xF, yF):
     
@@ -110,17 +112,24 @@ def saveJson(ids,output_dir, src, dataType):
                 json.dump(opd, f)
 
 def main():
+
+    parser = argparse.ArgumentParser(description='Classification')
+
+    parser.add_argument('--src', type=str, default='./../.././Data/Dataset/keypoints/', help='...')
+    parser.add_argument('--keyPath', type=str, default='./../../../Data/Dataset/readyToRun/', help='...')
+
+    args = parser.parse_args()
+    
     train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
     val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
 
-    src = './../.././Data/Dataset/keypoints/'
-    
-    keyPath = './../../../Data/Dataset/readyToRun/'
+    #src = './../.././Data/Dataset/keypoints/'
+    #keyPath = './../../../Data/Dataset/readyToRun/'
     
     output_dir = './project/data/kp/'
     
-    saveJson(train_ids, output_dir, src, "train")
-    saveJson(val_ids, output_dir, src, "val")
+    saveJson(train_ids, output_dir, args.src, "train")
+    saveJson(val_ids, output_dir, args.src, "val")
 
 main()
 
