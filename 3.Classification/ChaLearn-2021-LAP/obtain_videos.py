@@ -12,12 +12,13 @@ import os
 from sys import platform
 import argparse
 
-#all_files = glob.glob('./../../Data/Videos/Segmented_gestures/*/*.mp4')
+#
 parser = argparse.ArgumentParser(description='Classification')
 parser.add_argument('--allfiles', type=str, default='./../../Data/Videos/Segmented_gestures/*/*.mp4', help='...')
 args = parser.parse_args()
     
-all_files = args.allfiles    
+pathAllFiles = args.allfiles
+all_files = glob.glob(pathAllFiles)
 train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
 val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
 print(train_ids)
