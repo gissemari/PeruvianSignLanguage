@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences version="1.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/Prefs_v1.1.xsd">
+    <prefList key="MultiTierViewer.TierOrder">
+        <String>GLOSA</String>
+        <String>DESCRIBIR</String>
+        <String>CLASIFICADORES</String>
+    </prefList>
+    <pref key="LayoutManager.VisibleMultiTierViewer">
+        <String>mpi.eudico.client.annotator.viewer.TimeLineViewer</String>
+    </pref>
+    <prefList key="CommentViewer.Columns.Order">
+        <String>Start Time</String>
+        <String>End Time</String>
+        <String>Tier</String>
+        <String>Initials</String>
+        <String>Comment</String>
+        <String>Thread</String>
+        <String>Sender</String>
+        <String>Recipient</String>
+        <String>Creation Date</String>
+        <String>Modification Date</String>
+    </prefList>
+    <pref key="LayoutManager.SplitPaneDividerLocation">
+        <Int>1</Int>
+    </pref>
+    <pref key="TimeLineViewer.TickerMode">
+        <Boolean>true</Boolean>
+    </pref>
+    <pref key="TimeLineViewer.ZoomLevel">
+        <Float>136.0</Float>
+    </pref>
+    <pref key="LayoutManager.SelectedTabIndex">
+        <Int>7</Int>
+    </pref>
+    <prefGroup key="TierColors">
+        <pref key="CLASIFICADORES">
+            <Object class="java.awt.Color">160,0,160</Object>
+        </pref>
+        <pref key="DESCRIBIR">
+            <Object class="java.awt.Color">90,160,0</Object>
+        </pref>
+        <pref key="GLOSA">
+            <Object class="java.awt.Color">90,0,0</Object>
+        </pref>
+    </prefGroup>
+    <prefList key="CommentViewer.Columns.Hidden">
+        <String>Sender</String>
+        <String>Recipient</String>
+    </prefList>
+    <pref key="FrameLocation">
+        <Object class="java.awt.Point">0,0</Object>
+    </pref>
+    <pref key="TimeLineViewer.HorizontalScrollBarVisible">
+        <Boolean>false</Boolean>
+    </pref>
+    <pref key="SelectionBeginTime">
+        <Long>98191</Long>
+    </pref>
+    <pref key="LayoutManager.CurrentMode">
+        <Int>1</Int>
+    </pref>
+    <pref key="MediaTime">
+        <Long>98400</Long>
+    </pref>
+    <pref key="TimeLineViewer.TimeRulerVisible">
+        <Boolean>true</Boolean>
+    </pref>
+    <pref key="MediaControlRate">
+        <Float>0.3</Float>
+    </pref>
+    <pref key="TimeLineViewer.ReducedTierHeight">
+        <Boolean>true</Boolean>
+    </pref>
+    <pref key="FrameSize">
+        <Object class="java.awt.Dimension">1366,728</Object>
+    </pref>
+    <prefGroup key="AAM-LR Phone level audio segmentation">
+        <pref key="base_url">
+            <String>http://lux17.mpi.nl/aamlr/</String>
+        </pref>
+    </prefGroup>
+    <pref key="ActiveRecognizerName">
+        <String>AAM-LR Phone level audio segmentation</String>
+    </pref>
+    <pref key="MultiTierViewer.ActiveTierName">
+        <String>GLOSA</String>
+    </pref>
+    <pref key="TimeLineViewer.TimeScaleConnected">
+        <Boolean>false</Boolean>
+    </pref>
+    <prefGroup key="CommentViewer.Columns">
+        <pref key="Modification Date">
+            <Int>75</Int>
+        </pref>
+        <pref key="Sender">
+            <Int>0</Int>
+        </pref>
+        <pref key="Tier">
+            <Int>75</Int>
+        </pref>
+        <pref key="Creation Date">
+            <Int>75</Int>
+        </pref>
+        <pref key="Initials">
+            <Int>75</Int>
+        </pref>
+        <pref key="Comment">
+            <Int>75</Int>
+        </pref>
+        <pref key="End Time">
+            <Int>75</Int>
+        </pref>
+        <pref key="Start Time">
+            <Int>75</Int>
+        </pref>
+        <pref key="Recipient">
+            <Int>0</Int>
+        </pref>
+        <pref key="Thread">
+            <Int>75</Int>
+        </pref>
+    </prefGroup>
+    <pref key="TimeScaleBeginTime">
+        <Long>42494</Long>
+    </pref>
+    <pref key="LayoutManager.MediaAreaHeight">
+        <Int>411</Int>
+    </pref>
+    <prefList key="MultiTierViewer.HiddenTiers"/>
+    <pref key="SelectionEndTime">
+        <Long>98566</Long>
+    </pref>
+</preferences>

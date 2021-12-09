@@ -1,0 +1,400 @@
+file:///E:/Google Drive/AAVideosLibro/VideosGlosados156/ANAROSAGLOSADO27.eaf
+lunes 29 de octubre de 2018 11:33 PM
+
+GLOSADO	MUJER
+
+
+GLOSADO	FLACA
+
+
+GLOSADO	ALTA
+
+
+GLOSADO	HOMBRE
+
+
+CLASIFICADORES	aquí el artículo va al final y se refiere a los dos, el hombre 
+	y la mujer, no significa el lugar donde está parada la 
+	persona, ni señala a los personajes
+
+
+GLOSADO	EL
+
+
+GLOSADO	QUERER
+
+
+CLASIFICADORES	EL / corrige para regresar a las características del hombre
+
+
+GLOSADO	HOMBRE
+
+
+GLOSADO	GORDO
+
+
+CLASIFICADORES	dos señas, la primera es peruana, la segunda es ASL; en ambos 
+	casos se necesita la expersión no manual de inflar las mejillas
+
+
+GLOSADO	EL
+
+
+CLASIFICADORES	esto puede ser un pronombre y no un artículo, puesto que ya no 
+	menciona al referente
+
+
+GLOSADO	QUERER
+
+
+GLOSADO	CASARSE
+
+
+GLOSADO	LA
+
+
+CLASIFICADORES	el artículo puede cambiar de posición. Como ella esta 
+	empezando y empieza a decirte quién es, entonces es "la mujer"
+
+
+GLOSADO	MUJER
+
+
+NO MANUAL	NO
+
+
+GLOSADO	SE SIENTE INCÓMODA / CON DUDA
+
+
+NO MANUAL	SENTIR
+
+
+CLASIFICADORES	INSEGURA
+
+
+NO MANUAL	INSEGURA
+
+
+GLOSADO	EL
+
+
+GLOSADO	OTRO
+
+
+GLOSADO	HOMBRE
+
+
+GLOSADO	FLACO
+
+
+GLOSADO	ALTO
+
+
+NO MANUAL	CUÁL: seña peruana, también puede ser "INDECISA"
+
+
+CLASIFICADORES	NECESITO ESPERAR: tomarme un tiempo
+
+
+NO MANUAL	seña ASL
+
+
+GLOSADO	ESPERAR
+
+
+GLOSADO	PENSAR
+
+
+NO MANUAL	seña LSP
+
+
+GLOSADO	ESPERAR
+
+
+NO MANUAL	no es apuntar sino trayecto, es IR, no EL
+
+
+GLOSADO	IR-fue
+
+
+GLOSADO	ADIVINA
+
+
+CLASIFICADORES	esto no tiene artículo, es "una adivina"
+
+
+GLOSADO	LA
+
+
+GLOSADO	ELLA
+
+
+GLOSADO	FLACO
+
+
+CLASIFICADORES	qué futuro me espera, cuál futuro
+
+
+GLOSADO	QUÉ
+
+
+GLOSADO	FUTURO
+
+
+GLOSADO	MARCA DE PREGUNTA
+
+
+GLOSADO	ELLA
+
+
+CLASIFICADORES	no sabemos si es hombre o mujer el/la adivin@
+
+
+NO MANUAL	AHI, ELLA?
+
+
+GLOSADO	BOLA-IMAGEN-verbo
+
+
+CLASIFICADORES	ESFERA:cl de muchas cosas esféricas, papa, pelota, naranja
+
+
+NO MANUAL	la otra seña: RELLENO, APARECE, AGREGAR... se combina con 
+	otros, por ejemplo con CASA, peruano
+
+
+GLOSADO	ELLA DECIR
+
+
+NO MANUAL	arranca la seña, sube, pensando, tratando de decir futuro, 
+	como eee..
+
+
+GLOSADO	FUTURO
+
+
+GLOSADO	TENER
+
+
+NO MANUAL	reduplicación para plural
+
+
+GLOSADO	HIJO
+
+
+GLOSADO	HIJO
+
+
+GLOSADO	CASAR
+
+
+GLOSADO	MATRIMONIO
+
+
+GLOSADO	MUJER
+
+
+GLOSADO	PENSAR
+
+
+CLASIFICADORES	DECISIÓN, OCURRIR, RECUERDO
+
+
+GLOSADO	CASAR
+
+
+GLOSADO	YA NO
+
+
+GLOSADO	NO-GUSTAR
+
+
+CLASIFICADORES	GUSTAR en la garganta es peruana, pero en el pecho es ASL
+
+
+GLOSADO	GUSTAR
+
+
+NO MANUAL	DEDESAGRADO
+
+
+GLOSADO	ESPERA / AGUANTA
+
+
+GLOSADO	ELLA (MUJER+ESA)
+
+
+GLOSADO	FUE-con otro, a otro lado
+
+
+CLASIFICADORES	con quién, JUNTOS? SECASARON?
+
+
+GLOSADO	CON
+
+
+GLOSADO	MATRIMONIO
+
+
+CLASIFICADORES	reduplicación plural
+
+
+GLOSADO	HIJO
+
+
+GLOSADO	HIJO
+
+
+GLOSADO	DESPÚES
+
+
+GLOSADO	PENSAR
+
+
+GLOSADO	SENTIR
+
+
+CLASIFICADORES	ASL
+
+
+GLOSADO	ABURRIDO
+
+
+GLOSADO	SENTIR
+
+
+CLASIFICADORES	lsp
+
+
+GLOSADO	ABURRIDA
+
+
+GLOSADO	HIJO
+
+
+GLOSADO	TAMBIÉN
+
+
+GLOSADO	ABURRIDA
+
+
+CLASIFICADORES	HARTA, seña LSP
+
+
+GLOSADO	VA - FUE
+
+
+GLOSADO	PENSAR
+
+
+NO MANUAL	piensa si el gordo sigue igual como antes
+
+
+GLOSADO	GORDO
+
+
+CLASIFICADORES	MISMO, sigue igual
+
+
+GLOSADO	IGUAL
+
+
+GLOSADO	ANTES, PASADO
+
+
+GLOSADO	GORDO
+
+
+GLOSADO	BAJO
+
+
+GLOSADO	ADIVINA
+
+
+GLOSADO	BOLA DE CRISTAL
+
+
+GLOSADO	DICE
+
+
+NO MANUAL	dónde está
+
+
+GLOSADO	DÓNDE
+
+
+GLOSADO	BAJO
+
+
+GLOSADO	GORDO
+
+
+GLOSADO	LA
+
+
+NO MANUAL	ELLA
+
+
+CLASIFICADORES	titubeo
+
+
+NO MANUAL	"BOLEA"
+
+
+GLOSADO	BOLA
+
+
+GLOSADO	VER
+
+
+GLOSADO	HOMBRE
+
+
+GLOSADO	GORDO
+
+
+GLOSADO	RICO
+
+
+CLASIFICADORES	MUY
+
+
+GLOSADO	MUCHO
+
+
+GLOSADO	RICO / MILLONARIO
+
+
+GLOSADO	MUJER
+
+
+GLOSADO	FREGADA
+
+
+CLASIFICADORES	puede ser MISIA, puede ser FREGADA, o EMBARAZADA, QUE HA 
+	PERDIDO LA VIRGINIDAD
+
+
+CLASIFICADORES	YA
+
+
+GLOSADO	CASADO
+
+
+CLASIFICADORES	aquí la expresión de la cara se comporta como un modal, puesto 
+	que parece decir "ahora no puedo casarme" o "me hubiera 
+	casado" o "podría haberme casado"
+
+
+GLOSADO	PODER
+
+
+GLOSADO	CASAR
+
+
+GLOSADO	PODER
+
+
+GLOSADO	FREGADA
+
+

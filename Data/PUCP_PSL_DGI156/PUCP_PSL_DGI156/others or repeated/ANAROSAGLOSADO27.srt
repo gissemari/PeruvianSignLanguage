@@ -1,0 +1,813 @@
+1
+00:00:01,470 --> 00:00:02,410
+MUJER
+
+2
+00:00:02,410 --> 00:00:02,820
+FLACA
+
+3
+00:00:03,060 --> 00:00:03,500
+ALTA
+
+4
+00:00:03,520 --> 00:00:03,630
+HOMBRE
+
+5
+00:00:03,630 --> 00:00:04,360
+HOMBRE
+aquí el artículo va al final y se refiere a los dos, el hombre y la mujer, no significa el lugar donde está parada la persona, ni señala a los personajes
+
+6
+00:00:04,360 --> 00:00:04,410
+aquí el artículo va al final y se refiere a los dos, el hombre y la mujer, no significa el lugar donde está parada la persona, ni señala a los personajes
+
+7
+00:00:04,410 --> 00:00:04,710
+EL
+aquí el artículo va al final y se refiere a los dos, el hombre y la mujer, no significa el lugar donde está parada la persona, ni señala a los personajes
+
+8
+00:00:04,710 --> 00:00:04,720
+EL
+
+9
+00:00:04,765 --> 00:00:05,220
+QUERER
+
+10
+00:00:05,220 --> 00:00:05,225
+QUERER
+EL / corrige para regresar a las características del hombre
+
+11
+00:00:05,225 --> 00:00:05,690
+EL / corrige para regresar a las características del hombre
+
+12
+00:00:05,705 --> 00:00:05,995
+HOMBRE
+
+13
+00:00:06,010 --> 00:00:06,025
+GORDO
+
+14
+00:00:06,025 --> 00:00:06,640
+GORDO
+dos señas, la primera es peruana, la segunda es ASL; en ambos casos se necesita la expersión no manual de inflar las mejillas
+
+15
+00:00:06,640 --> 00:00:06,675
+dos señas, la primera es peruana, la segunda es ASL; en ambos casos se necesita la expersión no manual de inflar las mejillas
+
+16
+00:00:06,675 --> 00:00:06,715
+EL
+dos señas, la primera es peruana, la segunda es ASL; en ambos casos se necesita la expersión no manual de inflar las mejillas
+
+17
+00:00:06,715 --> 00:00:06,750
+EL
+
+18
+00:00:06,750 --> 00:00:07,050
+EL
+esto puede ser un pronombre y no un artículo, puesto que ya no menciona al referente
+
+19
+00:00:07,095 --> 00:00:07,445
+QUERER
+
+20
+00:00:07,490 --> 00:00:07,950
+CASARSE
+
+21
+00:00:08,000 --> 00:00:08,015
+LA
+
+22
+00:00:08,015 --> 00:00:08,140
+LA
+el artículo puede cambiar de posición. Como ella esta empezando y empieza a decirte quién es, entonces es "la mujer"
+
+23
+00:00:08,140 --> 00:00:08,180
+el artículo puede cambiar de posición. Como ella esta empezando y empieza a decirte quién es, entonces es "la mujer"
+
+24
+00:00:08,180 --> 00:00:08,485
+MUJER
+el artículo puede cambiar de posición. Como ella esta empezando y empieza a decirte quién es, entonces es "la mujer"
+
+25
+00:00:08,485 --> 00:00:08,500
+MUJER
+
+26
+00:00:08,545 --> 00:00:08,735
+NO
+
+27
+00:00:08,740 --> 00:00:08,745
+SE SIENTE INCÓMODA / CON DUDA
+
+28
+00:00:08,745 --> 00:00:09,015
+SE SIENTE INCÓMODA / CON DUDA
+INSEGURA
+SENTIR
+
+29
+00:00:09,015 --> 00:00:09,055
+SE SIENTE INCÓMODA / CON DUDA
+INSEGURA
+
+30
+00:00:09,055 --> 00:00:09,120
+SE SIENTE INCÓMODA / CON DUDA
+INSEGURA
+INSEGURA
+
+31
+00:00:09,120 --> 00:00:09,325
+INSEGURA
+INSEGURA
+
+32
+00:00:09,325 --> 00:00:09,340
+INSEGURA
+
+33
+00:00:09,340 --> 00:00:09,345
+EL
+INSEGURA
+
+34
+00:00:09,345 --> 00:00:09,690
+EL
+
+35
+00:00:09,865 --> 00:00:10,015
+OTRO
+
+36
+00:00:10,020 --> 00:00:10,420
+HOMBRE
+
+37
+00:00:10,450 --> 00:00:10,750
+FLACO
+
+38
+00:00:10,790 --> 00:00:11,170
+ALTO
+
+39
+00:00:11,246 --> 00:00:12,176
+CUÁL: seña peruana, también puede ser "INDECISA"
+
+40
+00:00:12,275 --> 00:00:12,286
+NECESITO ESPERAR: tomarme un tiempo
+
+41
+00:00:12,286 --> 00:00:12,295
+NECESITO ESPERAR: tomarme un tiempo
+seña ASL
+
+42
+00:00:12,295 --> 00:00:12,806
+ESPERAR
+NECESITO ESPERAR: tomarme un tiempo
+seña ASL
+
+43
+00:00:12,806 --> 00:00:12,815
+ESPERAR
+NECESITO ESPERAR: tomarme un tiempo
+
+44
+00:00:12,815 --> 00:00:12,850
+NECESITO ESPERAR: tomarme un tiempo
+
+45
+00:00:12,850 --> 00:00:13,050
+PENSAR
+NECESITO ESPERAR: tomarme un tiempo
+
+46
+00:00:13,050 --> 00:00:13,061
+NECESITO ESPERAR: tomarme un tiempo
+
+47
+00:00:13,061 --> 00:00:13,075
+NECESITO ESPERAR: tomarme un tiempo
+seña LSP
+
+48
+00:00:13,075 --> 00:00:13,365
+ESPERAR
+NECESITO ESPERAR: tomarme un tiempo
+seña LSP
+
+49
+00:00:13,365 --> 00:00:13,395
+NECESITO ESPERAR: tomarme un tiempo
+seña LSP
+
+50
+00:00:13,395 --> 00:00:13,431
+seña LSP
+
+51
+00:00:13,809 --> 00:00:13,855
+no es apuntar sino trayecto, es IR, no EL
+
+52
+00:00:13,855 --> 00:00:14,125
+IR-fue
+no es apuntar sino trayecto, es IR, no EL
+
+53
+00:00:14,125 --> 00:00:14,145
+no es apuntar sino trayecto, es IR, no EL
+
+54
+00:00:14,145 --> 00:00:14,160
+ADIVINA
+no es apuntar sino trayecto, es IR, no EL
+
+55
+00:00:14,160 --> 00:00:14,209
+ADIVINA
+esto no tiene artículo, es "una adivina"
+no es apuntar sino trayecto, es IR, no EL
+
+56
+00:00:14,209 --> 00:00:14,960
+ADIVINA
+esto no tiene artículo, es "una adivina"
+
+57
+00:00:14,990 --> 00:00:15,230
+LA
+
+58
+00:00:15,374 --> 00:00:15,704
+ELLA
+
+59
+00:00:15,724 --> 00:00:16,054
+FLACO
+
+60
+00:00:16,204 --> 00:00:16,230
+qué futuro me espera, cuál futuro
+
+61
+00:00:16,230 --> 00:00:16,560
+QUÉ
+qué futuro me espera, cuál futuro
+
+62
+00:00:16,560 --> 00:00:16,624
+qué futuro me espera, cuál futuro
+
+63
+00:00:16,624 --> 00:00:16,834
+FUTURO
+qué futuro me espera, cuál futuro
+
+64
+00:00:16,834 --> 00:00:16,864
+qué futuro me espera, cuál futuro
+
+65
+00:00:16,864 --> 00:00:17,124
+MARCA DE PREGUNTA
+qué futuro me espera, cuál futuro
+
+66
+00:00:17,124 --> 00:00:17,144
+MARCA DE PREGUNTA
+
+67
+00:00:17,174 --> 00:00:17,199
+ELLA
+no sabemos si es hombre o mujer el/la adivin@
+
+68
+00:00:17,199 --> 00:00:17,564
+ELLA
+no sabemos si es hombre o mujer el/la adivin@
+AHI, ELLA?
+
+69
+00:00:17,564 --> 00:00:17,594
+no sabemos si es hombre o mujer el/la adivin@
+AHI, ELLA?
+
+70
+00:00:17,594 --> 00:00:17,634
+BOLA-IMAGEN-verbo
+no sabemos si es hombre o mujer el/la adivin@
+AHI, ELLA?
+
+71
+00:00:17,634 --> 00:00:17,649
+BOLA-IMAGEN-verbo
+AHI, ELLA?
+
+72
+00:00:17,649 --> 00:00:17,654
+BOLA-IMAGEN-verbo
+
+73
+00:00:17,654 --> 00:00:17,689
+BOLA-IMAGEN-verbo
+ESFERA:cl de muchas cosas esféricas, papa, pelota, naranja
+
+74
+00:00:17,689 --> 00:00:18,124
+BOLA-IMAGEN-verbo
+ESFERA:cl de muchas cosas esféricas, papa, pelota, naranja
+la otra seña: RELLENO, APARECE, AGREGAR... se combina con otros, por ejemplo con CASA, peruano
+
+75
+00:00:18,124 --> 00:00:18,334
+ELLA DECIR
+ESFERA:cl de muchas cosas esféricas, papa, pelota, naranja
+la otra seña: RELLENO, APARECE, AGREGAR... se combina con otros, por ejemplo con CASA, peruano
+
+76
+00:00:18,334 --> 00:00:18,424
+ELLA DECIR
+la otra seña: RELLENO, APARECE, AGREGAR... se combina con otros, por ejemplo con CASA, peruano
+
+77
+00:00:18,424 --> 00:00:18,449
+la otra seña: RELLENO, APARECE, AGREGAR... se combina con otros, por ejemplo con CASA, peruano
+
+78
+00:00:18,479 --> 00:00:18,694
+arranca la seña, sube, pensando, tratando de decir futuro, como eee..
+
+79
+00:00:18,694 --> 00:00:19,474
+FUTURO
+arranca la seña, sube, pensando, tratando de decir futuro, como eee..
+
+80
+00:00:19,509 --> 00:00:19,999
+TENER
+
+81
+00:00:19,999 --> 00:00:20,004
+TENER
+reduplicación para plural
+
+82
+00:00:20,004 --> 00:00:20,304
+HIJO
+reduplicación para plural
+
+83
+00:00:20,304 --> 00:00:20,359
+reduplicación para plural
+
+84
+00:00:20,359 --> 00:00:20,649
+HIJO
+reduplicación para plural
+
+85
+00:00:20,979 --> 00:00:21,419
+CASAR
+
+86
+00:00:21,434 --> 00:00:22,064
+MATRIMONIO
+
+87
+00:00:22,104 --> 00:00:22,544
+MUJER
+
+88
+00:00:22,579 --> 00:00:22,589
+PENSAR
+
+89
+00:00:22,589 --> 00:00:22,909
+PENSAR
+DECISIÓN, OCURRIR, RECUERDO
+
+90
+00:00:22,909 --> 00:00:23,129
+DECISIÓN, OCURRIR, RECUERDO
+
+91
+00:00:23,169 --> 00:00:23,389
+CASAR
+
+92
+00:00:23,404 --> 00:00:23,574
+YA NO
+
+93
+00:00:23,594 --> 00:00:23,614
+NO-GUSTAR
+
+94
+00:00:23,614 --> 00:00:23,764
+NO-GUSTAR
+GUSTAR en la garganta es peruana, pero en el pecho es ASL
+
+95
+00:00:23,764 --> 00:00:23,804
+GUSTAR en la garganta es peruana, pero en el pecho es ASL
+
+96
+00:00:23,804 --> 00:00:23,894
+GUSTAR
+GUSTAR en la garganta es peruana, pero en el pecho es ASL
+DEDESAGRADO
+
+97
+00:00:23,894 --> 00:00:23,924
+GUSTAR en la garganta es peruana, pero en el pecho es ASL
+
+98
+00:00:23,924 --> 00:00:24,054
+ESPERA / AGUANTA
+GUSTAR en la garganta es peruana, pero en el pecho es ASL
+
+99
+00:00:24,054 --> 00:00:24,154
+ESPERA / AGUANTA
+
+100
+00:00:24,234 --> 00:00:24,874
+ELLA (MUJER+ESA)
+
+101
+00:00:24,889 --> 00:00:24,899
+FUE-con otro, a otro lado
+
+102
+00:00:24,899 --> 00:00:25,159
+FUE-con otro, a otro lado
+con quién, JUNTOS? SECASARON?
+
+103
+00:00:25,159 --> 00:00:25,174
+con quién, JUNTOS? SECASARON?
+
+104
+00:00:25,174 --> 00:00:25,664
+CON
+con quién, JUNTOS? SECASARON?
+
+105
+00:00:25,664 --> 00:00:25,694
+con quién, JUNTOS? SECASARON?
+
+106
+00:00:25,694 --> 00:00:25,699
+MATRIMONIO
+con quién, JUNTOS? SECASARON?
+
+107
+00:00:25,699 --> 00:00:27,054
+MATRIMONIO
+
+108
+00:00:27,054 --> 00:00:27,084
+MATRIMONIO
+reduplicación plural
+
+109
+00:00:27,084 --> 00:00:27,099
+reduplicación plural
+
+110
+00:00:27,099 --> 00:00:27,479
+HIJO
+reduplicación plural
+
+111
+00:00:27,479 --> 00:00:27,524
+reduplicación plural
+
+112
+00:00:27,524 --> 00:00:27,754
+HIJO
+reduplicación plural
+
+113
+00:00:27,754 --> 00:00:27,764
+HIJO
+
+114
+00:00:28,314 --> 00:00:28,954
+DESPÚES
+
+115
+00:00:29,729 --> 00:00:30,099
+PENSAR
+
+116
+00:00:30,099 --> 00:00:30,469
+SENTIR
+
+117
+00:00:30,514 --> 00:00:30,529
+ASL
+
+118
+00:00:30,529 --> 00:00:30,829
+ABURRIDO
+ASL
+
+119
+00:00:30,829 --> 00:00:30,844
+ASL
+
+120
+00:00:30,849 --> 00:00:31,389
+SENTIR
+
+121
+00:00:31,409 --> 00:00:31,414
+lsp
+
+122
+00:00:31,414 --> 00:00:32,114
+ABURRIDA
+lsp
+
+123
+00:00:32,114 --> 00:00:32,139
+lsp
+
+124
+00:00:32,139 --> 00:00:32,579
+HIJO
+
+125
+00:00:32,624 --> 00:00:32,834
+TAMBIÉN
+
+126
+00:00:32,834 --> 00:00:33,554
+ABURRIDA
+HARTA, seña LSP
+
+127
+00:00:33,559 --> 00:00:34,239
+VA - FUE
+
+128
+00:00:34,254 --> 00:00:34,304
+PENSAR
+
+129
+00:00:34,304 --> 00:00:34,634
+PENSAR
+piensa si el gordo sigue igual como antes
+
+130
+00:00:34,634 --> 00:00:34,669
+piensa si el gordo sigue igual como antes
+
+131
+00:00:34,669 --> 00:00:34,859
+GORDO
+piensa si el gordo sigue igual como antes
+
+132
+00:00:34,859 --> 00:00:34,864
+GORDO
+MISMO, sigue igual
+piensa si el gordo sigue igual como antes
+
+133
+00:00:34,864 --> 00:00:35,224
+IGUAL
+MISMO, sigue igual
+piensa si el gordo sigue igual como antes
+
+134
+00:00:35,224 --> 00:00:35,259
+MISMO, sigue igual
+piensa si el gordo sigue igual como antes
+
+135
+00:00:35,259 --> 00:00:35,379
+ANTES, PASADO
+MISMO, sigue igual
+piensa si el gordo sigue igual como antes
+
+136
+00:00:35,379 --> 00:00:35,549
+ANTES, PASADO
+piensa si el gordo sigue igual como antes
+
+137
+00:00:35,549 --> 00:00:35,565
+piensa si el gordo sigue igual como antes
+
+138
+00:00:35,565 --> 00:00:35,835
+GORDO
+piensa si el gordo sigue igual como antes
+
+139
+00:00:35,835 --> 00:00:35,875
+piensa si el gordo sigue igual como antes
+
+140
+00:00:35,875 --> 00:00:36,245
+BAJO
+piensa si el gordo sigue igual como antes
+
+141
+00:00:36,245 --> 00:00:36,314
+piensa si el gordo sigue igual como antes
+
+142
+00:00:36,675 --> 00:00:37,605
+ADIVINA
+
+143
+00:00:37,635 --> 00:00:38,355
+BOLA DE CRISTAL
+
+144
+00:00:38,400 --> 00:00:38,860
+DICE
+
+145
+00:00:38,865 --> 00:00:38,874
+dónde está
+
+146
+00:00:38,874 --> 00:00:39,215
+DÓNDE
+dónde está
+
+147
+00:00:39,215 --> 00:00:39,234
+DÓNDE
+
+148
+00:00:39,245 --> 00:00:39,725
+BAJO
+
+149
+00:00:39,730 --> 00:00:40,500
+GORDO
+
+150
+00:00:40,540 --> 00:00:40,570
+LA
+
+151
+00:00:40,570 --> 00:00:41,100
+LA
+ELLA
+
+152
+00:00:41,100 --> 00:00:41,130
+LA
+
+153
+00:00:41,130 --> 00:00:41,590
+titubeo
+
+154
+00:00:41,590 --> 00:00:41,600
+titubeo
+"BOLEA"
+
+155
+00:00:41,600 --> 00:00:41,610
+BOLA
+titubeo
+"BOLEA"
+
+156
+00:00:41,610 --> 00:00:42,070
+BOLA
+"BOLEA"
+
+157
+00:00:42,070 --> 00:00:42,080
+"BOLEA"
+
+158
+00:00:42,100 --> 00:00:42,320
+VER
+
+159
+00:00:42,430 --> 00:00:43,040
+HOMBRE
+
+160
+00:00:43,060 --> 00:00:43,230
+GORDO
+
+161
+00:00:43,250 --> 00:00:43,770
+RICO
+
+162
+00:00:43,790 --> 00:00:43,795
+MUY
+
+163
+00:00:43,795 --> 00:00:43,985
+MUCHO
+MUY
+
+164
+00:00:43,985 --> 00:00:44,005
+MUY
+
+165
+00:00:44,005 --> 00:00:44,100
+RICO / MILLONARIO
+MUY
+
+166
+00:00:44,100 --> 00:00:44,885
+RICO / MILLONARIO
+
+167
+00:00:45,075 --> 00:00:45,345
+MUJER
+
+168
+00:00:45,515 --> 00:00:45,545
+FREGADA
+
+169
+00:00:45,545 --> 00:00:45,825
+FREGADA
+puede ser MISIA, puede ser FREGADA, o EMBARAZADA, QUE HA PERDIDO LA VIRGINIDAD
+
+170
+00:00:45,825 --> 00:00:46,075
+puede ser MISIA, puede ser FREGADA, o EMBARAZADA, QUE HA PERDIDO LA VIRGINIDAD
+
+171
+00:00:46,200 --> 00:00:46,580
+YA
+
+172
+00:00:46,685 --> 00:00:46,730
+CASADO
+
+173
+00:00:46,730 --> 00:00:47,055
+CASADO
+aquí la expresión de la cara se comporta como un modal, puesto que parece decir "ahora no puedo casarme" o "me hubiera casado" o "podría haberme casado"
+
+174
+00:00:47,055 --> 00:00:47,405
+PODER
+aquí la expresión de la cara se comporta como un modal, puesto que parece decir "ahora no puedo casarme" o "me hubiera casado" o "podría haberme casado"
+
+175
+00:00:47,405 --> 00:00:47,575
+aquí la expresión de la cara se comporta como un modal, puesto que parece decir "ahora no puedo casarme" o "me hubiera casado" o "podría haberme casado"
+
+176
+00:00:47,575 --> 00:00:47,905
+CASAR
+aquí la expresión de la cara se comporta como un modal, puesto que parece decir "ahora no puedo casarme" o "me hubiera casado" o "podría haberme casado"
+
+177
+00:00:47,905 --> 00:00:47,925
+aquí la expresión de la cara se comporta como un modal, puesto que parece decir "ahora no puedo casarme" o "me hubiera casado" o "podría haberme casado"
+
+178
+00:00:47,925 --> 00:00:48,545
+PODER
+aquí la expresión de la cara se comporta como un modal, puesto que parece decir "ahora no puedo casarme" o "me hubiera casado" o "podría haberme casado"
+
+179
+00:00:48,545 --> 00:00:48,715
+aquí la expresión de la cara se comporta como un modal, puesto que parece decir "ahora no puedo casarme" o "me hubiera casado" o "podría haberme casado"
+
+180
+00:00:48,715 --> 00:00:49,020
+FREGADA
+aquí la expresión de la cara se comporta como un modal, puesto que parece decir "ahora no puedo casarme" o "me hubiera casado" o "podría haberme casado"
+
+181
+00:00:49,020 --> 00:00:49,045
+FREGADA
+

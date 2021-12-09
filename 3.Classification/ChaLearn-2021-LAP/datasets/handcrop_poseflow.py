@@ -43,8 +43,12 @@ class ChaLearnDataModule(pl.LightningDataModule):
                             RandomHorizontalFlip(), ColorJitter(0.5, 0.5, 0.5),
                             ToFloatTensor(), PermuteImage(),
                             Normalize(NORM_MEAN_IMGNET, NORM_STD_IMGNET))
+        
+        #nameFile = os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv')
+        nameFile = os.path.join(self.data_dir, 'train_val_labels_STAGE2.csv')
+        print(nameFile)
         self.train_set = ChaLearnDataset(self.data_dir, 'train', 'train',
-                                         os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv'),
+                                         nameFile,
                                          transform, self.sequence_length, self.temporal_stride)
         return DataLoader(self.train_set, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True,
                           shuffle=True)
@@ -53,8 +57,10 @@ class ChaLearnDataModule(pl.LightningDataModule):
         transform = Compose(Scale(IMAGE_SIZE * 8 // 7), CenterCrop(IMAGE_SIZE), ToFloatTensor(),
                             PermuteImage(),
                             Normalize(NORM_MEAN_IMGNET, NORM_STD_IMGNET))
+        #nameFile = os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv')
+        nameFile = os.path.join(self.data_dir, 'train_val_labels_STAGE2.csv')
         self.val_set = ChaLearnDataset(self.data_dir, 'val', 'val',
-                                       os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv'),
+                                       nameFile,
                                        transform,
                                        self.sequence_length, self.temporal_stride)
         return DataLoader(self.val_set, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True)
