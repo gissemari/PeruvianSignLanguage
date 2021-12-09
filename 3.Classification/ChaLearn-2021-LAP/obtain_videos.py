@@ -10,7 +10,7 @@ import pandas as pd
 import shutil
 import os
 from sys import platform
-
+import argparse
 
 #all_files = glob.glob('./../../Data/Videos/Segmented_gestures/*/*.mp4')
 parser = argparse.ArgumentParser(description='Classification')
