@@ -44,8 +44,8 @@ class ChaLearnDataModule(pl.LightningDataModule):
                             ToFloatTensor(), PermuteImage(),
                             Normalize(NORM_MEAN_IMGNET, NORM_STD_IMGNET))
         
-        #nameFile = os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv')
-        nameFile = os.path.join(self.data_dir, 'train_val_labels_STAGE2.csv')
+        nameFile = os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv')
+        #nameFile = os.path.join(self.data_dir, 'train_val_labels_STAGE2.csv')
         print(nameFile)
         self.train_set = ChaLearnDataset(self.data_dir, 'train', 'train',
                                          nameFile,
