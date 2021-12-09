@@ -25,8 +25,7 @@ import utils.video as uv  # for folder creation
 ##############
 
 # Title
-parser = argparse.ArgumentParser(description='Mediapipe models ' +
-                                 '(FaceMesh, Hands, Pose)')
+parser = argparse.ArgumentParser(description='Use of Holistic Mediapipe model to generate a Dict')
 
 parser.add_argument('--image', action="store_true",
                     help='to get image data in pkl')
@@ -55,7 +54,7 @@ args = parser.parse_args()
 # -Holistic
 ##############
 
-print("Holistic Model")
+print("\n#####\nHolistic Model\n#####\n")
 mp_holistic = mp.solutions.holistic
 
 #########################
@@ -76,10 +75,11 @@ holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
 if os.path.isdir(args.inputPath):
     folder_list = [file for file in os.listdir(args.inputPath)
                    if os.path.isdir(args.inputPath+file)]
-    print("Is Directory")
+    print("InputPath is Directory\n")
 else:
     folder_list = [args.inputPath]
 
+print("Folder List:\n")
 print(folder_list)
 
 uv.createFolder(args.img_output)
@@ -95,7 +95,7 @@ dictPath = args.dict_output+'/'+"dict"+'.json'
 # Iterate over the folders of each video in Video/Segmented_gesture
 for videoFolderName in folder_list:
     print()
-    videoFolderPath = args.inputPath+videoFolderName
+    videoFolderPath = args.inputPath + videoFolderName
 
     videoFolderList = [file for file in os.listdir(videoFolderPath)]
 
@@ -115,15 +115,15 @@ for videoFolderName in folder_list:
 
         # Check if camera opened successfully
         if (cap.isOpened() is False):
-            print("Unable to read camera feed", videoSegFolderName)
-            video_errors.append(videoSegFolderName)
+            print("Unable to read camera feed", videoFolderPath+'/'+videoFile)
+            video_errors.append(videoFolderPath+'/'+videoFile)
             continue
-        
+
         if args.image:
             image_data_acum = []
 
         idx = 0
-
+        continue
         ret, frame = cap.read()
         # While a frame was read
         while ret is True:
@@ -143,17 +143,16 @@ for videoFolderName in folder_list:
 
             # POSE
 
-            
             kpDict["pose"]={}
-
-            if holisResults.pose_landmarks.landmark:
+ 
+            if holisResults.pose_landmarks:
 
                 kpDict["pose"]["x"] = [point.x for point in holisResults.pose_landmarks.landmark]
                 kpDict["pose"]["y"] = [point.y for point in holisResults.pose_landmarks.landmark]
 
             else:
-                kpDict["left_hand"]["x"] = [1.0 for point in range(0, 33)]
-                kpDict["left_hand"]["y"] = [1.0 for point in range(0, 33)]
+                kpDict["pose"]["x"] = [1.0 for point in range(0, 33)]
+                kpDict["pose"]["y"] = [1.0 for point in range(0, 33)]
         
             # HANDS
 
@@ -295,7 +294,7 @@ for videoFolderName in folder_list:
             # image s
             imageData = imageData/255
 
-        print(videoFolderName, videoFile, "\nkeypoints path:", pklKeypointsPath)
+        print(videoFolderPath, videoFile, "\nkeypoints path:", pklKeypointsPath)
 
         if args.image:
             print("Image shape:", imageData.shape)
