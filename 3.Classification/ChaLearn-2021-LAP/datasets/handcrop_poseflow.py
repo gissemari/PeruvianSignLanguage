@@ -45,6 +45,7 @@ class ChaLearnDataModule(pl.LightningDataModule):
                             Normalize(NORM_MEAN_IMGNET, NORM_STD_IMGNET))
         
         nameFile = os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv')
+        # in Windows the go up folder does not work '..'
         #nameFile = os.path.join(self.data_dir, 'train_val_labels_STAGE2.csv')
         print(nameFile)
         self.train_set = ChaLearnDataset(self.data_dir, 'train', 'train',
@@ -57,8 +58,9 @@ class ChaLearnDataModule(pl.LightningDataModule):
         transform = Compose(Scale(IMAGE_SIZE * 8 // 7), CenterCrop(IMAGE_SIZE), ToFloatTensor(),
                             PermuteImage(),
                             Normalize(NORM_MEAN_IMGNET, NORM_STD_IMGNET))
-        #nameFile = os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv')
-        nameFile = os.path.join(self.data_dir, 'train_val_labels_STAGE2.csv')
+        nameFile = os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv')
+        # in Windows the go up folder does not work '..'
+        #nameFile = os.path.join(self.data_dir, 'train_val_labels_STAGE2.csv')
         self.val_set = ChaLearnDataset(self.data_dir, 'val', 'val',
                                        nameFile,
                                        transform,
