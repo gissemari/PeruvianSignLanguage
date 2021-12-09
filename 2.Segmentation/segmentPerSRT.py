@@ -27,6 +27,7 @@ parser.add_argument('--inputName', type=str, default='',
 parser.add_argument('--outputVideoPath', type=str,
                     default='./Data/Videos/Segmented_gestures/',
                     help='Path where per-line files are located')
+
 # parser.add_argument('--fpsOutput', type=int, default=25, metavar='fpsO', help='Frames per second for the output file')
 parser.add_argument('--flgGesture', type=int, default=1, metavar='FLGES', help='Frames per second for the output file')
 parser.add_argument('--width', type=int, default=220, metavar='WIDTH', help='Width of SL signer or interpreter')
@@ -70,7 +71,6 @@ if inputName == '':
 else:
     listFile = [inputName]
 
-
 print(srtPath, inputName, listFile)
 
 for filePath in listFile:
@@ -79,10 +79,11 @@ for filePath in listFile:
     inputName = os.path.basename(filePath)
     inputName = os.path.splitext(inputName)[0]
     outputFolder = outputVideoPath+inputName
+    outputFolder = outputFolder.replace(' ','_').replace('(','').replace(')','')
     if uv.createFolder(outputFolder, createFullPath=True):
-        print('Created folder :', filePath, inputName)
+        print('Created folder :', outputFolder)
     else:
-        print('Folder existed :', filePath, inputName)
+        print('Folder existed :', outputFolder)
 
     # Create a VideoCapture object
     cap = cv2.VideoCapture(rawVideoPath+inputName+'.mp4')
@@ -124,15 +125,15 @@ for filePath in listFile:
         positionEnd = positionEnd*fps
         print(iniFrame, endFrame, positionStart,positionEnd)
         '''
-        print(line.start.to_time().strftime("%H:%M:%S.%f"), iniFrame, endFrame)
+        print(line.start.to_time().strftime("%H:%M:%S.%f"), iniFrame, endFrame, endFrame - iniFrame)
         if flgGesture:
             #line.text.upper()
-        	outSegment = cv2.VideoWriter(outputVideoPath+inputName+'/'+ line.text+'_'+str(sentence)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
+            outSegment = cv2.VideoWriter(outputFolder+'/'+ line.text+'_'+str(sentence)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
         else:
         	
-        	#foldName = outputVideoPath+inputName+'/'+inputName+'_'+str(sentence)+'.mp4'
-        	#print(foldName)
-        	outSegment = cv2.VideoWriter(outputVideoPath+inputName+'/'+str(sentence+1)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
+            #foldName = outputVideoPath+inputName+'/'+inputName+'_'+str(sentence)+'.mp4'
+            #print(foldName)
+            outSegment = cv2.VideoWriter(outputVideoPath+inputName+'/'+str(sentence+1)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
         # Doc: CV_CAP_PROP_POS_MSEC Current position of the video file in milliseconds or video capture timestamp.
         # cap.set(cv2.CAP_PROP_POS_MSEC,line.start.to_time())
         # To give a threshold
