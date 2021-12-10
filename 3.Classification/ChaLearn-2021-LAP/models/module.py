@@ -48,16 +48,16 @@ class Module(pl.LightningModule):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
-        self.log('train_loss', loss)
-        self.log('train_accuracy', self.accuracy(z, y))
+        self.log('train_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('train_accuracy', self.accuracy(z, y),on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
-        self.log('val_loss', loss)
-        self.log('val_accuracy', self.accuracy(z, y))
+        self.log('val_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('val_accuracy', self.accuracy(z, y),on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def configure_optimizers(self):
