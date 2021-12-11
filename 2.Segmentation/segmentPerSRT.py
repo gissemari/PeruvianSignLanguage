@@ -30,10 +30,10 @@ parser.add_argument('--outputVideoPath', type=str,
 
 # parser.add_argument('--fpsOutput', type=int, default=25, metavar='fpsO', help='Frames per second for the output file')
 parser.add_argument('--flgGesture', type=int, default=1, metavar='FLGES', help='Frames per second for the output file')
-parser.add_argument('--width', type=int, default=220, metavar='WIDTH', help='Width of SL signer or interpreter')
-parser.add_argument('--height', type=int, default=220, metavar='HEIGHT', help='Height of SL signer or interpreter')
-parser.add_argument('--x1', type=int, default=380, metavar='X1', help='Beginning of coordinate x frame')
-parser.add_argument('--y1', type=int, default=988, metavar='Y1', help='Beginning of coordinate y frame')
+parser.add_argument('--width', type=int, default=-1, metavar='WIDTH', help='Width of SL signer or interpreter')
+parser.add_argument('--height', type=int, default=-1, metavar='HEIGHT', help='Height of SL signer or interpreter')
+parser.add_argument('--x1', type=int, default=-1, metavar='X1', help='Beginning of coordinate x frame')
+parser.add_argument('--y1', type=int, default=-1, metavar='Y1', help='Beginning of coordinate y frame')
 
 
 args = parser.parse_args()
@@ -50,15 +50,20 @@ flgGesture = args.flgGesture
 videoWidth = args.width
 videoHeight = args.height
 
+crop = False
+#if this four variables are not set as default 
+if (args.x1 != -1 and args.y1 != -1 and args.width != -1 and args.height != -1):
+    crop = True 
 
-# ## X1,Y1 .... X2, Y1
-# ## X1,Y2 .... X2, Y2
-# AEC dataset x1 380 y1 988
-# PUCP DGI dataset ...
-x1 = args.x1
-x2 = x1 + videoHeight + 1  # 601
-y1 = args.y1
-y2 = y1 + videoWidth + 1
+if crop:
+    # ## X1,Y1 .... X2, Y1
+    # ## X1,Y2 .... X2, Y2
+    # AEC dataset x1 380 y1 988
+    # PUCP DGI dataset ...
+    x1 = args.x1
+    x2 = x1 + videoHeight + 1  # 601
+    y1 = args.y1
+    y2 = y1 + videoWidth + 1
 
 count = 0
 # Set begining of reading
@@ -91,10 +96,17 @@ for filePath in listFile:
     # Check if camera opened successfully
     if(cap.isOpened() is False):
         print("Unable to read camera feed", rawVideoPath+inputName+'.mp4')
+    if not crop:
+        videoWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))   # float `width`
+        videoHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # float `height`
 
     fps = uv.getNumFrames(cap)
     fpsOutput = fps
-    print(fps)
+
+    totalFrameCount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Total number of video's frames
+    videoDuration = totalFrameCount/fps # Video time in seconds
+    print("N° frames:",totalFrameCount,"Duration:",videoDuration)
+
     # Define the codec and create VideoWriter object.The output
     # is stored in 'outpy.avi' file.
     fcc = cv2.VideoWriter_fourcc(*'mp4v')  # 'M', 'J', 'P', 'G' # *'MP4V'
@@ -139,15 +151,23 @@ for filePath in listFile:
         # To give a threshold
         for i in range(iniFrame-1, endFrame+1):
 
-            # Frame number divided by rate to obtain the second and
-            # multiply by miliSecs
-            pos = i/fps*1000
-            cap.set(cv2.CAP_PROP_POS_MSEC, pos)
+            # from https://stackoverflow.com/questions/33650974/opencv-python-read-specific-frame-using-videocapture
+            # frame_no = (frame_seq /(time_length*fps))
+            # where
+            # frame_no: 0-based index of the frame to be decoded/captured (range 0.0-1.0)
+            # i: frame we select in range ("-1" is added because frame count starts at 0 value)
+            # fps: frames per seconds of the video
+            # videoDuration: duration in seconds of the video
+            pos = i-1/fps*videoDuration
+            cap.set(cv2.CAP_PROP_POS_FRAMES, pos)
 
             ret, frame = cap.read()
             # While a frame was read
             if ret is True:
-                crop_frame = frame[x1:x2, y1:y2]
+                if crop:
+                    crop_frame = frame[x1:x2, y1:y2]
+                else:
+                    crop_frame = frame
                 outSegment.write(crop_frame)
 
         sentence += 1

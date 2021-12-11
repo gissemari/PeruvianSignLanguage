@@ -48,7 +48,7 @@ parser.add_argument("--words", type=int, default=10,
 
 args = parser.parse_args()
 
-args.wordList = ['bien', 'comer', 'cuánto', 'dentro', 'ese', 'fuerte', 'pensar', 'sí', 'tú', 'él']
+#args.wordList = ['bien', 'comer', 'cuánto', 'dentro', 'ese', 'fuerte', 'pensar', 'sí', 'tú', 'él']
 args.shuffle = True
 if(args.wordList):
     print("WordList: ", args.wordList)
