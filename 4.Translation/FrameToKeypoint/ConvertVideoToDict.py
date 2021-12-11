@@ -123,7 +123,7 @@ for videoFolderName in folder_list:
             image_data_acum = []
 
         idx = 0
-        continue
+
         ret, frame = cap.read()
         # While a frame was read
         while ret is True:
