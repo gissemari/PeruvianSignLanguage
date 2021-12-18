@@ -43,7 +43,7 @@ class Net(torch.nn.Module):
         if(self.dropoutValue and self.numLayers==1):
             out = self.dropout(out)
 
-        #out = self.layerNorm(out)
+        out = self.layerNorm(out)
 
         out = self.fc(out[:, -1, :])
 

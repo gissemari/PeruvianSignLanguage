@@ -17,7 +17,7 @@ import pandas as pd
 import pickle as pkl
 
 # Local imports
-import utils.video as uv  # for folder creation
+import utils.video as uv  # for folder creation and keypoints normalization
 
 
 #########################
@@ -61,8 +61,10 @@ mp_holistic = mp.solutions.holistic
 # MODELS PARAMETERS
 ##############
 
-# FACE MESH parameters.
-holistic = mp_holistic.Holistic(min_detection_confidence=0.5,
+# HOLISTIC parameters.
+holistic = mp_holistic.Holistic(static_image_mode=False,
+                                model_complexity=2,
+                                min_detection_confidence=0.5,
                                 min_tracking_confidence=0.5)
 
 ####
@@ -92,6 +94,7 @@ video_errors = []
 
 dictPath = args.dict_output+'/'+"dict"+'.json'
 
+
 # Iterate over the folders of each video in Video/Segmented_gesture
 for videoFolderName in folder_list:
     print()
@@ -99,9 +102,14 @@ for videoFolderName in folder_list:
 
     videoFolderList = [file for file in os.listdir(videoFolderPath)]
 
+    cropVideoPath = '/'.join(args.inputPath.split('/')[0:-2])+'/cropped/'+videoFolderName+'/'
+    uv.createFolder(cropVideoPath,createFullPath=True)
+
     for videoFile in videoFolderList:
 
-        word = videoFile.split('_')[0]
+        word = videoFile.split("_")[0]
+        #if word not in ["PENSAR", "MUJER", "HOMBRE", "YO", "CAMINAR", "DOS", "NO", "QUÉ?", "YA", "MAMÁ"]:
+        #    continue
 
         keypointsDict = []
 
@@ -112,6 +120,10 @@ for videoFolderName in folder_list:
 
         # Create a VideoCapture object
         cap = cv2.VideoCapture(videoFolderPath+'/'+videoFile)
+
+        fps = cap.get(cv2.CAP_PROP_FPS)
+
+        video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount),cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
 
         # Check if camera opened successfully
         if (cap.isOpened() is False):
@@ -124,7 +136,10 @@ for videoFolderName in folder_list:
 
         idx = 0
 
+        w_frame, h_frame = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
         ret, frame = cap.read()
+
         # While a frame was read
         while ret is True:
 
@@ -135,16 +150,53 @@ for videoFolderName in folder_list:
 
             # Convert the BGR image to RGB before processing.
             imageBGR = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            height, width, _ = imageBGR.shape
 
             # ###### IMAGE - LANDMARK ANOTATION SECTION #######
             # Process
-
             holisResults = holistic.process(imageBGR)
+
+            if holisResults.pose_landmarks:
+                poseX = [point.x*width for point in holisResults.pose_landmarks.landmark]
+                poseY = [point.y*height for point in holisResults.pose_landmarks.landmark]
+
+                sr = np.asarray((poseX[11],poseY[11]))
+                sl = np.asarray((poseX[12],poseY[12]))
+
+                sRange = np.linalg.norm(sr - sl)
+
+                mid = (sr+sl)/2
+
+                midY = mid[1]
+                prop = 1 - sRange/width
+
+                top = int(midY - sRange*1.2)
+                botton = int(midY + sRange*1.2)
+                left = int(sl[0] - sRange*prop)
+                right = int(sr[0] + sRange*prop)
+
+                bTop, bBot, bLeft, bRight = 0, 0, 0, 0
+
+                if(botton > height):
+                    bBot = botton - height
+                    botton = height-1
+                if(top < 0):
+                    bBot = -top
+                    top = 0
+                if(left < 0):
+                    bLeft = -left
+                    left = 0
+                if(right > width):
+                    bRight = right - width
+                    right = width-1
+
+                black = [0,0,0]
+                imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],bBot,bTop,bLeft,bRight,cv2.BORDER_CONSTANT,value=black)
+            imageBGR = cv2.resize(imageBGR, (220, 220))
 
             # POSE
 
             kpDict["pose"]={}
- 
             if holisResults.pose_landmarks:
 
                 kpDict["pose"]["x"] = [point.x for point in holisResults.pose_landmarks.landmark]
@@ -153,7 +205,7 @@ for videoFolderName in folder_list:
             else:
                 kpDict["pose"]["x"] = [1.0 for point in range(0, 33)]
                 kpDict["pose"]["y"] = [1.0 for point in range(0, 33)]
-        
+
             # HANDS
 
             # Left hand
@@ -200,7 +252,7 @@ for videoFolderName in folder_list:
                                      249,373,374,380,381,382,390]
                 right_eyebrow_points = [293,296,300,334,336]
                                         #276,282,283,285,295]
-  
+
                 #There are 97 points
                 exclusivePoints = nose_points
                 exclusivePoints = exclusivePoints + mouth_points
@@ -222,17 +274,18 @@ for videoFolderName in folder_list:
             else:
                 kpDict["face"]["x"] = [1.0 for point in range(0, 468)]
                 kpDict["face"]["y"] = [1.0 for point in range(0, 468)]
-        
+
             keypointsDict.append(kpDict)
             if args.image:
                 # acumulate image frame as a data
                 image_data_acum.append(imageBGR)
-
+            video.write(imageBGR)
             # Next frame
             ret, frame = cap.read()
+        video.release()
 
         height, width, channels = imageBGR.shape
-
+        print("N° frames:",idx, int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))
         glossInst = {
                 "image_dimention": {
                     "height": height,
@@ -244,6 +297,7 @@ for videoFolderName in folder_list:
                 "frame_start": 1,
                 "instance_id": IdCount,
                 "signer_id": -1,
+                "unique_name": word +'_'+ str(IdCount),
                 "source": "LSP",
                 "split": "",
                 "variation_id": -1,
@@ -295,7 +349,7 @@ for videoFolderName in folder_list:
             imageData = imageData/255
 
         print(videoFolderPath, videoFile, "\nkeypoints path:", pklKeypointsPath)
-
+        print("Unique name path:", cropVideoPath + word + "_" + str(IdCount))
         if args.image:
             print("Image shape:", imageData.shape)
 
