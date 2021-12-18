@@ -123,13 +123,13 @@ for videoFolderName in folder_list:
 
         fps = cap.get(cv2.CAP_PROP_FPS)
 
-        video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount),cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
-
         # Check if camera opened successfully
         if (cap.isOpened() is False):
             print("Unable to read camera feed", videoFolderPath+'/'+videoFile)
             video_errors.append(videoFolderPath+'/'+videoFile)
             continue
+
+        video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount)+'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
 
         if args.image:
             image_data_acum = []
