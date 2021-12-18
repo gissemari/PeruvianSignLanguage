@@ -39,13 +39,13 @@ def openPoseDict(xP, yP, xLH, yLH, xRH, yRH, xF, yF):
 
 def extratXYFromBodyPart(fileData, bodyName, exclusivePoints=[]):
 
-    if exclusivePoints:
-        x = [item * 256.0 for pos, item in enumerate(fileData[bodyName]["x"]) if pos in exclusivePoints]
-        y = [item * 256.0 for pos, item in enumerate(fileData[bodyName]["y"]) if pos in exclusivePoints]
+    if exclusivePoints: #256.0
+        x = [item * 220.0 for pos, item in enumerate(fileData[bodyName]["x"]) if pos in exclusivePoints]
+        y = [item * 220.0 for pos, item in enumerate(fileData[bodyName]["y"]) if pos in exclusivePoints]
     else:
 
-        x = [item * 256.0 for pos, item in enumerate(fileData[bodyName]["x"])]
-        y = [item * 256.0 for pos, item in enumerate(fileData[bodyName]["y"])]
+        x = [item * 220.0 for pos, item in enumerate(fileData[bodyName]["x"])]
+        y = [item * 220.0 for pos, item in enumerate(fileData[bodyName]["y"])]
 
     return x, y
 

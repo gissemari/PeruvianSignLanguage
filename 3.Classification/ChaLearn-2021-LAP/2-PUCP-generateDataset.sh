@@ -3,7 +3,7 @@ echo "generating data in Peruvian Sign language project..."
 sleep 1
 cd ../..
 cp -r utils 5.Preparation
-python 5.Preparation/DictToSample.py --dict_Path ./Data/PUCP_PSL_DGI156/Dataset/dict/dict.json --shuffle --output_Path ./Data/PUCP_PSL_DGI156/Dataset/readyToRun/ --words $1
+python 5.Preparation/DictToSample.py --dict_Path ./Data/PUCP_PSL_DGI156/Dataset/dict/dict.json --output_Path ./Data/PUCP_PSL_DGI156/Dataset/readyToRun/ --words $1
 echo ""
 echo "generating csv in Chalearn..."
 sleep 1
@@ -18,7 +18,7 @@ echo "train_val_labels_STAGE2.csv copied in project file"
 echo ""
 echo "obtaining videos from Peruvian Sign language project..."
 sleep 1
-python obtain_videos.py --allfiles ./../../Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/
+python obtain_videos.py --allfiles ./../../Data/PUCP_PSL_DGI156/Videos/cropped/
 echo "counting frames..."
 python count_frames.py
 echo "extracting keypoints..."

@@ -108,7 +108,7 @@ class ChaLearnDataset(Dataset):
 
         frames, _, _ = torchvision.io.read_video(os.path.join(sample['path']),
                                                  pts_unit='sec')
-
+        #print("N°:",frames.shape,sample['path'])
         clip = []
         poseflow_clip = []
         missing_wrists_left, missing_wrists_right = [], []

@@ -48,6 +48,7 @@ class Module(pl.LightningModule):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
+        print("Train Loss:",loss)
         self.log('train_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('train_accuracy', self.accuracy(z, y),on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
@@ -56,6 +57,7 @@ class Module(pl.LightningModule):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
+        print("Val Loss:",loss)
         self.log('val_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('val_accuracy', self.accuracy(z, y),on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss

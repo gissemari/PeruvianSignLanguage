@@ -71,7 +71,7 @@ def normalize(poses):
         head_top = poses[i, 12]
         neck_length = np.linalg.norm(upper_neck - head_top)
         poses[i] /= neck_length
-        assert math.isclose(np.linalg.norm(upper_neck - head_top), 1)
+        #assert math.isclose(np.linalg.norm(upper_neck - head_top), 1)
     return poses
 
 
