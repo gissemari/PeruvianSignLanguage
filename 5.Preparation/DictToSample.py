@@ -76,7 +76,7 @@ y = []
 for glossIndex in glossList:
 
     word = str.upper(glossList[glossIndex]["gloss"])
-    
+    print(word)
     if args.words_File != '' and word not in wordList:
         continue
         
@@ -160,8 +160,10 @@ if(args.shuffle):
     y = new_y
 
 
+# Balancing the dataset to the min number of instances
 if(args.leastValue):
     
+    #min value of instances
     minValue = topWords[-1][1]
     
     #pivot = {key:minValue for key in range(len(topWordList))}
@@ -170,6 +172,7 @@ if(args.leastValue):
     new_x = []
     new_y = []
 
+    # Find minValue instances of each label and save only those.
     for instanceId, label in zip(x, y):
         if(pivot[label]>0):
             new_x.append(instanceId)

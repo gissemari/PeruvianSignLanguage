@@ -40,7 +40,7 @@ if args.train:
 
         isVal = False
         for newUniqueName, prevName in val_ids.values.tolist():
-            if name == prevName:
+            if name == newUniqueName:
                 isVal = True
                 print(name)
                 target = './project/data/mp4/val/'+newUniqueName+'_color.mp4'
@@ -49,7 +49,7 @@ if args.train:
 
         isTrain = False
         for newUniqueName, prevName in train_ids.values.tolist():
-            if name == prevName:
+            if name == newUniqueName:
                 isTrain = True
                 print(name)
                 target = './project/data/mp4/train/'+newUniqueName+'_color.mp4'
@@ -76,7 +76,7 @@ else:
 
         isTest = False
         for newUniqueName, prevName in test_ids.values.tolist():
-            if name == prevName:
+            if name == newUniqueName:
                 isTest = True
                 print(name)
                 continue
