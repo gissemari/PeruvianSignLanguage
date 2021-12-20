@@ -72,6 +72,7 @@ else:
             name = filePath.split('/')[-1]
         else:
             name = filePath.split('\\')[-1]
+            
         name = name.split('.')[0].upper()
 
         isTest = False
@@ -79,8 +80,9 @@ else:
             if name == newUniqueName:
                 isTest = True
                 print(name)
+                target = './project/data/mp4/test/'+newUniqueName+'_color.mp4'
+                shutil.copyfile(filePath.replace('\\','/'), target)
                 continue
-        if isTest:        
-            name = name.split('.')[0]
-            target = './project/data/mp4/test/'+newUniqueName+'_color.mp4'
-            shutil.copyfile(filePath.replace('\\','/'), target)
+
+            
+            

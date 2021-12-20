@@ -3,7 +3,7 @@ cp -r utils 2.Segmentation
 cp -r utils 4.Translation/FrameToKeypoint
 cp -r utils 5.Preparation
 
-python 2.Segmentation/segmentPerSRT.py --rawVideoPath ./Data/PUCP_PSL_DGI156/Videos/original/ --srtPath ./Data/PUCP_PSL_DGI156/SRT/SEGMENTED_SENTENCE/ --outputVideoPath ./Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/ --flgGesture 1 
+#python 2.Segmentation/segmentPerSRT.py --rawVideoPath ./Data/PUCP_PSL_DGI156/Videos/original/ --srtPath ./Data/PUCP_PSL_DGI156/SRT/SEGMENTED_SENTENCE/ --outputVideoPath ./Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/ --flgGesture 1 
 
 python 4.Translation/FrameToKeypoint/ConvertVideoToDict.py --inputPath ./Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/ --img_output ./Data/PUCP_PSL_DGI156/Dataset/img/  --dict_output ./Data/PUCP_PSL_DGI156/Dataset/dict/ --keypoints_output ./Data/PUCP_PSL_DGI156/Dataset/keypoints/
 

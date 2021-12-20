@@ -96,7 +96,7 @@ def keypointsFormat(fileData, bodyPart):
 def saveJson(ids,output_dir, src, dataType):
     for uniqueName, prevName in ids.values.tolist():
 
-        os.makedirs('%s%s/%s_color.kp/'%(output_dir,dataType,name), exist_ok=True)
+        os.makedirs('%s%s/%s_color.kp/'%(output_dir,dataType,uniqueName), exist_ok=True)
 
         idxpkl = uniqueName.split('_')[-1]
         
@@ -109,7 +109,7 @@ def saveJson(ids,output_dir, src, dataType):
             keys = timestep.keys()
             opd = keypointsFormat(timestep, keys)
 
-            jsonName = '%s%s/%s_color.kp/%s_color_%1.12d_keypoints.json'%(output_dir,dataType,name,name,pos)
+            jsonName = '%s%s/%s_color.kp/%s_color_%1.12d_keypoints.json'%(output_dir,dataType,uniqueName,uniqueName,pos)
             
             with open(jsonName, 'w') as f:
                 json.dump(opd, f)

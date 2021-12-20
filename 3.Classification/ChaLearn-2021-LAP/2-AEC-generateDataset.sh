@@ -3,7 +3,7 @@ echo "generating data in Peruvian Sign language project..."
 sleep 1
 cd ../..
 cp -r utils 5.Preparation
-python 5.Preparation/DictToSample.py --dict_Path ./Data/AEC/Dataset/dict/dict.json --output_Path ./Data/AEC/Dataset/readyToRun/ --words_File ./Data/list.csv --words $1
+python 5.Preparation/DictToSample.py --dict_Path ./Data/AEC/Dataset/dict/dict.json --shuffle --output_Path ./Data/AEC/Dataset/readyToRun/ --words_File ./Data/list.csv --words $1
 echo ""
 echo "generating csv in Chalearn..."
 sleep 1
