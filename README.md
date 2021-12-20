@@ -104,6 +104,12 @@ Output:
 Code:
 ./PeruvianSignLanguaje/3.Translation/FrameToKeypoint/ConvertVideoToKeypoint.py
 
+Parameters:
+--image creates pickle files of images. However it is recommended not to use it
+--input_path
+
+
+
 
 
 

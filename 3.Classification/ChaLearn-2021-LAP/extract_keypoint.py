@@ -94,11 +94,14 @@ def keypointsFormat(fileData, bodyPart):
     return opd
 
 def saveJson(ids,output_dir, src, dataType):
-    for name, index in ids.values.tolist():
+    for uniqueName, prevName in ids.values.tolist():
 
         os.makedirs('%s%s/%s_color.kp/'%(output_dir,dataType,name), exist_ok=True)
 
-        with open(src+str(index)+'.pkl', 'rb') as f:
+        idxpkl = uniqueName.split('_')[-1]
+        
+        #with open(src+str(index)+'.pkl', 'rb') as f:
+        with open(src+str(idxpkl)+'.pkl', 'rb') as f:
             kp = pickle.load(f)
 
         for pos, timestep in enumerate(kp):
@@ -117,19 +120,23 @@ def main():
 
     parser.add_argument('--src', type=str, default='./../.././Data/Dataset/keypoints/', help='...')
     parser.add_argument('--keyPath', type=str, default='./../../../Data/Dataset/readyToRun/', help='...')
-
-    args = parser.parse_args()
-    
-    train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
-    val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
+    parser.add_argument('--train', type=int, default=1, help='Create files for train or not, for test')
 
     #src = './../.././Data/Dataset/keypoints/'
     #keyPath = './../../../Data/Dataset/readyToRun/'
+    args = parser.parse_args()
     
     output_dir = './project/data/kp/'
     
-    saveJson(train_ids, output_dir, args.src, "train")
-    saveJson(val_ids, output_dir, args.src, "val")
+    if args.train==1:
+        train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
+        val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
+        
+        saveJson(train_ids, output_dir, args.src, "train")
+        saveJson(val_ids, output_dir, args.src, "val")
+    else:
+        test_ids = pd.read_csv("./data/test_ids.csv", encoding='utf-8')
+        saveJson(test_ids, output_dir, args.src, "test")
 
 main()
 

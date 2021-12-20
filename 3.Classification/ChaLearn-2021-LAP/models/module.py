@@ -44,6 +44,23 @@ class Module(pl.LightningModule):
     def forward(self, x):
         return self.model(x)
 
+    # added for problem on gradient, anomaly detection in windows - gissella
+    def on_train_start(self, trainer, model):
+        n = 0
+
+        example_input = model.example_input_array.to(model.device)
+        example_input.requires_grad = True
+
+        model.zero_grad()
+        output = model(example_input)
+        output[n].abs().sum().backward()
+        
+        zero_grad_inds = list(range(example_input.size(0)))
+        zero_grad_inds.pop(n)
+        
+        if example_input.grad[zero_grad_inds].abs().sum().item() > 0:
+            raise RuntimeError("Your model mixes data across the batch dimension!")
+            
     def training_step(self, batch, batch_idx):
         x, y = batch
         z = self.model(x)
