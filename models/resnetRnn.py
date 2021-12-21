@@ -15,6 +15,7 @@ import torch
 from models.gru import Net as gru
 from models.resnet import ResNet as resnet
 from models.resnet import BasicBlock as basicBlock
+from torchvision.models import resnet18
 
 RENET_OUTPUT_SIZE = 512
 
@@ -25,7 +26,19 @@ class resnet_rnn(torch.nn.Module):
     def __init__(self,num_classes, inputSize, hiddenSize, rnnLayers, dropout):
 
         super(resnet_rnn, self).__init__()   
-        self.resnet = resnet(basicBlock, [2, 2, 2, 2], num_classes=num_classes, with_fc=False)
+
+        # Resnet
+        model = resnet18(pretrained=True)
+        self.resnet = nn.Sequential(*list(model.children())[:-2])
+        for layer_index in range(4):
+            for param in self.resnet[layer_index].parameters(True):
+                param.requires_grad_(False)
+        if embed_size != 512:
+            self.pointwise_conv = nn.Conv2d(512, embed_size, 1)
+        else:
+            self.pointwise_conv = nn.Identity()
+
+        #self.resnet = resnet(basicBlock, [2, 2, 2, 2], num_classes=num_classes, with_fc=False)
         self.gru = gru(inputSize+RENET_OUTPUT_SIZE, hiddenSize, rnnLayers, outputSize=num_classes, dropout=dropout)
         self.fc = torch.nn.Linear(RENET_OUTPUT_SIZE + hiddenSize, num_classes)
 
@@ -34,6 +47,7 @@ class resnet_rnn(torch.nn.Module):
         resnetOut = []
         for img in x_img:
             img_out = self.resnet(img)
+            img_out = self.pointwise_conv(img_out)
             resnetOut.append(img_out)
         
         x_resnet = torch.stack(resnetOut)
