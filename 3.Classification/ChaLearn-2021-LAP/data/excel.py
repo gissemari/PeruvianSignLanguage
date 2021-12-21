@@ -9,7 +9,7 @@ import pickle
 import numpy as np
 from sklearn.model_selection  import train_test_split
 import argparse
-
+from collections import Counter
 
 
 def getData(path):
@@ -32,23 +32,25 @@ def getData(path):
     return X, Y, weight, y_meaning, X_timeSteps
 
 def getLabelsDataFrame(X_train, y_train, dataDict, y_labels):
-    
+
     name = []
     label = []
     inst_id = []
     nFrames = []
 
+    # for a key in X_train
     for idx, dataId in enumerate(X_train):
 
+        # find in dataDict his respective gloss
         for pos, gloss in enumerate(dataDict):
- 
+
+            # only if the key is 
             if(dataDict[pos]["gloss"].lower() == y_labels[y_train[idx]].lower()):
-                
+
                 for instances in dataDict[pos]["instances"]:
 
                     if(instances["instance_id"] == dataId):
-                        print(instances['timestep_vide_name'])
-                        name.append(instances['timestep_vide_name'])
+                        name.append(instances['unique_name'])
                         nFrames.append(instances['frame_end'])
                         label.append(y_train[idx])
                         inst_id.append(dataId)

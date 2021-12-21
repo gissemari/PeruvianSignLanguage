@@ -48,19 +48,48 @@ class Module(pl.LightningModule):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
-        print("Train Loss:",loss)
+        acc = self.accuracy(z, y)
+        #print("Train Loss:",loss,"Train Acc:",acc)
         self.log('train_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log('train_accuracy', self.accuracy(z, y),on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('train_accuracy',acc ,on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
-        print("Val Loss:",loss)
+        acc = self.accuracy(z, y)
+        #print("Val Loss:",loss, "Val Acc:", acc)
         self.log('val_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log('val_accuracy', self.accuracy(z, y),on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('val_accuracy',acc ,on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
+
+    def training_epoch_end(self, training_step_outputs):
+        #print('training steps', training_step_outputs)
+
+        loss_acum = []
+
+        for value in training_step_outputs:
+            loss = value['loss']
+            loss_acum.append(loss)
+
+        avg_loss = sum(loss_acum)/len(loss_acum)
+        #result = pl.EvalResult(checkpoint_on=avg_loss)
+        print("Train Lss AVR:",avg_loss)
+        print("-------------------------------------------------------------")
+        #result.log('train_avr_loss', avg_loss, on_epoch=True, prog_bar=True)
+
+    def validation_epoch_end(self, validation_step_outputs):
+
+        loss_acum = []
+
+        for value in validation_step_outputs:
+            loss = value
+            loss_acum.append(loss)
+
+        avg_loss = sum(loss_acum)/len(loss_acum)
+
+        print("Test Lss AVR:",avg_loss)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate,

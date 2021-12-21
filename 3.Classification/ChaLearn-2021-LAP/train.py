@@ -54,6 +54,7 @@ if __name__ == '__main__':
         overfit_batches=args.overfit_batches,
         accumulate_grad_batches=args.accumulate_grad_batches,
         val_check_interval=args.val_check_interval,
+        enable_progress_bar=False,
         profiler=args.profiler,
         progress_bar_refresh_rate=args.progress_bar_refresh_rate,
         gpus=args.gpus)
