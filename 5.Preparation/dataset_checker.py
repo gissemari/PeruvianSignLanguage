@@ -46,7 +46,7 @@ for idx, dataId in enumerate(X_train):
     indG = -1
     for pos, gloss in enumerate(dataDict):
 
-        if(dataDict[pos]["gloss"] == y_labels[y_train[idx]].lower().lower()):
+        if(dataDict[pos]["gloss"].upper() == y_labels[y_train[idx]].upper()): #.lower()
             indG = pos
     
     toCheck = [instances["instance_id"] for instances in dataDict[indG]["instances"]]

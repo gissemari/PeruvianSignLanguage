@@ -129,6 +129,7 @@ for videoFolderName in folder_list:
             video_errors.append(videoFolderPath+'/'+videoFile)
             continue
 
+        #video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount)+'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
         video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount)+'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
 
         if args.image:

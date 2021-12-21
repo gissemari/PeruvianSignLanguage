@@ -15,42 +15,74 @@ import argparse
 #
 parser = argparse.ArgumentParser(description='Classification')
 parser.add_argument('--allfiles', type=str, default='./../../Data/Videos/Segmented_gestures/', help='...')
+parser.add_argument('--train', type=int, default=1, help='Create files for train or not, for test')
+
 args = parser.parse_args()
     
 pathAllFiles = args.allfiles
 all_files = glob.glob(pathAllFiles + '*/*.mp4')
-train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
-val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
-print(train_ids)
 
-for filePath in all_files:
-
+if args.train:
+    train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
+    val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
     
-    if platform == 'linux' or platform == 'linux2':
-        name = filePath.split('/')[-1]
-    else:
-        name = filePath.split('\\')[-1]
-    
-    name = name.split('.')[0]
+    #print(train_ids)
 
+    for filePath in all_files:
 
-    isVal = False
-    for valName, index in val_ids.values.tolist():
-        if name == valName:
-            isVal = True
-            print(name)
-            continue
+        
+        if platform == 'linux' or platform == 'linux2':
+            name = filePath.split('/')[-1]
+        else:
+            name = filePath.split('\\')[-1]
+        
+        name = name.split('.')[0].upper()
 
-    isTrain = False
-    for trainName, index in train_ids.values.tolist():
-        if name == trainName:
-            isTrain = True
-            print(name)
-            continue
+        isVal = False
+        for newUniqueName, prevName in val_ids.values.tolist():
+            if name == newUniqueName:
+                isVal = True
+                print(name)
+                target = './project/data/mp4/val/'+newUniqueName+'_color.mp4'
+                shutil.copyfile(filePath.replace('\\','/'), target)
+                continue
 
-    if isVal:
-        target = './project/data/mp4/val/'+name+'_color.mp4'
-        shutil.copyfile(filePath.replace('\\','/'), target)
-    if isTrain:
-        target = './project/data/mp4/train/'+name+'_color.mp4'
-        shutil.copyfile(filePath.replace('\\','/'), target)
+        isTrain = False
+        for newUniqueName, prevName in train_ids.values.tolist():
+            if name == newUniqueName:
+                isTrain = True
+                print(name)
+                target = './project/data/mp4/train/'+newUniqueName+'_color.mp4'
+                shutil.copyfile(filePath.replace('\\','/'), target)
+                continue
+        '''
+        if isVal:
+            target = './project/data/mp4/val/'+newUniqueName+'_color.mp4'
+            shutil.copyfile(filePath.replace('\\','/'), target)
+        if isTrain:
+            target = './project/data/mp4/train/'+newUniqueName+'_color.mp4'
+            shutil.copyfile(filePath.replace('\\','/'), target)
+        '''
+else:
+    test_ids = pd.read_csv("./data/test_ids.csv", encoding='utf-8')
+
+    #print(all_files)
+    for filePath in all_files:
+        if platform == 'linux' or platform == 'linux2':
+            name = filePath.split('/')[-1]
+        else:
+            name = filePath.split('\\')[-1]
+            
+        name = name.split('.')[0].upper()
+
+        isTest = False
+        for newUniqueName, prevName in test_ids.values.tolist():
+            if name == newUniqueName:
+                isTest = True
+                print(name)
+                target = './project/data/mp4/test/'+newUniqueName+'_color.mp4'
+                shutil.copyfile(filePath.replace('\\','/'), target)
+                continue
+
+            
+            

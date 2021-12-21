@@ -3,13 +3,13 @@ echo "generating data in Peruvian Sign language project..."
 sleep 1
 cd ../..
 cp -r utils 5.Preparation
-python 5.Preparation/DictToSample.py --words $1
+python 5.Preparation/DictToSample.py --dict_Path ./Data/AEC/Dataset/dict/dict.json --shuffle --output_Path ./Data/AEC/Dataset/readyToRun/ --words_File ./Data/list.csv --words $1
 echo ""
 echo "generating csv in Chalearn..."
 sleep 1
 cd 3.Classification/ChaLearn-2021-LAP/data
-python excel.py
-python stage2.py
+python excel.py --dictPath ./../../../Data/AEC/Dataset/dict/dict.json --keyPath ./../../../Data/AEC/Dataset/readyToRun/
+python stage2.py 1
 
 cd ..
 cp data/train_val_labels_STAGE2.csv project
@@ -18,11 +18,11 @@ echo "train_val_labels_STAGE2.csv copied in project file"
 echo ""
 echo "obtaining videos from Peruvian Sign language project..."
 sleep 1
-python obtain_videos.py
+python obtain_videos.py --allfiles ./../../Data/AEC/Videos/cropped/
 echo "counting frames..."
 python count_frames.py
 echo "extracting keypoints..."
-python extract_keypoint.py
+python extract_keypoint.py --src ./../../Data/AEC/Dataset/keypoints/ --keyPath ./../../Data/AEC/Dataset/readyToRun/
 echo "extrancting poseflow..."
 sleep 1
 python extract_poseflow.py

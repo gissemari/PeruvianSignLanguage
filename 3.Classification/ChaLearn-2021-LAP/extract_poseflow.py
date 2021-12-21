@@ -6,7 +6,7 @@ import os
 from collections import defaultdict
 
 import numpy as np
-
+import argparse
 
 def read_pose(kp_file):
     with open(kp_file) as kf:
@@ -76,12 +76,17 @@ def normalize(poses):
 
 
 def main():
+
+    parser = argparse.ArgumentParser(description='Classification')
+    parser.add_argument('--train', type=int, default=1, help='Create files for train or not, for test')
+    args = parser.parse_args()
+    
     input_path = 'project/data/kp'
     input_dirs = sorted(glob.glob(os.path.join(input_path, '*', '*_color.kp')))
     input_dir_index = 0
     total = len(input_dirs)
     for input_dir in input_dirs:
-        print(f'{input_dir_index}/{total}')
+        #print(f'{input_dir_index}/{total}')
         input_dir_index += 1
 
         output_dir = input_dir.replace('kp', 'kpflow2')
@@ -112,6 +117,6 @@ def main():
             np.save(os.path.join(output_dir, 'flow_{:05d}'.format(i - 1)), flow)
             prev = next
 
-
+    print("PoseFlow Processed: ",total)
 if __name__ == '__main__':
     main()
