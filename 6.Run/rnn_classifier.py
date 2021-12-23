@@ -55,12 +55,12 @@ parser.add_argument('--pose', action="store_true",
                     help='Use holistic model: pose')
 
 parser.add_argument('--keys_input_Path', type=str,
-                    default="./Data/Dataset/readyToRun/",
+                    default="./Data/AEC/Dataset/readyToRun/",
                     help='relative path of keypoints input.'
                     ' Default: ./Data/Dataset/keypoints/')
 
 parser.add_argument('--keypoints_input_Path', type=str,
-                    default="./Data/Dataset/keypoints/",
+                    default="./Data/AEC/Dataset/keypoints/",
                     help='relative path of keypoints input.' +
                     ' Default: ./Data/Dataset/keypoints/')
 
@@ -207,10 +207,10 @@ def main():
     num_classes = dataTrainXY.outputSize
     batch_size = 32
     nEpoch = 2000
-    lrn_rate = 0.0004
+    lrn_rate = 0.00004
     weight_decay = 0
     epsilon = 1e-8
-    hidden_size = 200
+    hidden_size = 700
 
     if args.wandb:
         wandbF.initConfigWandb(num_layers, num_classes, batch_size, nEpoch,

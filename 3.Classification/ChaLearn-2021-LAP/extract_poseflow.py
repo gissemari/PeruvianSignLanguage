@@ -70,8 +70,13 @@ def normalize(poses):
         upper_neck = poses[i,11]
         head_top = poses[i, 12]
         neck_length = np.linalg.norm(upper_neck - head_top)
+        if math.isclose(np.linalg.norm(upper_neck - head_top), 0):
+            print("because np.linalg.norm(upper_neck - head_top) is zero, it will be normalize divided by 220")
+            neck_length = 220.0
         poses[i] /= neck_length
+
         #assert math.isclose(np.linalg.norm(upper_neck - head_top), 1)
+
     return poses
 
 

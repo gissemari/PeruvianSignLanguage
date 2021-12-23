@@ -84,7 +84,7 @@ else:
 print("Folder List:\n")
 print(folder_list)
 
-uv.createFolder(args.img_output)
+#uv.createFolder(args.img_output)
 uv.createFolder(args.dict_output)
 uv.createFolder(args.keypoints_output)
 
@@ -194,6 +194,9 @@ for videoFolderName in folder_list:
                 black = [0,0,0]
                 imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],bBot,bTop,bLeft,bRight,cv2.BORDER_CONSTANT,value=black)
             imageBGR = cv2.resize(imageBGR, (220, 220))
+            imageBGR = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+            holisResults = holistic.process(imageBGR)
 
             # POSE
 

@@ -24,7 +24,7 @@ class Module(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters()
-        NUM_CLASSES = 10
+        NUM_CLASSES = 5 #10
 
         if model == 'VTN_HCPF':
             self.model = VTNHCPF(NUM_CLASSES, self.hparams.num_heads, self.hparams.num_layers, self.hparams.embed_size,
@@ -41,9 +41,11 @@ class Module(pl.LightningModule):
         
         self.accuracy = torchmetrics.Accuracy()
 
+        self.epochCount = 0
+
     def forward(self, x):
         return self.model(x)
-
+    '''
     # added for problem on gradient, anomaly detection in windows - gissella
     def on_train_start(self, trainer, model):
         n = 0
@@ -60,7 +62,7 @@ class Module(pl.LightningModule):
         
         if example_input.grad[zero_grad_inds].abs().sum().item() > 0:
             raise RuntimeError("Your model mixes data across the batch dimension!")
-            
+    '''
     def training_step(self, batch, batch_idx):
         x, y = batch
         z = self.model(x)
@@ -91,6 +93,8 @@ class Module(pl.LightningModule):
             loss_acum.append(loss)
 
         avg_loss = sum(loss_acum)/len(loss_acum)
+
+        self.epochCount = self.epochCount + 1
         #result = pl.EvalResult(checkpoint_on=avg_loss)
         print("Train Lss AVR:",avg_loss)
         print("-------------------------------------------------------------")
@@ -105,7 +109,7 @@ class Module(pl.LightningModule):
             loss_acum.append(loss)
 
         avg_loss = sum(loss_acum)/len(loss_acum)
-
+        print("Epoch:", self.epochCount)
         print("Test Lss AVR:",avg_loss)
 
     def configure_optimizers(self):
