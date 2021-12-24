@@ -24,7 +24,9 @@ class Module(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters()
-        NUM_CLASSES = 5 #10
+        NUM_CLASSES = self.hparams.num_classes
+
+        print("Num Classes:", self.hparams.num_classes)
 
         if model == 'VTN_HCPF':
             self.model = VTNHCPF(NUM_CLASSES, self.hparams.num_heads, self.hparams.num_layers, self.hparams.embed_size,
@@ -135,4 +137,5 @@ class Module(pl.LightningModule):
         parser.add_argument('--dropout', help='Dropout before MHA and FC', type=float, default=0)
         parser.add_argument('--lr_step_size', type=int, default=5)
         parser.add_argument('--model', type=str, required=True)
+        parser.add_argument('--num_classes', type=int, default=10)
         return parser
