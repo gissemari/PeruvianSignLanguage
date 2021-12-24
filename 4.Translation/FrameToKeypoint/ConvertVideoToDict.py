@@ -108,7 +108,7 @@ for videoFolderName in folder_list:
     for videoFile in videoFolderList:
 
         word = videoFile.split("_")[0]
-        #if word not in ["PENSAR", "MUJER", "HOMBRE", "YO", "CAMINAR", "DOS", "NO", "QUÉ?", "YA", "MAMÁ"]:
+        #if word not in ["G-R", "bien", "comer", "cuánto", "dos", "porcentaje", "proteína", "sí", "tú", "yo"]:
         #    continue
 
         keypointsDict = []
@@ -156,7 +156,7 @@ for videoFolderName in folder_list:
             # ###### IMAGE - LANDMARK ANOTATION SECTION #######
             # Process
             holisResults = holistic.process(imageBGR)
-
+            
             if holisResults.pose_landmarks:
                 poseX = [point.x*width for point in holisResults.pose_landmarks.landmark]
                 poseY = [point.y*height for point in holisResults.pose_landmarks.landmark]
@@ -194,10 +194,10 @@ for videoFolderName in folder_list:
                 black = [0,0,0]
                 imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],bBot,bTop,bLeft,bRight,cv2.BORDER_CONSTANT,value=black)
             imageBGR = cv2.resize(imageBGR, (220, 220))
-            imageBGR = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
+            imageBGR = cv2.cvtColor(imageBGR, cv2.COLOR_RGB2BGR)
+            
             holisResults = holistic.process(imageBGR)
-
+            
             # POSE
 
             kpDict["pose"]={}
