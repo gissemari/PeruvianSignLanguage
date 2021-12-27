@@ -4,11 +4,13 @@ PATH_ASL="/home/cc/ASL/PeruvianSignLanguage"
 cp -r $PATH_ASL/utils $PATH_ASL/2.Segmentation
 cp -r $PATH_ASL/utils $PATH_ASL/4.Translation/FrameToKeypoint
 cp -r $PATH_ASL/utils $PATH_ASL/5.Preparation
-#export PYTHON_PATH=/home/bejaranog/signLanguage/PeruvianSignLanguage
 
 python 2.Segmentation/segmentPerSRT.py --rawVideoPath $PATH_ASL/Data/AEC/Videos/RawVideo/ --srtPath $PATH_ASL/Data/AEC/SRT/SRT_SIGN/ --outputVideoPath $PATH_ASL/Data/AEC/Videos/SEGMENTED_SIGN/ --flgGesture 1 --width 220 --height 220 --x1 380 --y1 988
 
-python 4.Translation/FrameToKeypoint/ConvertVideoToDict.py --inputPath $PATH_ASL/Data/AEC/Videos/SEGMENTED_SIGN/ --img_output  $PATH_ASL/Data/AEC/Dataset/img/  --dict_output $PATH_ASL/Data/AEC/Dataset/dict/ --keypoints_output $PATH_ASL/Data/AEC/Dataset/keypoints/
+python 4.Translation/FrameToKeypoint/multiprocess.py --inputPath $PATH_ASL/Data/AEC/Videos/SEGMENTED_SIGN/ --dict_output $PATH_ASL/Data/AEC/Dataset/dict/ --keypoints_output $PATH_ASL/Data/AEC/Dataset/keypoints/
+
+# ConvertVideoToDict was replaced by multiprocess
+#python 4.Translation/FrameToKeypoint/ConvertVideoToDict.py --inputPath $PATH_ASL/Data/AEC/Videos/SEGMENTED_SIGN/ --img_output  $PATH_ASL/Data/AEC/Dataset/img/  --dict_output $PATH_ASL/Data/AEC/Dataset/dict/ --keypoints_output $PATH_ASL/Data/AEC/Dataset/keypoints/
 
 #python 5.Preparation/DictToSample.py --dict_Path ./Data/Dataset/dict/dict.json --shuffle --leastValue --output_Path ./Data/Dataset/readyToRun/ --words 10
 
