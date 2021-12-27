@@ -27,15 +27,9 @@ import utils.video as uv  # for folder creation and keypoints normalization
 # Title
 parser = argparse.ArgumentParser(description='Use of Holistic Mediapipe model to generate a Dict')
 
-parser.add_argument('--image', action="store_true",
-                    help='to get image data in pkl')
-
 # File paths
 parser.add_argument('--inputPath', type=str, default="./Data/Videos/Segmented_gestures/",
                     help='relative path of images input.' + ' Default: ./Data/Videos/Segmented_gestures/')
-
-parser.add_argument('--img_output', type=str, default="./Data/Dataset/img/",
-                    help='relative path of images output with landmarks.' + ' Default: ./Data/Dataset/img/')
 
 parser.add_argument('--dict_output', type=str, default="./Data/Dataset/dict/",
                     help='relative path of scv output set of landmarks.' +' Default: ./Data/Dataset/dict/')
@@ -62,7 +56,7 @@ mp_holistic = mp.solutions.holistic
 ##############
 
 # HOLISTIC parameters.
-holistic = mp_holistic.Holistic(static_image_mode=False,
+holistic = mp_holistic.Holistic(static_image_mode=True,
                                 model_complexity=2,
                                 min_detection_confidence=0.5,
                                 min_tracking_confidence=0.5)
@@ -116,11 +110,9 @@ for videoFolderName in folder_list:
         videoSegFolderName = videoFolderPath+'/'+videoFile[:-4]
 
         pklKeypointsPath = args.keypoints_output+str(IdCount)+'.pkl'
-        pklImagePath = args.img_output+str(IdCount)+'.pkl'
 
         # Create a VideoCapture object
         cap = cv2.VideoCapture(videoFolderPath+'/'+videoFile)
-
         fps = cap.get(cv2.CAP_PROP_FPS)
 
         # Check if camera opened successfully
@@ -132,13 +124,10 @@ for videoFolderName in folder_list:
         #video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount)+'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
         video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount)+'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
 
-        if args.image:
-            image_data_acum = []
-
         idx = 0
 
         w_frame, h_frame = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
+        print("Init video size:",w_frame, h_frame)
         ret, frame = cap.read()
 
         # While a frame was read
@@ -156,8 +145,9 @@ for videoFolderName in folder_list:
             # ###### IMAGE - LANDMARK ANOTATION SECTION #######
             # Process
             holisResults = holistic.process(imageBGR)
-            
+
             if holisResults.pose_landmarks:
+
                 poseX = [point.x*width for point in holisResults.pose_landmarks.landmark]
                 poseY = [point.y*height for point in holisResults.pose_landmarks.landmark]
 
@@ -176,28 +166,29 @@ for videoFolderName in folder_list:
                 left = int(sl[0] - sRange*prop)
                 right = int(sr[0] + sRange*prop)
 
-                bTop, bBot, bLeft, bRight = 0, 0, 0, 0
-
                 if(botton > height):
-                    bBot = botton - height
                     botton = height-1
                 if(top < 0):
-                    bBot = -top
                     top = 0
                 if(left < 0):
-                    bLeft = -left
                     left = 0
                 if(right > width):
-                    bRight = right - width
                     right = width-1
 
                 black = [0,0,0]
-                imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],bBot,bTop,bLeft,bRight,cv2.BORDER_CONSTANT,value=black)
+                imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],0,0,0,0,cv2.BORDER_CONSTANT,value=black)
+            else:
+                if top == 0 and botton ==0 and left == 0 and right == 0:
+                    print("NO KEYPOINT IN THE FIRST FRAME:",videoFolderPath + os.sep + videoFile)
+                else:
+                    # if it is not the first frame it takes the previous value of top, botton, left and right
+                    imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],0,0,0,0,cv2.BORDER_CONSTANT,value=black)
+
             imageBGR = cv2.resize(imageBGR, (220, 220))
             imageBGR = cv2.cvtColor(imageBGR, cv2.COLOR_RGB2BGR)
-            
+
             holisResults = holistic.process(imageBGR)
-            
+
             # POSE
 
             kpDict["pose"]={}
@@ -226,6 +217,7 @@ for videoFolderName in folder_list:
             # Right hand
             kpDict["right_hand"]={}
             if(holisResults.right_hand_landmarks):
+
                 kpDict["right_hand"]["x"] = [point.x for point in holisResults.right_hand_landmarks.landmark]
                 kpDict["right_hand"]["y"] = [point.y for point in holisResults.right_hand_landmarks.landmark]
 
@@ -280,9 +272,6 @@ for videoFolderName in folder_list:
                 kpDict["face"]["y"] = [1.0 for point in range(0, 468)]
 
             keypointsDict.append(kpDict)
-            if args.image:
-                # acumulate image frame as a data
-                image_data_acum.append(imageBGR)
             video.write(imageBGR)
             # Next frame
             ret, frame = cap.read()
@@ -296,7 +285,7 @@ for videoFolderName in folder_list:
                     "witdh": width
                 },
                 "keypoints_path": pklKeypointsPath,
-                "image_path": pklImagePath,
+                #"image_path": pklImagePath,
                 "frame_end": idx,
                 "frame_start": 1,
                 "instance_id": IdCount,
@@ -342,35 +331,20 @@ for videoFolderName in folder_list:
         # [Pose, Hand left, Hand right, face] with its corresponding size
         # keypointsData = np.asarray(list_seq).reshape(-1, (33+21+21+0)*2, order="F")
 
-        if args.image:
-            imageData = np.asarray(image_data_acum)
-            # to change from (T, H, W, C) to (T, C, H, W)
-            # T = timesteps
-            # C = channels = 3
-            # H and W are dimentions of the image
-            imageData = np.moveaxis(imageData, -1, 1)
-            # image s
-            imageData = imageData/255
-
         print(videoFolderPath, videoFile, "\nkeypoints path:", pklKeypointsPath)
         print("Unique name path:", cropVideoPath + word + "_" + str(IdCount))
-        if args.image:
-            print("Image shape:", imageData.shape)
 
         # Save Pickle
 
         with open(pklKeypointsPath, 'wb') as pickle_file:
-            pkl.dump(keypointsDict, pickle_file)
+            print()
+            #pkl.dump(keypointsDict, pickle_file)
 
-        if args.image:
-            print("Image path:",pklImagePath)
-            with open(pklImagePath, 'wb') as pickle_file:
-                pkl.dump(imageData, pickle_file)
         print()
         
         # Save JSON
         df = pd.DataFrame(LSP)
-        df.to_json(dictPath, orient='index', indent=2)
+        #df.to_json(dictPath, orient='index', indent=2)
         
         # Id of each instance
         IdCount += 1
