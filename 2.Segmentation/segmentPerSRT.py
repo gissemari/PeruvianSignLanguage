@@ -140,7 +140,8 @@ for filePath in listFile:
         print(line.start.to_time().strftime("%H:%M:%S.%f"), iniFrame, endFrame, endFrame - iniFrame)
         if flgGesture:
             #line.text.upper()
-            outSegment = cv2.VideoWriter(outputFolder+'/'+ line.text+'_'+str(sentence)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
+            rmSpacesName = line.text.replace(' ','-')
+            outSegment = cv2.VideoWriter(outputFolder+'/'+ rmSpacesName +'_'+str(sentence)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
         else:
         	
             #foldName = outputVideoPath+inputName+'/'+inputName+'_'+str(sentence)+'.mp4'

@@ -3,11 +3,12 @@ source activate chalearn
 cp -r /home/bejaranog/signLanguage/PeruvianSignLanguage/utils /home/bejaranog/signLanguage/PeruvianSignLanguage/2.Segmentation
 cp -r /home/bejaranog/signLanguage/PeruvianSignLanguage/utils /home/bejaranog/signLanguage/PeruvianSignLanguage/4.Translation/FrameToKeypoint
 cp -r /home/bejaranog/signLanguage/PeruvianSignLanguage/utils /home/bejaranog/signLanguage/PeruvianSignLanguage/5.Preparation
-#export PYTHON_PATH=/home/bejaranog/signLanguage/PeruvianSignLanguage
 
 python /home/bejaranog/signLanguage/PeruvianSignLanguage/2.Segmentation/segmentPerSRT.py --rawVideoPath /data/bejaranog/signLanguage/Data/AEC/Videos/RawVideo/ --srtPath /data/bejaranog/signLanguage/Data/AEC/SRT/SRT_SIGN/ --outputVideoPath /data/bejaranog/signLanguage/Data/AEC/Videos/SEGMENTED_SIGN/ --flgGesture 1 
 
-python /home/bejaranog/signLanguage/PeruvianSignLanguage/4.Translation/FrameToKeypoint/ConvertVideoToDict.py --inputPath /data/bejaranog/signLanguage/Data/AEC/Videos/SEGMENTED_SIGN/ --img_output  /data/bejaranog/signLanguage/Data/AEC/Dataset/img/  --dict_output /data/bejaranog/signLanguage/Data/AEC/Dataset/dict/ --keypoints_output /data/bejaranog/signLanguage/Data/AEC/Dataset/keypoints/
+python /home/bejaranog/signLanguage/PeruvianSignLanguage/4.Translation/FrameToKeypoint/multiprocess.py --inputPath /data/bejaranog/signLanguage/Data/AEC/Videos/SEGMENTED_SIGN/ --dict_output /data/bejaranog/signLanguage/Data/AEC/Dataset/dict/ --keypoints_output /data/bejaranog/signLanguage/Data/AEC/Dataset/keypoints/
+
+#python /home/bejaranog/signLanguage/PeruvianSignLanguage/4.Translation/FrameToKeypoint/ConvertVideoToDict.py --inputPath /data/bejaranog/signLanguage/Data/AEC/Videos/SEGMENTED_SIGN/ --img_output  /data/bejaranog/signLanguage/Data/AEC/Dataset/img/  --dict_output /data/bejaranog/signLanguage/Data/AEC/Dataset/dict/ --keypoints_output /data/bejaranog/signLanguage/Data/AEC/Dataset/keypoints/
 
 #python 5.Preparation/DictToSample.py --dict_Path ./Data/Dataset/dict/dict.json --shuffle --leastValue --output_Path ./Data/Dataset/readyToRun/ --words 10
 
