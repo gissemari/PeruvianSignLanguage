@@ -28,7 +28,7 @@ mp_holistic = mp.solutions.holistic
 ##############
 
 # HOLISTIC parameters.
-holistic = mp_holistic.Holistic(static_image_mode=False,
+holistic = mp_holistic.Holistic(static_image_mode=True,
                                 model_complexity=2,
                                 min_detection_confidence=0.5,
                                 min_tracking_confidence=0.5)
@@ -120,7 +120,8 @@ def worker(data):
                 right = width-1
 
             black = [0,0,0]
-            imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],bBot,bTop,bLeft,bRight,cv2.BORDER_CONSTANT,value=black)
+            #imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],bBot,bTop,bLeft,bRight,cv2.BORDER_CONSTANT,value=black)
+            imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],0,0,0,0,cv2.BORDER_CONSTANT,value=black)
         imageBGR = cv2.resize(imageBGR, (220, 220))
         imageBGR = cv2.cvtColor(imageBGR, cv2.COLOR_RGB2BGR)
         
