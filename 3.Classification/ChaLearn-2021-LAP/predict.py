@@ -68,7 +68,7 @@ if __name__ == '__main__':
             predictions = torch.argmax(logits, dim=1)
             for j in range(logits.size(0)):
                 submission[paths[j]] = predictions[j].item()
-
+    print(submission)
     with open(args.submission_template) as stf:
         reader = csv.reader(stf)
         with open(args.out, 'w') as of:

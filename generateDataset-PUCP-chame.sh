@@ -5,9 +5,9 @@ cp -r $PATH_ASL/utils $PATH_ASL/2.Segmentation
 cp -r $PATH_ASL/utils $PATH_ASL/4.Translation/FrameToKeypoint
 cp -r $PATH_ASL/utils $PATH_ASL/5.Preparation
 
-python 2.Segmentation/segmentPerSRT.py --rawVideoPath $PATH_ASL/Data/PUCP_PSL_DGI156/Videos/original/ --srtPath $PATH_ASL/Data/PUCP_PSL_DGI156/SRT/SRT_SEGMENTED_SIGN/ --outputVideoPath $PATH_ASL/Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/ --flgGesture 1 
+#python 2.Segmentation/segmentPerSRT.py --rawVideoPath $PATH_ASL/Data/PUCP_PSL_DGI156/Videos/original/ --srtPath $PATH_ASL/Data/PUCP_PSL_DGI156/SRT/SRT_SEGMENTED_SIGN/ --outputVideoPath $PATH_ASL/Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/ --flgGesture 1 
 
-python 4.Translation/FrameToKeypoint/multiprocess.py --inputPath $PATH_ASL/Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/ --dict_output $PATH_ASL/Data/PUCP_PSL_DGI156/Dataset/dict/ --keypoints_output $PATH_ASL/Data/PUCP_PSL_DGI156/Dataset/keypoints/
+python 4.Translation/FrameToKeypoint/ConvertVideoToDict.py --inputPath $PATH_ASL/Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/ --dict_output $PATH_ASL/Data/PUCP_PSL_DGI156/Dataset/dict/ --keypoints_output $PATH_ASL/Data/PUCP_PSL_DGI156/Dataset/keypoints/
 
 #python 4.Translation/FrameToKeypoint/ConvertVideoToDict.py --inputPath $PATH_ASL/Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/ --dict_output $PATH_ASL/Data/PUCP_PSL_DGI156/Dataset/dict/ --keypoints_output $PATH_ASL/Data/PUCP_PSL_DGI156/Dataset/keypoints/
 
