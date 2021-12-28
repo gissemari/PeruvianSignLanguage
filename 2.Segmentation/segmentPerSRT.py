@@ -137,7 +137,7 @@ for filePath in listFile:
         positionEnd = positionEnd*fps
         print(iniFrame, endFrame, positionStart,positionEnd)
         '''
-        print(line.start.to_time().strftime("%H:%M:%S.%f"), iniFrame, endFrame, endFrame - iniFrame)
+        print(line.start.to_time().strftime("%H:%M:%S.%f"),line.end.to_time().strftime("%H:%M:%S.%f"), ini, end, iniFrame, endFrame, endFrame - iniFrame)
         if flgGesture:
             #line.text.upper()
             rmSpacesName = line.text.replace(' ','-')
@@ -150,7 +150,7 @@ for filePath in listFile:
         # Doc: CV_CAP_PROP_POS_MSEC Current position of the video file in milliseconds or video capture timestamp.
         # cap.set(cv2.CAP_PROP_POS_MSEC,line.start.to_time())
         # To give a threshold
-        for i in range(iniFrame-1, endFrame+1):
+        for i in range(iniFrame, endFrame+1):
 
             # from https://stackoverflow.com/questions/33650974/opencv-python-read-specific-frame-using-videocapture
             # frame_no = (frame_seq /(time_length*fps))
@@ -159,8 +159,11 @@ for filePath in listFile:
             # i: frame we select in range ("-1" is added because frame count starts at 0 value)
             # fps: frames per seconds of the video
             # videoDuration: duration in seconds of the video
-            pos = i-1/fps*videoDuration
-            cap.set(cv2.CAP_PROP_POS_FRAMES, pos)
+            
+            # it seems like we are using calculating pos in vaine, we can use i
+            #pos = i-1/fps*videoDuration
+            #print(i, pos, i-1/fps*1000)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, i)
 
             ret, frame = cap.read()
             # While a frame was read
