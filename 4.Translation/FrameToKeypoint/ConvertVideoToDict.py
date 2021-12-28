@@ -129,7 +129,10 @@ for videoFolderName in folder_list:
         w_frame, h_frame = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         print("Init video size:",w_frame, h_frame)
         ret, frame = cap.read()
-
+        top = 0
+        botton = 0
+        left = 0
+        right = 0
         # While a frame was read
         while ret is True:
 
