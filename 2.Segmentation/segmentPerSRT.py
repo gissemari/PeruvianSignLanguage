@@ -137,7 +137,9 @@ for filePath in listFile:
         positionEnd = positionEnd*fps
         print(iniFrame, endFrame, positionStart,positionEnd)
         '''
-        print(line.start.to_time().strftime("%H:%M:%S.%f"),line.end.to_time().strftime("%H:%M:%S.%f"), ini, end, iniFrame, endFrame, endFrame - iniFrame)
+        
+        #print(line.start.to_time().strftime("%H:%M:%S.%f"),line.end.to_time().strftime("%H:%M:%S.%f"), ini, end, iniFrame, endFrame, endFrame - iniFrame)
+        
         if flgGesture:
             #line.text.upper()
             rmSpacesName = line.text.replace(' ','-')
