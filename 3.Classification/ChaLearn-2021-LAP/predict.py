@@ -68,20 +68,22 @@ if __name__ == '__main__':
             predictions = torch.argmax(logits, dim=1)
             for j in range(logits.size(0)):
                 submission[paths[j]] = predictions[j].item()
-    print(submission)
+    #print(submission)
     with open(args.submission_template) as stf:
         reader = csv.reader(stf)
+        totalRows = 0#len(list(reader))
         with open(args.out, 'w') as of:
             writer = csv.writer(of)
             accum = 0
             for row in reader:
                 sample = row[0]
                 print(f'Predicting {sample}', end=' ')
-                print(f'as {submission[sample]}')
+                print(f'as {submission[sample]} - pred {submission[sample]} and real {row[1]}')
                 match=0
                 if int(row[1]) == int(submission[sample]):
                     match=1
                     accum+=1
-                writer.writerow([sample, submission[sample], row[1], match])
-    print(f'Accuracy for Test set {accum/len(reader)}')
+                totalRows+=1
+                writer.writerow([sample, submission[sample], str(row[1]), str(match)])
+    print(f'Accuracy for Test set {accum/totalRows}')
     print(f'Wrote submission to {args.out}')
