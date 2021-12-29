@@ -84,6 +84,16 @@ if __name__ == '__main__':
                     match=1
                     accum+=1
                 totalRows+=1
-                writer.writerow([sample, submission[sample], str(row[1]), str(match)])
+                
+                # identifying subject
+                with open(args.subject) as subjectFile:
+                    readerSubject = csv.reader(subjectFile)
+                    idx = sample.split('_')[-1]
+                    subjectName = 'NA'
+                    for name, idxStart, idxEnd in readerSubject:
+                        if idxStart <= idx and idx<= idxEnd
+                            subjectName = name
+                            break
+                writer.writerow([sample, submission[sample], str(row[1]), str(match), subjectName])
     print(f'Accuracy for Test set {accum/totalRows}')
     print(f'Wrote submission to {args.out}')
