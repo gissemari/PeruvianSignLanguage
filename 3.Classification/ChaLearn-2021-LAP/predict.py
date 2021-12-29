@@ -73,10 +73,15 @@ if __name__ == '__main__':
         reader = csv.reader(stf)
         with open(args.out, 'w') as of:
             writer = csv.writer(of)
+            accum = 0
             for row in reader:
                 sample = row[0]
                 print(f'Predicting {sample}', end=' ')
                 print(f'as {submission[sample]}')
-                writer.writerow([sample, submission[sample]])
-
+                match=0
+                if int(row[1]) == int(submission[sample]):
+                    match=1
+                    accum+=1
+                writer.writerow([sample, submission[sample], row[1], match])
+    print(f'Accuracy for Test set {accum/len(reader)}')
     print(f'Wrote submission to {args.out}')
