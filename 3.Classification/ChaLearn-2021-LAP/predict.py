@@ -78,8 +78,8 @@ if __name__ == '__main__':
             accum = 0
             for row in reader:
                 sample = row[0]
-                print(f'Predicting {sample}', end=' ')
-                print(f'as {submission[sample]} - pred {submission[sample]} and real {row[1]}')
+                #print(f'Predicting {sample}', end=' ')
+                #print(f'as {submission[sample]} - pred {submission[sample]} and real {row[1]}')
                 match=0
                 if int(row[1]) == int(submission[sample]):
                     match=1
