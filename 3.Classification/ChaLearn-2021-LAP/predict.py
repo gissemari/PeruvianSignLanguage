@@ -21,6 +21,7 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint', type=str, help='Path to the checkpoint', required=True)
     parser.add_argument('--submission_template', type=str, help='Path to the submission template', required=True)
     parser.add_argument('--out', type=str, help='Output file path', required=True)
+    parser.add_argument('--subject', type=str, help='file of subjects', required=True)
 
     program_args, _ = parser.parse_known_args()
 
@@ -88,10 +89,10 @@ if __name__ == '__main__':
                 # identifying subject
                 with open(args.subject) as subjectFile:
                     readerSubject = csv.reader(subjectFile)
-                    idx = sample.split('_')[-1]
+                    idx = int(sample.split('_')[-1])
                     subjectName = 'NA'
                     for name, idxStart, idxEnd in readerSubject:
-                        if idxStart <= idx and idx<= idxEnd
+                        if (int(idxStart) <= idx) and (idx<= int(idxEnd)):
                             subjectName = name
                             break
                 writer.writerow([sample, submission[sample], str(row[1]), str(match), subjectName])
