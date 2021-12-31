@@ -341,13 +341,13 @@ for videoFolderName in folder_list:
 
         with open(pklKeypointsPath, 'wb') as pickle_file:
             print()
-            #pkl.dump(keypointsDict, pickle_file)
+            pkl.dump(keypointsDict, pickle_file)
 
         print()
         
         # Save JSON
         df = pd.DataFrame(LSP)
-        #df.to_json(dictPath, orient='index', indent=2)
+        df.to_json(dictPath, orient='index', indent=2)
         
         # Id of each instance
         IdCount += 1
