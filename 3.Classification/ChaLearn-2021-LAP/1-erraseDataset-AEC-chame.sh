@@ -3,9 +3,9 @@ rm data/val*.csv
 rm project/train*.csv
 echo "csv removed"
 rm -r project/data/kp/train/*.*
-rm -r data/kp/val/*.*
+rm -r project/data/kp/val/*.*
 echo "keypoints removed"
-rm -r data/mp4/val/*.*
+rm -r project/data/mp4/val/*.*
 rm -r project/data/mp4/val/*
 rm -r project/data/mp4/train/*.*
 rm -r project/data/mp4/train/*
