@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     # Program specific
     parser.add_argument('--log_dir', type=str, help='Directory to which experiment logs will be written', required=True)
-    parser.add_argument('--seed', type=int, help='Random seed', default=42)
+    parser.add_argument('--seed', type=int, help='Random seed', default=41)
     parser.add_argument('--dataset', type=str, help='Dataset module', required=True)
 
     program_args, _ = parser.parse_known_args()
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     pl.seed_everything(args.seed)
 
     trainer = pl.Trainer(callbacks=[
-        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=50),
+        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=100),
         LearningRateMonitor(logging_interval='epoch')
     ], logger=TensorBoardLogger(args.log_dir, name=args.model),
         fast_dev_run=args.fast_dev_run,

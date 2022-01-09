@@ -10,6 +10,10 @@ from .vtn_hcpf import VTNHCPF
 from .vtn_hcpf_d import VTNHCPFD
 import torchmetrics
 
+import numpy as np
+import pandas as pd
+import os.path
+
 def get_model_def():
     return Module
 
@@ -40,10 +44,31 @@ class Module(pl.LightningModule):
                                   self.hparams.dropout, device=self.device)
 
         self.criterion = torch.nn.CrossEntropyLoss()
-        
-        self.accuracy = torchmetrics.Accuracy()
+
+        # Metrics have been changed following this guide
+        # https://www.exxactcorp.com/blog/Deep-Learning/advanced-pytorch-lightning-using-torchmetrics-and-lightning-flash
+
+        self.train_acc = torchmetrics.Accuracy()
+        self.train_f1_micro = torchmetrics.F1(num_classes=NUM_CLASSES, average="micro")
+        self.train_f1_macro = torchmetrics.F1(num_classes=NUM_CLASSES, average="macro")
+        #self.train_auroc = torchmetrics.AUROC(num_classes=NUM_CLASSES, average="micro")
+        self.val_acc = torchmetrics.Accuracy()
+        self.val_f1_micro = torchmetrics.F1(num_classes=NUM_CLASSES, average="micro")
+        self.val_f1_macro = torchmetrics.F1(num_classes=NUM_CLASSES, average="macro")
+        #self.val_auroc = torchmetrics.AUROC(num_classes=NUM_CLASSES, average="micro")
 
         self.epochCount = 0
+
+        self.best_val_acc = np.NINF
+        self.best_val_f1_micro = np.NINF
+        self.best_val_f1_macro = np.NINF
+        self.best_val_loss = np.inf
+
+        self.best_train_acc = np.NINF
+        self.best_train_f1_micro = np.NINF
+        self.best_train_f1_macro = np.NINF
+        self.best_train_loss = np.inf
+
 
     def forward(self, x):
         return self.model(x)
@@ -69,20 +94,34 @@ class Module(pl.LightningModule):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
-        acc = self.accuracy(z, y)
+        # accumulate and return metrics for logging
+        acc = self.train_acc(z, y)
+        f1_micro = self.train_f1_micro(z, y)
+        f1_macro = self.train_f1_macro(z, y)
+        # just accumulate
+        #self.train_auroc.update(z, y)
+        self.log("train_loss", loss)
+        self.log("train_accuracy", acc)
+        self.log("train_f1_micro", f1_micro)
+        self.log("train_f1_macro", f1_macro)
+        #acc = self.accuracy(z, y)
         #print("Train Loss:",loss,"Train Acc:",acc)
-        self.log('train_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log('train_accuracy',acc ,on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        #self.log('train_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        #self.log('train_accuracy',acc ,on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
-        acc = self.accuracy(z, y)
+        self.val_acc.update(z, y)
+        self.val_f1_micro.update(z, y)
+        self.val_f1_macro.update(z, y)
+        #self.val_auroc.update(pred, y)
+        #acc = self.accuracy(z, y)
         #print("Val Loss:",loss, "Val Acc:", acc)
-        self.log('val_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log('val_accuracy',acc ,on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        #self.log('val_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        #self.log('val_accuracy',acc ,on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def training_epoch_end(self, training_step_outputs):
@@ -97,10 +136,36 @@ class Module(pl.LightningModule):
         avg_loss = sum(loss_acum)/len(loss_acum)
 
         self.epochCount = self.epochCount + 1
+
+        # compute metrics
+        train_accuracy = self.train_acc.compute()
+        train_f1_micro = self.train_f1_micro.compute()
+        train_f1_macro = self.train_f1_macro.compute()
+        #train_auroc = self.train_auroc.compute()
+        # log metrics
+        self.log("train_accuracy", train_accuracy)
+        self.log("train_f1_micro", train_f1_micro)
+        self.log("train_f1_macro", train_f1_macro)
+        # reset all metrics
+        self.train_acc.reset()
+        self.train_f1_micro.reset()
+        self.train_f1_macro.reset()
+        print(f"\ntraining accuracy: {train_accuracy:.4}, "\
+        f"f1_micro: {train_f1_micro:.4}, "\
+        f"f1_macro: {train_f1_macro:.4}")
         #result = pl.EvalResult(checkpoint_on=avg_loss)
         print("Train Lss AVR:",avg_loss)
         print("-------------------------------------------------------------")
         #result.log('train_avr_loss', avg_loss, on_epoch=True, prog_bar=True)
+
+        if self.best_train_acc < train_accuracy:
+            self.best_train_acc = train_accuracy
+        if self.best_train_f1_micro < train_f1_micro:
+            self.best_train_f1_micro = train_f1_micro
+        if self.best_train_f1_macro < train_f1_macro:
+            self.best_train_f1_macro = train_f1_macro
+        if self.best_train_loss > avg_loss:
+            self.best_train_loss = avg_loss
 
     def validation_epoch_end(self, validation_step_outputs):
 
@@ -113,6 +178,72 @@ class Module(pl.LightningModule):
         avg_loss = sum(loss_acum)/len(loss_acum)
         print("Epoch:", self.epochCount)
         print("Test Lss AVR:",avg_loss)
+
+        # compute metrics
+        val_accuracy = self.val_acc.compute()
+        val_f1_micro = self.val_f1_micro.compute()
+        val_f1_macro = self.val_f1_macro.compute()
+        #train_auroc = self.train_auroc.compute()
+        # log metrics
+        self.log("val_accuracy", val_accuracy)
+        self.log("val_f1_micro", val_f1_micro)
+        self.log("val_f1_macro", val_f1_macro)
+        # reset all metrics
+        self.val_acc.reset()
+        self.val_f1_micro.reset()
+        self.val_f1_macro.reset()
+        print(f"\ntraining accuracy: {val_accuracy:.4}, "\
+        f"f1_micro: {val_f1_micro:.4}, "\
+        f"f1_macro: {val_f1_macro:.4}")
+
+        if self.best_val_acc < val_accuracy:
+            self.best_val_acc = val_accuracy
+        if self.best_val_f1_micro < val_f1_micro:
+            self.best_val_f1_micro = val_f1_micro
+        if self.best_val_f1_macro < val_f1_macro:
+            self.best_val_f1_macro = val_f1_macro
+        if self.best_val_loss > avg_loss:
+            self.best_val_loss = avg_loss
+
+    def on_train_end(self):
+         print(f"\nbest val acc: {self.best_val_acc:.4}")
+         print(f"\nbest val f1 micro: {self.best_val_f1_micro:.4}")
+         print(f"\nbest val f1 macro: {self.best_val_f1_macro:.4}")
+         print(f"\nbest val loss: {self.best_val_loss:.4}")
+         print(f"\nbest train acc: {self.best_train_acc:.4}")
+         print(f"\nbest train f1 micro: {self.best_train_f1_micro:.4}")
+         print(f"\nbest train f1 macro: {self.best_train_f1_macro:.4}")
+         print(f"\nbest train loss: {self.best_train_loss:.4}")
+
+         dfData = pd.DataFrame({
+             "ListWords": [str(self.hparams.num_classes) + " words"],
+             "SequenceLen": [self.hparams.sequence_length],
+             "LearningRate":[self.hparams.learning_rate],
+             "Stride":[self.hparams.temporal_stride],
+             "batch_size":[self.hparams.batch_size],
+             "accumulated_batch_size":[self.hparams.accumulate_grad_batches],
+             "DropOut":[self.hparams.dropout],
+             "BestValAcc": [self.best_val_acc.cpu().data.numpy()],
+             "BestValF1-Micro": [self.best_val_f1_micro.cpu().data.numpy()],
+             "BestValF1-Macro": [self.best_val_f1_macro.cpu().data.numpy()],
+             "BestValLoss": [self.best_val_loss.cpu().data.numpy()],
+             "BestTrainAcc": [self.best_train_acc.cpu().data.numpy()],
+             "BestTrainF1-Micro": [self.best_train_f1_micro.cpu().data.numpy()],
+             "BestTrainF1-Macro": [self.best_train_f1_macro.cpu().data.numpy()],
+             "BestTrainLoss": [self.best_train_loss.cpu().data.numpy()],
+             "TestAcc":[-1],
+             "seed":[self.hparams.seed]})
+
+         if os.path.isfile('trainSummary.csv'):
+             df = pd.read_csv("trainSummary.csv",index_col=0)
+             df = df.append(dfData)
+             df.to_csv("trainSummary.csv")
+             print ("trainSummary.csv updated")
+         else:
+             df = pd.DataFrame()
+             df = df.append(dfData)
+             df.to_csv("trainSummary.csv")
+             print ("File not exist - trainSummary.csv created")
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate,
@@ -127,10 +258,14 @@ class Module(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--learning_rate', type=float, default=1e-3)
+        #parser.add_argument('--sequence_length', type=int, default=16)
+        #parser.add_argument('--temporal_stride', type=int, default=2)
         parser.add_argument('--num_heads', type=int, default=4)
         parser.add_argument('--num_layers', type=int, default=2)
         parser.add_argument('--embed_size', type=int, default=512)
         parser.add_argument('--cnn', type=str, default='rn18')
+        #parser.add_argument('--batch_size', type=int, default=32)
+        #parser.add_argument('--accumulate_grad_batches', type=int, default=8)
         parser.add_argument('--freeze_layers', type=int, default=0,
                             help='Freeze all CNN layers up to this index (default: 0, no frozen layers)')
         parser.add_argument('--weight_decay', type=float, default=0)
