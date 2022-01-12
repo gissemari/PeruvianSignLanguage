@@ -99,8 +99,8 @@ if __name__ == '__main__':
                             break
                 writer.writerow([sample, submission[sample], str(row[1]), str(match), subjectName])
 
-    df = pd.read_csv("trainSummary.csv",index_col=0)
+    df = pd.read_csv("trainSummary_2.csv",index_col=0)
     df.loc[(df["SequenceLen"]==args.sequence_length) & (df["Stride"]==args.temporal_stride) & (df["LearningRate"]==args.learning_rate) & (df["seed"]==program_args.seed) ,["TestAcc"]] = accum/totalRows
-    df.to_csv("trainSummary.csv")
+    df.to_csv("trainSummary_2.csv")
     print(f'Accuracy for Test set {accum/totalRows}')
     print(f'Wrote submission to {args.out}')

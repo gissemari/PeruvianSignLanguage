@@ -7,6 +7,8 @@ from argparse import ArgumentParser
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.callbacks import LearningRateMonitor
+from pytorch_lightning.callbacks import ModelSummary
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from models import module
@@ -43,8 +45,10 @@ if __name__ == '__main__':
     pl.seed_everything(args.seed)
 
     trainer = pl.Trainer(callbacks=[
-        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=100),
-        LearningRateMonitor(logging_interval='epoch')
+        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=2),
+        LearningRateMonitor(logging_interval='epoch'),
+        ModelCheckpoint(filename='bestLoggedModel'),
+        ModelSummary(max_depth=2)
     ], logger=TensorBoardLogger(args.log_dir, name=args.model),
         fast_dev_run=args.fast_dev_run,
         track_grad_norm=args.track_grad_norm,

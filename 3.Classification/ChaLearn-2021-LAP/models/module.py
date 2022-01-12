@@ -92,12 +92,13 @@ class Module(pl.LightningModule):
     '''
     def training_step(self, batch, batch_idx):
         x, y = batch
-        z = self.model(x)
+        z = self.forward(x)
         loss = self.criterion(z, y)
         # accumulate and return metrics for logging
         acc = self.train_acc(z, y)
         f1_micro = self.train_f1_micro(z, y)
         f1_macro = self.train_f1_macro(z, y)
+        #print("TRAIN",z,y)
         # just accumulate
         #self.train_auroc.update(z, y)
         self.log("train_loss", loss)
@@ -112,12 +113,13 @@ class Module(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        z = self.model(x)
+        z = self.forward(x)
         loss = self.criterion(z, y)
+        #print("VAL",z,y)
         self.val_acc.update(z, y)
         self.val_f1_micro.update(z, y)
         self.val_f1_macro.update(z, y)
-        #self.val_auroc.update(pred, y)
+        #self.val_auroc.update(z, y)
         #acc = self.accuracy(z, y)
         #print("Val Loss:",loss, "Val Acc:", acc)
         #self.log('val_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
@@ -142,6 +144,7 @@ class Module(pl.LightningModule):
         train_f1_micro = self.train_f1_micro.compute()
         train_f1_macro = self.train_f1_macro.compute()
         #train_auroc = self.train_auroc.compute()
+        #print("TRAIN_E_E:",train_auroc)
         # log metrics
         self.log("train_accuracy", train_accuracy)
         self.log("train_f1_micro", train_f1_micro)
@@ -152,7 +155,8 @@ class Module(pl.LightningModule):
         self.train_f1_macro.reset()
         print(f"\ntraining accuracy: {train_accuracy:.4}, "\
         f"f1_micro: {train_f1_micro:.4}, "\
-        f"f1_macro: {train_f1_macro:.4}")
+        f"f1_macro: {train_f1_macro:.4}") #\
+        #f"auroc: {train_auroc:.4}")
         #result = pl.EvalResult(checkpoint_on=avg_loss)
         print("Train Lss AVR:",avg_loss)
         print("-------------------------------------------------------------")
@@ -183,18 +187,22 @@ class Module(pl.LightningModule):
         val_accuracy = self.val_acc.compute()
         val_f1_micro = self.val_f1_micro.compute()
         val_f1_macro = self.val_f1_macro.compute()
-        #train_auroc = self.train_auroc.compute()
-        # log metrics
+        #val_auroc = self.val_auroc.compute()
+        #print("VAL_E_END",val_auroc)
+        # log metrics 
         self.log("val_accuracy", val_accuracy)
         self.log("val_f1_micro", val_f1_micro)
         self.log("val_f1_macro", val_f1_macro)
+        #self.log("val_auroc", val_auroc)
         # reset all metrics
         self.val_acc.reset()
         self.val_f1_micro.reset()
         self.val_f1_macro.reset()
+        #self.val_auroc.reset()
         print(f"\ntraining accuracy: {val_accuracy:.4}, "\
         f"f1_micro: {val_f1_micro:.4}, "\
-        f"f1_macro: {val_f1_macro:.4}")
+        f"f1_macro: {val_f1_macro:.4}") #\
+        #f"f1: {val_f1:.4}, auroc: {val_auroc:.4}")
 
         if self.best_val_acc < val_accuracy:
             self.best_val_acc = val_accuracy
@@ -234,16 +242,16 @@ class Module(pl.LightningModule):
              "TestAcc":[-1],
              "seed":[self.hparams.seed]})
 
-         if os.path.isfile('trainSummary.csv'):
-             df = pd.read_csv("trainSummary.csv",index_col=0)
+         if os.path.isfile('trainSummary_2.csv'):
+             df = pd.read_csv("trainSummary_2.csv",index_col=0)
              df = df.append(dfData)
-             df.to_csv("trainSummary.csv")
-             print ("trainSummary.csv updated")
+             df.to_csv("trainSummary_2.csv")
+             print ("trainSummary_2.csv updated")
          else:
              df = pd.DataFrame()
              df = df.append(dfData)
-             df.to_csv("trainSummary.csv")
-             print ("File not exist - trainSummary.csv created")
+             df.to_csv("trainSummary_2.csv")
+             print ("File not exist - trainSummary_2.csv created")
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate,
