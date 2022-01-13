@@ -23,8 +23,8 @@ pathAllFiles = args.allfiles
 all_files = glob.glob(pathAllFiles + '*/*.mp4')
 
 if args.train:
-    train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
-    val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
+    train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8',header=None)
+    val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8',header=None)
     
     #print(train_ids)
 
@@ -64,7 +64,7 @@ if args.train:
             shutil.copyfile(filePath.replace('\\','/'), target)
         '''
 else:
-    test_ids = pd.read_csv("./data/test_ids.csv", encoding='utf-8')
+    test_ids = pd.read_csv("./data/test_ids.csv", encoding='utf-8', header=None)
 
     #print(all_files)
     for filePath in all_files:

@@ -41,6 +41,7 @@ class VTNHCPF(nn.Module):
 
         # Reshape to put both hand crops on the same axis.
         b, t, x, c, h, w = rgb_clip.size()
+
         rgb_clip = rgb_clip.view(b, t * x, c, h, w)
         z = self.feature_extractor(rgb_clip)
         # Reshape back to extract features of both wrist crops as one feature vector.

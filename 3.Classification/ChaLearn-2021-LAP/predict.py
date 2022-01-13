@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import torch
+import torchmetrics
 
 from models import module
 
@@ -24,6 +25,9 @@ if __name__ == '__main__':
     parser.add_argument('--submission_template', type=str, help='Path to the submission template', required=True)
     parser.add_argument('--out', type=str, help='Output file path', required=True)
     parser.add_argument('--subject', type=str, help='file of subjects', required=True)
+    parser.add_argument('--csv_name', type=str, help='')
+    parser.add_argument('--version', type=str, help='')
+
 
     program_args, _ = parser.parse_known_args()
 
@@ -72,6 +76,9 @@ if __name__ == '__main__':
             for j in range(logits.size(0)):
                 submission[paths[j]] = predictions[j].item()
     #print(submission)
+    predLabels = []
+    groundLabels = []
+
     with open(args.submission_template) as stf:
         reader = csv.reader(stf)
         totalRows = 0#len(list(reader))
@@ -83,6 +90,8 @@ if __name__ == '__main__':
                 #print(f'Predicting {sample}', end=' ')
                 #print(f'as {submission[sample]} - pred {submission[sample]} and real {row[1]}')
                 match=0
+                predLabels.append(submission[sample])
+                groundLabels.append(int(row[1]))
                 if int(row[1]) == int(submission[sample]):
                     match=1
                     accum+=1
@@ -98,9 +107,18 @@ if __name__ == '__main__':
                             subjectName = name
                             break
                 writer.writerow([sample, submission[sample], str(row[1]), str(match), subjectName])
+    predLabels = torch.tensor(predLabels)
+    groundLabels = torch.tensor(groundLabels)
 
-    df = pd.read_csv("trainSummary_2.csv",index_col=0)
-    df.loc[(df["SequenceLen"]==args.sequence_length) & (df["Stride"]==args.temporal_stride) & (df["LearningRate"]==args.learning_rate) & (df["seed"]==program_args.seed) ,["TestAcc"]] = accum/totalRows
-    df.to_csv("trainSummary_2.csv")
+    f1ScoreMacro = torchmetrics.F1(average='macro', num_classes=args.num_classes)
+    f1ScoreMicro = torchmetrics.F1(average='micro')
+
+    df = pd.read_csv(args.csv_name,index_col=0)
+
+    df.loc[(df["SequenceLen"]==args.sequence_length) & (df["experiment-name"]==args.temporal_stride) &(df["Stride"]==args.temporal_stride) & (df["LearningRate"]==args.learning_rate) & (df["seed"]==program_args.seed) ,["TestAcc"]] = accum/totalRows
+    df.loc[(df["SequenceLen"]==args.sequence_length) & (df["experiment-name"]==args.temporal_stride) &(df["Stride"]==args.temporal_stride) & (df["LearningRate"]==args.learning_rate) & (df["seed"]==program_args.seed) ,["F1-macro"]] = f1ScoreMacro(predLabels,groundLabels).item()
+    df.loc[(df["SequenceLen"]==args.sequence_length) & (df["experiment-name"]==args.temporal_stride) &(df["Stride"]==args.temporal_stride) & (df["LearningRate"]==args.learning_rate) & (df["seed"]==program_args.seed) ,["F1-micro"]] = f1ScoreMicro(predLabels,groundLabels).item()
+
+    df.to_csv(args.csv_name)
     print(f'Accuracy for Test set {accum/totalRows}')
     print(f'Wrote submission to {args.out}')

@@ -8,8 +8,8 @@ if sys.argv[1] == '1':
 
     print("Training in stage2")
 
-    train_reader = pd.read_csv("train_labels.csv", encoding='utf-8')
-    val_reader = pd.read_csv("val_labels.csv", encoding='utf-8')
+    train_reader = pd.read_csv("train_labels.csv", encoding='utf-8', header=None)
+    val_reader = pd.read_csv("val_labels.csv", encoding='utf-8', header=None)
 
     train_stage = [[name,label,'train'] for name, label in train_reader.values.tolist()]
     val_stage = [[name,label,'val'] for name, label in val_reader.values.tolist()]
@@ -32,8 +32,10 @@ if sys.argv[1] == '1':
 
 
 else:
-    test_reader = pd.read_csv("test_labels.csv", encoding='utf-8')
-    test_stage = [[name,label,'test'] for name, label in test_reader.values.tolist()]
-    df = pd.DataFrame(test_stage)
+    test_reader = pd.read_csv("test_labels.csv", encoding='utf-8',header=None)
 
+    test_stage = [[name,label,'test'] for name, label in test_reader.values.tolist()]
+
+    df = pd.DataFrame(test_stage)
+    print(df)
     df.to_csv('test_labels_STAGE2.csv',index=False, header=False)

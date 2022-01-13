@@ -58,14 +58,12 @@ def getLabelsDataFrame(X_train, y_train, dataDict, y_labels):
                         #inst_id.append(dataId)
 
     # Used to get videos from mp4, and other ids. The only prev not unique ID is in file ids.csv
-    nVidFrames = np. stack((newNameUniqueID, nFrames), axis=1)
+    nVidFrames = np.stack((newNameUniqueID, nFrames), axis=1)
     data = np.stack((newNameUniqueID, label), axis=1)
     ids = np.stack((newNameUniqueID, prevNameID), axis=1)
-
     dfData = pd.DataFrame(data)
     dfId = pd.DataFrame(ids)
     dfNFrames = pd.DataFrame(nVidFrames)
-
     return dfData, dfId, dfNFrames
 
 def main():
