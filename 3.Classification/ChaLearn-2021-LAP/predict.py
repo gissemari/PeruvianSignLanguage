@@ -115,9 +115,9 @@ if __name__ == '__main__':
 
     df = pd.read_csv(args.csv_name,index_col=0)
 
-    df.loc[(df["SequenceLen"]==args.sequence_length) & (df["experiment-name"]==args.temporal_stride) &(df["Stride"]==args.temporal_stride) & (df["LearningRate"]==args.learning_rate) & (df["seed"]==program_args.seed) ,["TestAcc"]] = accum/totalRows
-    df.loc[(df["SequenceLen"]==args.sequence_length) & (df["experiment-name"]==args.temporal_stride) &(df["Stride"]==args.temporal_stride) & (df["LearningRate"]==args.learning_rate) & (df["seed"]==program_args.seed) ,["F1-macro"]] = f1ScoreMacro(predLabels,groundLabels).item()
-    df.loc[(df["SequenceLen"]==args.sequence_length) & (df["experiment-name"]==args.temporal_stride) &(df["Stride"]==args.temporal_stride) & (df["LearningRate"]==args.learning_rate) & (df["seed"]==program_args.seed) ,["F1-micro"]] = f1ScoreMicro(predLabels,groundLabels).item()
+    df.loc[(df["version"]==args.version),["TestAcc"]] = accum/totalRows
+    df.loc[(df["version"]==args.version),["F1-macro"]] = f1ScoreMacro(predLabels,groundLabels).item()
+    df.loc[(df["version"]==args.version),["F1-micro"]] = f1ScoreMicro(predLabels,groundLabels).item()
 
     df.to_csv(args.csv_name)
     print(f'Accuracy for Test set {accum/totalRows}')
