@@ -105,21 +105,21 @@ Parameters:
 --input_path
 
 
-###### 2.SEGMENTATION ######
+# 2.SEGMENTATION #
 
 Here we will place all the models to perform automatic segmentations (identification of sign units or sign sentence units).
 
 
 
 
-###### 3.CLASSIFICATION ######
+# 3.CLASSIFICATION #
 
 To run the ChaLearn Model go to ./PeruvianSignLanguaje/3.Classification
 It works with a different data folder where it creates only the classes that the model is working with.
 
 
 
-###### 4.TRANSLATION ######
+# 4.TRANSLATION #
 
 Here we will place all the models to perform the end-to-end translation.
 
