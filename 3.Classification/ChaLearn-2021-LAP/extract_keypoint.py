@@ -129,13 +129,13 @@ def main():
     output_dir = './project/data/kp/'
     
     if args.train==1:
-        train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8')
-        val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8')
+        train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8',header=None)
+        val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8',header=None)
         
         saveJson(train_ids, output_dir, args.src, "train")
         saveJson(val_ids, output_dir, args.src, "val")
     else:
-        test_ids = pd.read_csv("./data/test_ids.csv", encoding='utf-8')
+        test_ids = pd.read_csv("./data/test_ids.csv", encoding='utf-8',header=None)
         saveJson(test_ids, output_dir, args.src, "test")
 
 main()

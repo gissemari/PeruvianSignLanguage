@@ -24,6 +24,8 @@ if __name__ == '__main__':
     parser.add_argument('--log_dir', type=str, help='Directory to which experiment logs will be written', required=True)
     parser.add_argument('--seed', type=int, help='Random seed', default=41)
     parser.add_argument('--dataset', type=str, help='Dataset module', required=True)
+    parser.add_argument('--version', type=str, help='')
+    parser.add_argument('--csv_name', type=str, help='')
 
     program_args, _ = parser.parse_known_args()
 
@@ -49,7 +51,7 @@ if __name__ == '__main__':
         LearningRateMonitor(logging_interval='epoch'),
         ModelCheckpoint(filename='bestLoggedModel'),
         ModelSummary(max_depth=2)
-    ], logger=TensorBoardLogger(args.log_dir, name=args.model),
+    ], logger=TensorBoardLogger(args.log_dir, name=args.model, version=args.version),
         fast_dev_run=args.fast_dev_run,
         track_grad_norm=args.track_grad_norm,
         gradient_clip_val=args.gradient_clip_val,

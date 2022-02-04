@@ -1,3 +1,8 @@
+python predict.py --checkpoint 'project/log/VTN_HCPF/version_1/checkpoints/bestLoggedModel-v1.ckpt'  --log_dir project/log --dataset handcrop_poseflow --submission_template data/test_labels.csv --out submission/predOutputs1.csv --version 1 --subject pucpSubject.csv --seed 41 --num_workers 4 --sequence_length 15 --temporal_stride 1 --learning_rate 1e-4 --gradient_clip_val=1 --gpus 1 --cnn rn18 --num_layers 4 --num_heads 8 --batch_size 4 --accumulate_grad_batches 8 --data_dir project/data/mp4 --model VTN_HCPF  --num_classes 5 --csv_name summary.csv
+
+python predict.py --checkpoint 'project/log/VTN_HCPF/version_2/checkpoints/bestLoggedModel-v1.ckpt'  --log_dir project/log --dataset handcrop_poseflow --submission_template data/test_labels.csv --out submission/predOutputs2.csv --version 2 --subject pucpSubject.csv --seed 51 --num_workers 4 --sequence_length 15 --temporal_stride 1 --learning_rate 1e-4 --gradient_clip_val=1 --gpus 1 --cnn rn18 --num_layers 4 --num_heads 8 --batch_size 4 --accumulate_grad_batches 8 --data_dir project/data/mp4 --model VTN_HCPF  --num_classes 5 --csv_name summary.csv
+
+
 #python predict.py --log_dir project/log --dataset handcrop_poseflow --checkpoint 'project/log/VTN_HCPF/version_26/checkpoints/epoch=41-step=83.ckpt' --submission_template data/test_nframes.csv --out predOutputs.csv  --num_workers 4 --sequence_length 16 --temporal_stride 2 --learning_rate 1e-6 --gradient_clip_val=1 --gpus 1 --cnn rn34 --num_layers 2 --num_heads 2 --batch_size 8 --accumulate_grad_batches 8 --data_dir project/data/mp4 --model VTN_HCPF --num_classes 5
 
 #version_42

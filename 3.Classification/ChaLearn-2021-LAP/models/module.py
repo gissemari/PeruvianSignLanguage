@@ -224,6 +224,7 @@ class Module(pl.LightningModule):
          print(f"\nbest train loss: {self.best_train_loss:.4}")
 
          dfData = pd.DataFrame({
+             "version": [self.hparams.version],
              "ListWords": [str(self.hparams.num_classes) + " words"],
              "SequenceLen": [self.hparams.sequence_length],
              "LearningRate":[self.hparams.learning_rate],
@@ -239,19 +240,22 @@ class Module(pl.LightningModule):
              "BestTrainF1-Micro": [self.best_train_f1_micro.cpu().data.numpy()],
              "BestTrainF1-Macro": [self.best_train_f1_macro.cpu().data.numpy()],
              "BestTrainLoss": [self.best_train_loss.cpu().data.numpy()],
-             "TestAcc":[-1],
-             "seed":[self.hparams.seed]})
+             "TestAcc":[np.NINF],
+             "F1-micro":[np.NINF],
+             "F1-macro":[np.NINF],
+             "seed":[self.hparams.seed],
+             "experiment-name":[self.hparams.csv_name]})
 
-         if os.path.isfile('trainSummary_2.csv'):
-             df = pd.read_csv("trainSummary_2.csv",index_col=0)
+         if os.path.isfile(self.hparams.csv_name):
+             df = pd.read_csv(self.hparams.csv_name,index_col=0)
              df = df.append(dfData)
-             df.to_csv("trainSummary_2.csv")
-             print ("trainSummary_2.csv updated")
+             df.to_csv(self.hparams.csv_name)
+             print ("%s updated"%(self.hparams.csv_name))
          else:
              df = pd.DataFrame()
              df = df.append(dfData)
-             df.to_csv("trainSummary_2.csv")
-             print ("File not exist - trainSummary_2.csv created")
+             df.to_csv(self.hparams.csv_name)
+             print ("File not exist - %s created"%(self.hparams.csv_name))
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate,

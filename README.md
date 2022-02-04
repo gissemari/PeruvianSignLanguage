@@ -1,8 +1,13 @@
-###### 1.PREPROCESSING ######
+The Peruvian Sign Language Interpretation dataset is shared in this drive link [AEC](https://drive.google.com/file/d/1fwfbheNn_a-HlmWE0lSgofTnmnUupsv3/view?usp=sharing)
+
+
+
+# 1.PREPROCESSING #
 
 Every step counts with their own readme file for more details. This readme file is an overview and map of all the different scripts and functions that you can find and do with the data. You can generate the most-heay data with the generateDataset.sh script or find it in this link:
 
-You can also find the conda environment srts2.yml to import where all the libraries used.
+You can also find the conda environment srts2.yml to import all the libraries that use captioning related to SRT files. You can also use the environment.yml to work with all the libraries for videos.
+
 
 ## VIDEO TO ONLY SQUARE (CROP) ##
 
@@ -17,7 +22,7 @@ Output:
 (./PeruvianSignLanguaje/Data/Videos/OnlySquare)
 
 Code:
-./PeruvianSignLanguaje/1.Preprocessing/0.Video/crop_video.py
+./PeruvianSignLanguaje/1.Preprocessing/Video/crop_video.py
 
 
 ## RAW TRANSCRIPT TO PER LINE (aligned to audio) ##
@@ -50,8 +55,6 @@ Code:
 ./PeruvianSignLanguaje/1.Preprocessing/SRTs/convert_subtitle_sentence.py
 
 
-###### 2.SEGMENTATION ######
-
 
 ## SEGMENT GESTURES (aligned to interpreter) ##
 
@@ -65,7 +68,7 @@ Output:
 (./PeruvianSignLanguaje/Data/Videos/Segmented_gestures)
 
 Code:
-./PeruvianSignLanguaje/2.Segmentation/segmentPerSRT.py
+./PeruvianSignLanguaje/2.Segmentation/cropInterpreterBySRT.py (prev: segmentPerSRT.py)
 
 
 ## SEGMENT SIGN SENTENCES (aligned to interpreter##
@@ -79,15 +82,8 @@ Output:
 (./PeruvianSignLanguaje/Data/Videos/Segmented_gesture_sentence)
 
 Code:
-./PeruvianSignLanguaje/2.Segmentation/segmentPerSRT.py
+./PeruvianSignLanguaje/2.Segmentation/cropInterpreterBySRT.py (prev:segmentPerSRT.py)
 
-###### 3. CLASSIFICATION ####
-To run the ChaLearn Model go to ./PeruvianSignLanguaje/3.Classification
-It works with a different data folder where it creates only the classes that the model is working with.
-
-
-
-###### 4.TRANSLATION ######
 
 ## VIDEO TO KEYPOINTS (aligned to interpreter) ##
 
@@ -109,7 +105,30 @@ Parameters:
 --input_path
 
 
+# 2.SEGMENTATION #
+
+Here we will place all the models to perform automatic segmentations (identification of sign units or sign sentence units).
 
 
+
+
+# 3.CLASSIFICATION #
+
+To run the ChaLearn Model go to ./PeruvianSignLanguaje/3.Classification
+It works with a different data folder where it creates only the classes that the model is working with.
+
+
+
+# 4.TRANSLATION #
+
+Here we will place all the models to perform the end-to-end translation.
+
+
+
+#### PIPELINE USED FOR LREC ####
+For the AEC dataset:
+1. cropInterpreterBySRT.py
+2. convertVideoToDict.py
+3. Classification\ChaLearn
 
 

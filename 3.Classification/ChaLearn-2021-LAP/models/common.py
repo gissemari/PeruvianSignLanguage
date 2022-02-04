@@ -43,15 +43,11 @@ class FeatureExtractor(nn.Module):
         b, t, c, h, w = rgb_clip.size()
         # Process all sequential data in parallel as a large mini-batch.
         rgb_clip = rgb_clip.view(b * t, c, h, w)
-
         features = self.resnet(rgb_clip)
-
         # Transform to the desired embedding size.
         features = self.pointwise_conv(features)
-
         # Transform the output of the ResNet (C x H x W) to a single feature vector using pooling.
         features = F.adaptive_avg_pool2d(features, 1).squeeze()
-
         # Restore the original dimensions of the tensor.
         features = features.view(b, t, -1)
 
