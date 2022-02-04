@@ -1,0 +1,4 @@
+name: chaLearnWin
+channels:
+  - defaults
+prefix: C:\Anaconda3\envs\chaLearnWin
