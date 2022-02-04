@@ -44,7 +44,7 @@ if args.train:
                 isVal = True
                 print(name)
                 target = './project/data/mp4/val/'+newUniqueName+'_color.mp4'
-                shutil.copyfile(filePath.replace('\\','/'), target)
+                shutil.copyfile(filePath.replace('/','\\'), target.replace('/','\\'))
                 continue
 
         isTrain = False
@@ -53,7 +53,7 @@ if args.train:
                 isTrain = True
                 print(name)
                 target = './project/data/mp4/train/'+newUniqueName+'_color.mp4'
-                shutil.copyfile(filePath.replace('\\','/'), target)
+                shutil.copyfile(filePath.replace('/', '\\'), target.replace('/','\\'))
                 continue
         '''
         if isVal:
