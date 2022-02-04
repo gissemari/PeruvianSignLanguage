@@ -2,7 +2,7 @@ The Peruvian Sign Language Interpretation dataset is shared in this drive link [
 
 
 
-###### 1.PREPROCESSING ######
+# 1.PREPROCESSING #
 
 Every step counts with their own readme file for more details. This readme file is an overview and map of all the different scripts and functions that you can find and do with the data. You can generate the most-heay data with the generateDataset.sh script or find it in this link:
 
