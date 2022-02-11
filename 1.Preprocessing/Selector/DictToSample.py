@@ -129,12 +129,12 @@ topWordDict = dict(zip(topWordList, wordLabels))
 topWordList = list(topWordDict.keys())
 '''
 
-
 random.Random(SEED).shuffle([])
 
 '''
 x = []
 y = []
+
 for glossIndex in glossList:
     word = str.upper(glossList[glossIndex]["gloss"])
     if word not in topWordList:
