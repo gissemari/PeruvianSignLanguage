@@ -24,6 +24,8 @@ conda: 4.9.2
 # Standard library imports
 import argparse
 import time
+import os
+import sys
 
 # Third party imports
 import numpy as np
@@ -32,8 +34,9 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection  import train_test_split
 
 # Local imports
-from utils import LoadData
+sys.path.append(os.getcwd())
 import utils.video as uv
+from utils import LoadData
 import utils.wandbFunctions as wandbF
 import utils.backupModel as bckmod
 import utils.classificationPlotAndPrint as pp

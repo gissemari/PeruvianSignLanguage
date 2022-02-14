@@ -13,18 +13,25 @@ import numpy as np
 from sklearn.model_selection  import train_test_split
 import pandas as pd
 
+import os
+import sys
+
+# from os get the current path and add it as part of the system path to import utils modules
+sys.path.append(os.getcwd())
+
 # Local imports
 from utils import LoadData
+
 
 parser = argparse.ArgumentParser(description='Classification')
 
 parser.add_argument('--keys_input_Path', type=str,
-                    default="./Data/Dataset/readyToRun/",
+                    default="./Data/AEC/Dataset/readyToRun/",
                     help='relative path of key input.'
                     ' Default: ./Data/Dataset/readyToRun/')
 
 parser.add_argument('--dict_Path', type=str,
-                    default="./Data/Dataset/dict/dict.json",
+                    default="./Data/AEC/dict.json",
                     help='relative path of keypoints input.' +
                     ' Default: ./Data/Dataset/dict/dict.json')
 

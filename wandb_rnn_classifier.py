@@ -10,6 +10,8 @@ Created on Fri Aug  6 22:39:51 2021
 
 # Standard library imports
 import time
+import sys
+import os
 
 # Third party imports
 import numpy as np
@@ -20,8 +22,9 @@ import wandb
 from sklearn.model_selection  import train_test_split
 
 # Local imports
-from utils import LoadData
+sys.path.append(os.getcwd())
 import utils.video as uv
+from utils import LoadData
 import utils.wandbFunctions as wandbF
 import utils.backupModel as bckmod
 import utils.classificationPlotAndPrint as pp

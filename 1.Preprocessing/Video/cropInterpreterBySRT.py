@@ -1,6 +1,7 @@
 # Standard library imports
 import argparse
 import os
+import sys
 
 # Third party imports
 import cv2
@@ -8,6 +9,7 @@ import pysrt
 from scenedetect.frame_timecode import FrameTimecode
 
 # Local imports
+sys.path.append(os.getcwd())
 import utils.video as uv
 
 # import nltk

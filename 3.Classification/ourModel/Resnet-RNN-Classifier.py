@@ -9,6 +9,8 @@ Created on Fri Oct  1 10:15:22 2021
 # Standard library imports
 import argparse
 import time
+import os
+import sys
 
 # Third party imports
 import torch
@@ -17,11 +19,13 @@ from pandas import read_pickle
 import matplotlib.pyplot as plt
 
 # Local imports
+sys.path.append(os.getcwd())
+import utils.video as uv
 import models.resnetRnn as resnetRnn
 from utils import LoadData
 import utils.wandbFunctions as wandbF
 import utils.classificationPlotAndPrint as pp
-import utils.video as uv
+
 
 torch.cuda.empty_cache()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

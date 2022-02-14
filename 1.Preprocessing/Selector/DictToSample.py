@@ -7,6 +7,7 @@ Created on Wed Sep 29 11:35:07 2021
 # Standard library imports
 import argparse
 import os
+import sys
 import random
 from collections import Counter
 
@@ -16,6 +17,7 @@ import pickle as pkl
 import numpy as np
 import csv
 # Local imports
+sys.path.append(os.getcwd())
 import utils.video as uv
 
 SEED = 52
@@ -24,9 +26,9 @@ parser = argparse.ArgumentParser(description='X and Y of keypoints and image Dat
 
 # Path to folder with videos
 parser.add_argument('--dict_Path', type=str,
-                    default="./Data/Dataset/dict/dict.json",
+                    default="./Data/AEC/dict.json",
                     help='relative path of keypoints input.' +
-                    ' Default: ./Data/Dataset/dict/dict.json')
+                    ' Default: ./Data/AEC/dict.json')
 
 parser.add_argument('--shuffle', action="store_true",help='to shuffle dataset order')
 
@@ -34,13 +36,13 @@ parser.add_argument('--leastValue', action="store_true",help='to shuffle dataset
 
 # Path to the output folder
 parser.add_argument('--output_Path', type=str,
-                    default="./Data/Dataset/readyToRun/",
+                    default="./Data/AEC/Dataset/readyToRun/",
                     help='relative path of dataset output.' +
-                    ' Default: ./Data/Dataset/readyToRun/')
+                    ' Default: ./Data/AEC/Dataset/readyToRun/')
 
 parser.add_argument('--words_File', type=str, default='', #./Data/list5.csv
                     help='relative path of words file' + ' Default: ./Data/')
-                    
+
 #parser.add_argument('--wordList', '--names-list', nargs='+', default=[])
 
 # Number of top words
@@ -49,7 +51,6 @@ parser.add_argument("--words", type=int, default=10,
 
 args = parser.parse_args()
 args.shuffle = True
-
 
 # We get the list of words-gloss from the json file
 glossList = pd.read_json(args.dict_Path)
@@ -77,16 +78,17 @@ for glossIndex in glossList:
 
     word = str.upper(glossList[glossIndex]["gloss"])
     print(word)
+
     if args.words_File != '' and word not in wordList:
         continue
-        
+
     for pos, instance in enumerate(glossList[glossIndex]["instances"]):
-    
+
         # Assign label to the instance
         instanceId = instance["instance_id"]    
         x.append(instanceId)
         y.append(wordList[word])
-    
+
         # Saving time steps, more used in ResNET
         temporalList = temporalList + [word]
         timestep = glossList[glossIndex]["instances"][pos]["frame_end"]
@@ -108,6 +110,7 @@ print("\nInstance and timesteps size distribution: ")
 
 
 x_timeSteps = timeStepDict
+
 '''
 x_timeSteps = {}
 for word, value in topWords:
@@ -116,8 +119,6 @@ for word, value in topWords:
     print("Instance size of %d" % len(timeStepDict[word]))
     print()
 '''
-
-
 
 '''
 topWordList = [key for (key, value) in topWords]
@@ -148,7 +149,7 @@ for glossIndex in glossList:
 if(args.shuffle):
     newOrder = list(range(len(y)))
     random.Random(SEED).shuffle(newOrder)
-    
+
     new_x = []
     new_y = []
 
@@ -162,10 +163,10 @@ if(args.shuffle):
 
 # Balancing the dataset to the min number of instances
 if(args.leastValue):
-    
+
     #min value of instances
     minValue = topWords[-1][1]
-    
+
     #pivot = {key:minValue for key in range(len(topWordList))}
     pivot = {key:minValue for key in range(len(wordList))}
 
@@ -179,10 +180,10 @@ if(args.leastValue):
             new_y.append(label)
 
             pivot[label] = pivot[label] - 1
-        
+
     x = new_x
     y = new_y
-    
+
     print("leastValue is active, so all the distribution have the size of the least instance size:", topWords[-1])
 
 

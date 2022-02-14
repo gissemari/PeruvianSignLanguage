@@ -22,6 +22,7 @@ and
 # Standard library imports
 import argparse
 import os
+import sys
 
 # Third party imports
 import cv2
@@ -31,7 +32,8 @@ import pandas as pd
 import pickle as pkl
 
 # Local imports
-import utils.video as uv  # for folder creation
+sys.path.append(os.getcwd())
+import utils.video as uv
 
 
 #########################

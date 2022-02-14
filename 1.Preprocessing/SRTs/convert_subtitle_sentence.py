@@ -13,10 +13,10 @@ Output: a transformed SRT, annotated by sentences, rather than by subtitles
 '''
 parser = argparse.ArgumentParser(description='The Embedded Topic Model')
 
-parser.add_argument('--srtRawPath', type=str, default='./../../Data/SRT/SRT_raw/', help='Path where SRT raw is located')
+parser.add_argument('--srtRawPath', type=str, default='./../../Data/AEC/SRT/SRT_raw/', help='Path where SRT raw is located')
 parser.add_argument('--inputName', type=str, default='', help='Input File Name')
-parser.add_argument('--pathRealLine', type=str, default='./../../Data/Transcripts/per_line/LineAutomated/', help='Path where per-line files are located')
-parser.add_argument('--outputSRT', type=str, default='./../../Data/SRT/SRT_voice_sentences/', help='Path where to leave output')
+parser.add_argument('--pathRealLine', type=str, default='./../../Data/AEC/Transcripts/per_line/LineAutomated/', help='Path where per-line files are located')
+parser.add_argument('--outputSRT', type=str, default='./../../Data/AEC/SRT/SRT_voice_sentences/', help='Path where to leave output')
 
 args = parser.parse_args()
 

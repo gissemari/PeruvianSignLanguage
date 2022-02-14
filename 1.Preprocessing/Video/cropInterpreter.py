@@ -1,6 +1,9 @@
 import cv2
+import os
+import sys
 import numpy as np
 import argparse
+sys.path.append(os.getcwd())
 import utils.video as uv
 from os import path
 

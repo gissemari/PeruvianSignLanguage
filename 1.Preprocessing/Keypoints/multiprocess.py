@@ -6,7 +6,7 @@ Created on Sat Dec 25 22:06:40 2021
 """
 import argparse
 import os
-import time
+import sys
 from multiprocessing import Pool
 import multiprocessing
 
@@ -18,7 +18,8 @@ import pandas as pd
 import pickle as pkl
 
 # Local imports
-import utils.video as uv  # for folder creation and keypoints normalization
+sys.path.append(os.getcwd())
+import utils.video as uv   # for folder creation and keypoints normalization
 
 print("\n#####\nHolistic Model\n#####\n")
 mp_holistic = mp.solutions.holistic
