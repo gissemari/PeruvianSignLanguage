@@ -8,17 +8,16 @@ Created on Tue Sep 28 01:42:39 2021
 # Standard library imports
 import argparse
 import os
+import sys
 
 # Third party imports
 import cv2
 import mediapipe as mp
 import numpy as np
-import pandas as pd
-import pickle as pkl
 
 # Local imports
-import utils.video as uv  # for folder creation and keypoints normalization
-
+sys.path.append(os.getcwd())
+import utils.video as uv
 
 #########################
 # ARGS
@@ -28,14 +27,8 @@ import utils.video as uv  # for folder creation and keypoints normalization
 parser = argparse.ArgumentParser(description='Use of Holistic Mediapipe model to generate a Dict')
 
 # File paths
-parser.add_argument('--inputPath', type=str, default="./Data/Videos/Segmented_gestures/",
-                    help='relative path of images input.' + ' Default: ./Data/Videos/Segmented_gestures/')
-
-parser.add_argument('--dict_output', type=str, default="./Data/Dataset/dict/",
-                    help='relative path of scv output set of landmarks.' +' Default: ./Data/Dataset/dict/')
-
-parser.add_argument('--keypoints_output', type=str, default="./Data/Dataset/keypoints/",
-                    help='relative path of csv output set of landmarks.' + ' Default: ./Data/Dataset/keypoints/')
+parser.add_argument('--inputPath', type=str, default="./Data/AEC/Videos/SEGMENTED_SIGN/",
+                    help='relative path of images input.' + ' Default: ./Data/AEC/Videos/SEGMENTED_SIGN/')
 
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
@@ -78,15 +71,9 @@ else:
 print("Folder List:\n")
 print(folder_list)
 
-#uv.createFolder(args.img_output)
-uv.createFolder(args.dict_output)
-uv.createFolder(args.keypoints_output)
-
 IdCount = 1
 LSP = []
 video_errors = []
-
-dictPath = args.dict_output+'/'+"dict"+'.json'
 
 
 # Iterate over the folders of each video in Video/Segmented_gesture
@@ -143,9 +130,12 @@ for videoFolderName in folder_list:
 
             # ###### IMAGE - LANDMARK ANOTATION SECTION #######
             # Process
+            # ###### IMAGE - LANDMARK ANOTATION SECTION #######
+            # Process
             holisResults = holistic.process(imageBGR)
 
             if holisResults.pose_landmarks:
+
                 poseX = [point.x*width for point in holisResults.pose_landmarks.landmark]
                 poseY = [point.y*height for point in holisResults.pose_landmarks.landmark]
 
@@ -164,23 +154,24 @@ for videoFolderName in folder_list:
                 left = int(sl[0] - sRange*prop)
                 right = int(sr[0] + sRange*prop)
 
-                bTop, bBot, bLeft, bRight = 0, 0, 0, 0
-
                 if(botton > height):
-                    bBot = botton - height
                     botton = height-1
                 if(top < 0):
-                    bBot = -top
                     top = 0
                 if(left < 0):
-                    bLeft = -left
                     left = 0
                 if(right > width):
-                    bRight = right - width
                     right = width-1
 
                 black = [0,0,0]
-                imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],bBot,bTop,bLeft,bRight,cv2.BORDER_CONSTANT,value=black)
+                imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],0,0,0,0,cv2.BORDER_CONSTANT,value=black)
+            else:
+                if top == 0 and botton ==0 and left == 0 and right == 0:
+                    print("NO KEYPOINT IN THE FIRST FRAME:",videoFolderPath + os.sep + videoFile)
+                else:
+                    # if it is not the first frame it takes the previous value of top, botton, left and right
+                    imageBGR = cv2.copyMakeBorder(imageBGR[top:botton,left:right],0,0,0,0,cv2.BORDER_CONSTANT,value=black)
+
             imageBGR = cv2.resize(imageBGR, (220, 220))
             imageBGR = cv2.cvtColor(imageBGR, cv2.COLOR_RGB2BGR)
 
