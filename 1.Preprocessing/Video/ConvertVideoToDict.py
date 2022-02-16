@@ -70,9 +70,10 @@ holistic = mp_holistic.Holistic(static_image_mode=True,
 ###
 
 # Folder list of videos's frames
-if os.path.isdir(args.inputPath):
-    folder_list = [file for file in os.listdir(args.inputPath)
-                   if os.path.isdir(args.inputPath+file)]
+
+if os.path.isdir(os.getcwd()+args.inputPath):
+    folder_list = [file for file in os.listdir(os.getcwd()+args.inputPath)
+                   if os.path.isdir(os.getcwd()+args.inputPath+file)]
     print("InputPath is Directory\n")
 else:
     folder_list = [args.inputPath]
@@ -90,36 +91,42 @@ video_errors = []
 
 dictPath = args.dict_output+'/'+"dict"+'.json'
 
-
-# Iterate over the folders of each video in Video/Segmented_gesture
+# Iterate over the folders of each video in Video/Segmented_SIGN
 for videoFolderName in folder_list:
     print()
-    videoFolderPath = args.inputPath + videoFolderName
+    videoFolderPath = args.inputPath
 
-    videoFolderList = [file for file in os.listdir(videoFolderPath)]
+    videoFolderList = [file for file in os.listdir(os.sep.join([os.getcwd() + videoFolderPath + videoFolderName]))]
 
-    cropVideoPath = '/'.join(args.inputPath.split('/')[0:-2])+'/cropped/'+videoFolderName+'/'
+    cropVideoPath = os.sep.join([*videoFolderPath.split('/'),videoFolderName])
+
     uv.createFolder(cropVideoPath, createFullPath=True)
-    uv.createFolder(args.keypoints_output+'/'+videoFolderName, createFullPath=True)
-    for videoFile in videoFolderList:
+    #uv.createFolder(args.keypoints_output+'/'+videoFolderName, createFullPath=True)
 
+    for videoFile in videoFolderList:
+        
         word = videoFile.split("_")[0]
         #if word not in ["G-R", "bien", "comer", "cuánto", "dos", "porcentaje", "proteína", "sí", "tú", "yo"]:
         #    continue
 
         keypointsDict = []
 
-        videoSegFolderName = videoFolderPath+'/'+videoFile[:-4]
+        videoSegFolderName = videoFolderPath+videoFolderName+'/'+videoFile
+        videoSegFolderName = videoSegFolderName.split('/')
+        videoSegFolderName = os.sep.join([*videoSegFolderName])
 
-        pklKeypointsPath = os.sep.join([args.keypoints_output,videoFolderName,word+'_'+str(IdCount)+'.pkl'])
+        pklInitPath = os.sep.join([*args.keypoints_output.split('/')])
 
+        pklKeypointsCompletePath = os.sep.join([os.getcwd(),pklInitPath,videoFolderName,word+'_'+str(IdCount)+'.pkl'])
+        pklKeypointsPath = os.sep.join([pklInitPath,videoFolderName,word+'_'+str(IdCount)+'.pkl'])
+        print(videoSegFolderName)
         # Create a VideoCapture object
-        cap = cv2.VideoCapture(videoFolderPath+'/'+videoFile)
+        cap = cv2.VideoCapture(os.getcwd()+videoSegFolderName)
         fps = cap.get(cv2.CAP_PROP_FPS)
 
         # Check if camera opened successfully
         if (cap.isOpened() is False):
-            print("Unable to read camera feed", videoFolderPath+'/'+videoFile)
+            print("Unable to read camera feed", os.getcwd()+videoSegFolderName)
             video_errors.append(videoFolderPath+'/'+videoFile)
             continue
 
@@ -288,12 +295,12 @@ for videoFolderName in folder_list:
         # [Pose, Hand left, Hand right, face] with its corresponding size
         # keypointsData = np.asarray(list_seq).reshape(-1, (33+21+21+0)*2, order="F")
 
-        print(videoFolderPath, videoFile, "\nkeypoints path:", pklKeypointsPath)
-        print("Unique name path:", cropVideoPath + word + "_" + str(IdCount))
+        print(videoFolderPath, videoFile, "\nkeypoints path:", pklKeypointsCompletePath)
+        print("Unique name path:",os.sep.join([pklInitPath,videoFolderName,word+'_'+str(IdCount)+'.pkl']))
 
         # Save Pickle
 
-        with open(pklKeypointsPath, 'wb') as pickle_file:
+        with open(pklKeypointsCompletePath, 'wb') as pickle_file:
             print()
             pkl.dump(keypointsDict, pickle_file)
 
@@ -301,7 +308,7 @@ for videoFolderName in folder_list:
         
         # Save JSON
         df = pd.DataFrame(LSP)
-        #df.to_json(dictPath, orient='index', indent=2)
+        df.to_json(dictPath, orient='index', indent=2)
         
         # Id of each instance
         IdCount += 1
