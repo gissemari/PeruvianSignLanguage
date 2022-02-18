@@ -100,9 +100,20 @@ def saveJson(ids,output_dir, src, dataType):
 
         idxpkl = uniqueName.split('_')[-1]
         
-        #with open(src+str(index)+'.pkl', 'rb') as f:
-        with open(src+str(idxpkl)+'.pkl', 'rb') as f:
-            kp = pickle.load(f)
+        kp = []
+
+        folderList = os.listdir(src)
+        for folder in folderList:
+
+            pklsPath = src + folder
+            pklList = os.listdir(pklsPath)
+            for pkl in pklList:
+                key = pkl.split('_')[-1].split('.')[0]
+                if(key == idxpkl):
+                    print(key)
+                    with open(pklsPath + '/' + pkl, 'rb') as f:
+                        kp = pickle.load(f)
+                        break
 
         for pos, timestep in enumerate(kp):
 
@@ -110,9 +121,10 @@ def saveJson(ids,output_dir, src, dataType):
             opd = keypointsFormat(timestep, keys)
 
             jsonName = '%s%s/%s_color.kp/%s_color_%1.12d_keypoints.json'%(output_dir,dataType,uniqueName,uniqueName,pos)
-            
+
             with open(jsonName, 'w') as f:
                 json.dump(opd, f)
+
 
 def main():
 
@@ -131,7 +143,7 @@ def main():
     if args.train==1:
         train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8',header=None)
         val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8',header=None)
-        
+
         saveJson(train_ids, output_dir, args.src, "train")
         saveJson(val_ids, output_dir, args.src, "val")
     else:
@@ -139,5 +151,3 @@ def main():
         saveJson(test_ids, output_dir, args.src, "test")
 
 main()
-
-    
