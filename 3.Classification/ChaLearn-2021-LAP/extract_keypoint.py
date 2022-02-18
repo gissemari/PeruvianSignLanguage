@@ -110,7 +110,6 @@ def saveJson(ids,output_dir, src, dataType):
             for pkl in pklList:
                 key = pkl.split('_')[-1].split('.')[0]
                 if(key == idxpkl):
-                    print(key)
                     with open(pklsPath + '/' + pkl, 'rb') as f:
                         kp = pickle.load(f)
                         break
