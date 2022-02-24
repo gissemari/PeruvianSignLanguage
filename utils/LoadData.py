@@ -138,17 +138,16 @@ def getKeypointsfromIdList(src, idList, bodyPart=["pose","face","hands"] , timeS
     
     for pos in idList:
 
-        fileData = pd.read_pickle(src + str(pos) + '.pkl')
+        videoList = os.listdir(src)
 
-        fileData = keypointsFormat(fileData, bodyPart)
+        for video in videoList:
+            pklList = os.listdir(src.replace('/',os.sep)+video)
+            for pkl in pklList:
 
-        #without format timeStep
-        if timeStepSize == -1:
-            data.append(fileData)
-            continue
-        
-        fileData = timeStepFormat(fileData, timeStepSize)
-        data.append(fileData)
+                if str(pos) in pkl.split('_')[1].split('.')[0]:
+                    fileData = getXInfo(src.replace('/',os.sep)+video+os.sep, pkl.split('.')[0], timeStepSize)
+                    data.append(keypointsFormat(fileData, bodyPart))
+                    break
 
     return np.asarray(data)
 
