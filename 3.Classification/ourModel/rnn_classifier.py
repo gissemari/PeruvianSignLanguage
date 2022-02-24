@@ -63,7 +63,7 @@ parser.add_argument('--keys_input_Path', type=str,
                     ' Default: ./Data/AEC/Selected/')
 
 parser.add_argument('--keypoints_input_Path', type=str,
-                    default="./Data/AEC/Keypoints/",
+                    default="./Data/AEC/Keypoints/pkl/",
                     help='relative path of keypoints input.' +
                     ' Default: ./Data/keypoints/')
 
