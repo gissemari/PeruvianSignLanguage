@@ -58,14 +58,14 @@ parser.add_argument('--pose', action="store_true",
                     help='Use holistic model: pose')
 
 parser.add_argument('--keys_input_Path', type=str,
-                    default="./Data/AEC/Dataset/readyToRun/",
+                    default="./Data/AEC/Selected/",
                     help='relative path of keypoints input.'
-                    ' Default: ./Data/Dataset/keypoints/')
+                    ' Default: ./Data/AEC/Selected/')
 
 parser.add_argument('--keypoints_input_Path', type=str,
-                    default="./Data/AEC/Dataset/keypoints/",
+                    default="./Data/AEC/Keypoints/",
                     help='relative path of keypoints input.' +
-                    ' Default: ./Data/Dataset/keypoints/')
+                    ' Default: ./Data/keypoints/')
 
 parser.add_argument("--timesteps", type=int, default=17,
                     help="Number of top words")
