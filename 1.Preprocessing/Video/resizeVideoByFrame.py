@@ -30,6 +30,8 @@ parser = argparse.ArgumentParser(description='Use of Holistic Mediapipe model to
 parser.add_argument('--inputPath', type=str, default="./Data/AEC/Videos/SEGMENTED_SIGN/",
                     help='relative path of images input.' + ' Default: ./Data/AEC/Videos/SEGMENTED_SIGN/')
 
+parser.add_argument('--outputPath', type=str, default="./Data/AEC/Videos/cropped/", help='relative path of video output.' + ' Default: ./Data/AEC/Videos/SEGMENTED_SIGN/')
+
 # verbose
 parser.add_argument("--verbose", type=int, help="Verbosity")
 
@@ -83,7 +85,7 @@ for videoFolderName in folder_list:
 
     videoFolderList = [file for file in os.listdir(videoFolderPath)]
 
-    cropVideoPath = '/'.join(args.inputPath.split('/')[0:-2])+'/cropped/'+videoFolderName+'/'
+    cropVideoPath = args.outputPath + videoFolderName+'/'
     uv.createFolder(cropVideoPath,createFullPath=True)
 
     for videoFile in videoFolderList:
