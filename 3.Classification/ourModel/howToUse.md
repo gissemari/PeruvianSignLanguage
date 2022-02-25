@@ -8,7 +8,37 @@ The dataset is available at: https://drive.google.com/drive/u/2/folders/1xWPBmm3
 ## For PUCP or external data
 1. run "./shFiles/generateDataset-PUCP.sh" 
 
-# Steps to prepare dataset - Advance mode
+# Steps to prepare dataset AEC or similars- Advance mode
+
+1. run "python 1.Preprocessing/Video/cropInterpreterBySRT.py"  with this command line options:
+
+  * "--rawVideoPath PATH"   	'PATH' is the directory that points to the group of all the raw videos files
+  * "--srtPath PATH"		'PATH' is the directory that points to the group of all the SRT gestures files
+  * "--inputName PATH" 
+  * "--outputVideoPath PATH"   'PATH' is the directory where you want to save all the Segmented gestures videos (needed for the next step)
+  * "--flgGesture #"           '#' is the number of frames per second for the output file
+  * "--width #"                 '#' is the width of the SL signer or interpreter that appear in the small rectangle
+  * "--height #"                '#' is the height of the SL signer or interpreter that appear in the small rectangle
+  * "--x #"                     '#' is the x pixel position that will be the beginning of crop
+  * "--y #"                     '#' is the y pixel position that will be the beginning of crop
+
+2. run "python 1.Preprocessing/Video/generateKeypoints.py" with this command line options:
+
+  * "--inputPath PATH"		'PATH' is the directory that points to segmented gestures videos
+  * "--img_output PATH"	'PATH' is the directory output where you want to save images that have key point and key lines added in it (use it with '--image')
+  * "--keypoints_output PATH"	'PATH' is the directory output where you want to save pkl keypoint data in pkl
+  * "--dict_output PATH"	'PATH' is the directory output where you want to save all dataset information (needed in the following command)
+
+3. run "1.Preprocessing/Selector/DictToSample.py"  with this command line options:
+
+  * "--dict_Path PATH"     	'PATH' is the directory that points to the dict that have all the dataset information
+  * "--shuffle"		to shuffle instances keys
+  * "--leastValue"		to take the word with the least number of instances and cut all word instances to that value 
+  * "--wordList _"             '_' is a csv that have a list of word. You can see csv's format in "Data/list.csv"
+  * "--output_Path PATH"  	'PATH' is the directory output you want to have the dataset sample formated
+  * "--word #" 		'#' is the number of classes
+
+# Steps to prepare dataset for PUCP or external data - Advance mode
 
 1. run "python 1.Preprocessing/Video/cropInterpreterBySRT.py"  with this command line options:
 
@@ -18,21 +48,19 @@ The dataset is available at: https://drive.google.com/drive/u/2/folders/1xWPBmm3
   * "--outputVideoPath PATH"   'PATH' is the directory where you want to save all the Segmented gestures videos (needed for the next step)
   * "--flgGesture #"           '#' is the number of frames per second for the output file
 
-### If you are working with AEC or AEC similar format also use these parameters
+2. run "python 1.Preprocessing/Video/resizeVideoByFrame.py" with this command line options:
 
-  * "--width #"                 '#' is the width of the SL signer or interpreter that appear in the small rectangle
-  * "--height #"                '#' is the height of the SL signer or interpreter that appear in the small rectangle
-  * "--x #"                     '#' is the x pixel position that will be the beginning of crop
-  * "--y #"                     '#' is the y pixel position that will be the beginning of crop
+  * "--inputPath PATH"        'Path' is the directory of the input videos to process
+  * "--outputPath PATH"        'Path' is the directory where videos will be save
 
-2. run "python 1.Preprocessing/Video/ConvertVideoToDict.py" with this command line options:
+3. run "python 1.Preprocessing/Video/generateKeypoints.py" with this command line options:
 
   * "--inputPath PATH"		'PATH' is the directory that points to segmented gestures videos
   * "--img_output PATH"	'PATH' is the directory output where you want to save images that have key point and key lines added in it (use it with '--image')
   * "--keypoints_output PATH"	'PATH' is the directory output where you want to save pkl keypoint data in pkl
   * "--dict_output PATH"	'PATH' is the directory output where you want to save all dataset information (needed in the following command)
 
-3. run "1.Preprocessing/Selector/DictToSample.py"  with this command line options:
+4. run "1.Preprocessing/Selector/DictToSample.py"  with this command line options:
 
   * "--dict_Path PATH"     	'PATH' is the directory that points to the dict that have all the dataset information
   * "--shuffle"		to shuffle instances keys
