@@ -47,7 +47,7 @@ if __name__ == '__main__':
     pl.seed_everything(args.seed)
 
     trainer = pl.Trainer(callbacks=[
-        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=2),
+        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=100),
         LearningRateMonitor(logging_interval='epoch'),
         ModelCheckpoint(filename='bestLoggedModel'),
         ModelSummary(max_depth=2)

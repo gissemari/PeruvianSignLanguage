@@ -30,12 +30,11 @@ if args.train:
 
     for filePath in all_files:
 
-        
         if platform == 'linux' or platform == 'linux2':
             name = filePath.split('/')[-1]
         else:
             name = filePath.split('\\')[-1]
-        
+
         name = name.split('.')[0].upper()
 
         isVal = False
@@ -44,7 +43,7 @@ if args.train:
                 isVal = True
                 print(name)
                 target = './project/data/mp4/val/'+newUniqueName+'_color.mp4'
-                shutil.copyfile(filePath.replace('/','\\'), target.replace('/','\\'))
+                shutil.copyfile(filePath.replace('/',os.sep), target.replace('/',os.sep))
                 continue
 
         isTrain = False
@@ -53,7 +52,7 @@ if args.train:
                 isTrain = True
                 print(name)
                 target = './project/data/mp4/train/'+newUniqueName+'_color.mp4'
-                shutil.copyfile(filePath.replace('/', '\\'), target.replace('/','\\'))
+                shutil.copyfile(filePath.replace('/', os.sep), target.replace('/',os.sep))
                 continue
         '''
         if isVal:
@@ -81,7 +80,7 @@ else:
                 isTest = True
                 print(name)
                 target = './project/data/mp4/test/'+newUniqueName+'_color.mp4'
-                shutil.copyfile(filePath.replace('\\','/'), target)
+                shutil.copyfile(filePath.replace('\\',os.sep), target)
                 continue
 
             
