@@ -3,10 +3,10 @@ import os
 
 def createFolder(_path, createFullPath = False):
 
-	if not os.path.isdir(os.getcwd() + _path):
+	if not (os.path.isdir(os.getcwd() + _path) or os.path.isdir(_path)):
 		print(f"Directory {_path} has successfully been created")
 		if createFullPath:
-			os.makedirs(_path)
+			os.makedirs(_path, exist_ok=True)
 		else:
 			os.mkdir(_path)
 		return 1

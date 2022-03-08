@@ -71,9 +71,9 @@ holistic = mp_holistic.Holistic(static_image_mode=True,
 
 # Folder list of videos's frames
 
-if os.path.isdir(os.getcwd()+args.inputPath):
-    folder_list = [file for file in os.listdir(os.getcwd()+args.inputPath)
-                   if os.path.isdir(os.getcwd()+args.inputPath+file)]
+if os.path.isdir(os.getcwd()+'/'+args.inputPath) or os.path.isdir(args.inputPath):
+    folder_list = [file for file in (os.listdir(os.getcwd()+'/'+args.inputPath))
+                   if (os.path.isdir(os.getcwd()+'/'+args.inputPath+file) or os.path.isdir(args.inputPath+file))]
     print("InputPath is Directory\n")
 else:
     folder_list = [args.inputPath]
@@ -81,9 +81,10 @@ else:
 print("Folder List:\n")
 print(folder_list)
 
+#print(args.keypoints_output)
 #uv.createFolder(args.img_output)
 uv.createFolder(args.dict_output)
-uv.createFolder(args.keypoints_output)
+uv.createFolder(args.keypoints_output) #,createFullPath=True)
 
 IdCount = 1
 LSP = []
@@ -93,15 +94,14 @@ dictPath = args.dict_output+'/'+"dict"+'.json'
 
 # Iterate over the folders of each video in Video/Segmented_SIGN
 for videoFolderName in folder_list:
-    print()
+
     videoFolderPath = args.inputPath
 
-    videoFolderList = [file for file in os.listdir(os.sep.join([os.getcwd() + videoFolderPath + videoFolderName]))]
+    videoFolderList = [file for file in os.listdir(os.sep.join([os.getcwd(),videoFolderPath + videoFolderName]))]
 
-    cropVideoPath = os.sep.join([*videoFolderPath.split('/'),videoFolderName])
-
+    cropVideoPath = videoFolderPath + videoFolderName
     uv.createFolder(cropVideoPath, createFullPath=True)
-    #uv.createFolder(args.keypoints_output+'/'+videoFolderName, createFullPath=True)
+    uv.createFolder(args.keypoints_output+'/'+videoFolderName, createFullPath=True)
 
     for videoFile in videoFolderList:
         
@@ -117,11 +117,12 @@ for videoFolderName in folder_list:
 
         pklInitPath = os.sep.join([*args.keypoints_output.split('/')])
 
-        pklKeypointsCompletePath = os.sep.join([os.getcwd(),pklInitPath,videoFolderName,word+'_'+str(IdCount)+'.pkl'])
+        pklKeypointsCompletePath = os.sep.join([pklInitPath,videoFolderName,word+'_'+str(IdCount)+'.pkl'])
+
         pklKeypointsPath = os.sep.join([pklInitPath,videoFolderName,word+'_'+str(IdCount)+'.pkl'])
         print(videoSegFolderName)
         # Create a VideoCapture object
-        cap = cv2.VideoCapture(os.getcwd()+videoSegFolderName)
+        cap = cv2.VideoCapture(os.getcwd()+'/'+videoSegFolderName)
         fps = cap.get(cv2.CAP_PROP_FPS)
 
         # Check if camera opened successfully
@@ -130,8 +131,9 @@ for videoFolderName in folder_list:
             video_errors.append(videoFolderPath+'/'+videoFile)
             continue
 
+        uniqueVideoName = word + '_' + str(IdCount)
         #video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount)+'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
-        video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount)+'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
+        video = cv2.VideoWriter(cropVideoPath+'/' + uniqueVideoName +'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
 
         idx = 0
 
@@ -254,7 +256,7 @@ for videoFolderName in folder_list:
                 "frame_start": 1,
                 "instance_id": IdCount,
                 "signer_id": -1,
-                "unique_name": word +'_'+ str(IdCount),
+                "unique_name": uniqueVideoName,
                 "source": "LSP",
                 "split": "",
                 "variation_id": -1,

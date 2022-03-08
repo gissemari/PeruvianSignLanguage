@@ -85,7 +85,7 @@ for filePath in listFile:
     # to get only the name without the path
     inputName = os.path.basename(filePath)
     inputName = os.path.splitext(inputName)[0]
-    outputFolder = outputVideoPath+inputName
+    outputFolder = outputVideoPath+'/'+inputName
     outputFolder = outputFolder.replace(' ','_').replace('(','').replace(')','')
     if uv.createFolder(outputFolder, createFullPath=True):
         print('Created folder :', outputFolder)
@@ -145,12 +145,13 @@ for filePath in listFile:
         if flgGesture:
             #line.text.upper()
             rmSpacesName = line.text.replace(' ','-')
-            outSegment = cv2.VideoWriter(outputFolder+'/'+ rmSpacesName +'_'+str(sentence)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
+            outSegment = cv2.VideoWriter(outputFolder+'/'+ rmSpacesName +'_'+str(sentence+1)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
         else:
         	
             #foldName = outputVideoPath+inputName+'/'+inputName+'_'+str(sentence)+'.mp4'
             #print(foldName)
-            outSegment = cv2.VideoWriter(outputVideoPath+inputName+'/'+str(sentence+1)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
+            outSegment = cv2.VideoWriter(outputVideoPath+'/'+inputName+'/'+str(sentence+1)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
+        print(flgGesture,outputVideoPath+'/'+inputName+'/'+str(sentence+1)+'.mp4')
         # Doc: CV_CAP_PROP_POS_MSEC Current position of the video file in milliseconds or video capture timestamp.
         # cap.set(cv2.CAP_PROP_POS_MSEC,line.start.to_time())
         # To give a threshold
