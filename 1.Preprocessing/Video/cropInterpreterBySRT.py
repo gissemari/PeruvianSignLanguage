@@ -151,7 +151,7 @@ for filePath in listFile:
             #foldName = outputVideoPath+inputName+'/'+inputName+'_'+str(sentence)+'.mp4'
             #print(foldName)
             outSegment = cv2.VideoWriter(outputVideoPath+'/'+inputName+'/'+str(sentence+1)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
-        print(flgGesture,outputVideoPath+'/'+inputName+'/'+str(sentence+1)+'.mp4')
+        print(flgGesture,outputVideoPath+'/'+inputName+'/'+str(sentence)+'.mp4')
         # Doc: CV_CAP_PROP_POS_MSEC Current position of the video file in milliseconds or video capture timestamp.
         # cap.set(cv2.CAP_PROP_POS_MSEC,line.start.to_time())
         # To give a threshold

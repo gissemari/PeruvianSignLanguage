@@ -20,7 +20,7 @@ echo "obtaining videos from Peruvian Sign language project..."
 sleep 1
 python obtain_videos.py --allfiles ./../../Data/AEC/Videos/SEGMENTED_SIGN/
 echo "counting frames..."
-python count_frames.py
+python count_frames.py --train 1
 echo "extracting keypoints..."
 python extract_keypoint.py --src ./../../Data/AEC/Keypoints/pkl/ --keyPath ./../../Data/AEC/Selected/
 echo "extrancting poseflow..."

@@ -17,7 +17,7 @@ echo ""
 echo "train_val_labels_STAGE2.csv copied in project file"
 echo ""
 echo "obtaining videos from Peruvian Sign language project..."
-python obtain_videos.py --allfiles ../../Data/AEC/Videos/cropped/
+python obtain_videos.py --allfiles ../../Data/AEC/Videos/SEGMENTED_SIGN/
 echo "counting frames..."
 python count_frames.py
 echo "extracting keypoints..."

@@ -3,6 +3,7 @@ import math
 import os
 from argparse import ArgumentParser
 
+import cv2
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -13,7 +14,7 @@ from .common import collect_samples
 from .transforms import Compose, Scale, MultiScaleCrop, ToFloatTensor, PermuteImage, Normalize, scales, NORM_STD_IMGNET, \
     NORM_MEAN_IMGNET, CenterCrop, IMAGE_SIZE, DeleteFlowKeypoints, ColorJitter, RandomHorizontalFlip
 
-_DATA_DIR_LOCAL = '/project/data/chalearn21/data/mp4'
+_DATA_DIR_LOCAL = '/project/data/mp4'
 
 SHOULDER_DIST_EPSILON = 1.2
 WRIST_DELTA = 0.15
@@ -106,8 +107,7 @@ class ChaLearnDataset(Dataset):
 
         sample = self.samples[item]
 
-        frames, _, _ = torchvision.io.read_video(os.path.join(sample['path']),
-                                                 pts_unit='sec')
+        frames, _, _ = torchvision.io.read_video(os.path.join(sample['path']),pts_unit='sec')
         #print("N°:",frames.shape,sample['path'])
         clip = []
         poseflow_clip = []
@@ -116,7 +116,6 @@ class ChaLearnDataset(Dataset):
             kp_path = os.path.join(sample['path'].replace('mp4', 'kp'), '{}_{:012d}_keypoints.json'.format(
                     #sample['path'].split('/')[-1].replace('.mp4', ''), frame_index))
                     os.path.split(sample['path'])[-1].replace('.mp4', ''), frame_index))
-
             with open(kp_path, 'r') as keypoints_file:
                 value = json.loads(keypoints_file.read())
                 keypoints = np.array(value['people'][0]['pose_keypoints_2d'])
@@ -142,8 +141,11 @@ class ChaLearnDataset(Dataset):
             else:
                 poseflow = np.zeros((33, 2))
 
-            frame = frames[frame_index]
-
+            try:
+                frame = frames[frame_index]
+            except:
+                print("ERROR",frame_index,sample['path'])
+                continue
             left_wrist_index = 15
             left_elbow_index = 13
             right_wrist_index = 16

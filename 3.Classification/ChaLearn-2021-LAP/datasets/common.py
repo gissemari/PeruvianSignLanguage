@@ -9,7 +9,7 @@ def collect_samples(has_labels, root_path, job_path, sequence_length, temporal_s
         samples = []
         for video_file in sorted(glob.glob(os.path.join(root_path, job_path, '*_color.mp4'))):
             nframes_file = video_file.replace('color.mp4', 'nframes')
-            with open(nframes_file) as nff:
+            with open(nframes_file, encoding="utf8") as nff:
                 num_frames = int(nff.readline())
             # Center crop frames
             frame_start = (num_frames - sequence_length) // (2 * temporal_stride)
@@ -37,7 +37,7 @@ def collect_samples(has_labels, root_path, job_path, sequence_length, temporal_s
                         retrain_all and job == 'train'):  # If re-training, we want all samples, not just training
                     video_file = os.path.join(root_path, job_path, row[0] + '_color.mp4')
                     nframes_file = video_file.replace('color.mp4', 'nframes')
-                    with open(nframes_file) as nff:
+                    with open(nframes_file, encoding="utf8") as nff:
                         num_frames = int(nff.readline())
                     # Center crop frames
                     frame_start = (num_frames - sequence_length) // (2 * temporal_stride)
