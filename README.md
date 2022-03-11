@@ -131,4 +131,15 @@ For the AEC dataset:
 2. convertVideoToDict.py
 3. Classification\ChaLearn
 
+# REPOSITORIES USED FOR THE CLASSIFICATION
 
+```
+@InProceedings{De_Coster_2021_CVPR,
+    author    = {De Coster, Mathieu and Van Herreweghe, Mieke and Dambre, Joni},
+    title     = {Isolated Sign Recognition From RGB Video Using Pose Flow and Self-Attention},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops},
+    month     = {June},
+    year      = {2021},
+    pages     = {3441-3450}
+}
+```
