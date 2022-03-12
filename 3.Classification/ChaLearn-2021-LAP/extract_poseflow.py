@@ -82,27 +82,36 @@ def normalize(poses):
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Classification')
+    parser = argparse.ArgumentParser(description='Extract poseflow from pose keypoints')
     parser.add_argument('--train', type=int, default=1, help='Create files for train or not, for test')
     args = parser.parse_args()
-    
+
     input_path = 'project/data/kp'
+
+    if args.train == 1:
+        listSplits = ['train','val']
+    else:
+        listSplits = ['test']
+
     input_dirs = sorted(glob.glob(os.path.join(input_path, '*', '*_color.kp')))
     input_dir_index = 0
     total = len(input_dirs)
+
     for input_dir in input_dirs:
         #print(f'{input_dir_index}/{total}')
+        dataType = input_dir.split(os.sep)[-2]
+        if dataType not in listSplits:
+            continue
         input_dir_index += 1
-
         output_dir = input_dir.replace('kp', 'kpflow2')
         os.makedirs(output_dir, exist_ok=True)
-
         kp_files = sorted(glob.glob(os.path.join(input_dir, '*.json')))
 
         # 1. Collect all keypoint files and pre-process them
         poses = []
-        for i in range(len(kp_files)):
-            poses.append(read_pose(kp_files[i]))
+        for kp_file in kp_files:
+            poses.append(read_pose(kp_file))
+
         poses = np.stack(poses)
         poses = impute_missing_keypoints(poses)
         poses = normalize(poses)

@@ -190,7 +190,7 @@ class Module(pl.LightningModule):
         #val_auroc = self.val_auroc.compute()
         #print("VAL_E_END",val_auroc)
         # log metrics 
-        self.log("val_accuracy", val_accuracy)
+        self.log("val_accuracy", torch.tensor([val_accuracy]))
         self.log("val_f1_micro", val_f1_micro)
         self.log("val_f1_macro", val_f1_macro)
         #self.log("val_auroc", val_auroc)
@@ -263,7 +263,7 @@ class Module(pl.LightningModule):
         return {
             'optimizer': optimizer,
             'lr_scheduler': StepLR(optimizer, step_size=self.hparams.lr_step_size, gamma=0.1),
-            'monitor': 'val_accuracy'
+            'monitor': "val_accuracy"
         }
 
     @staticmethod

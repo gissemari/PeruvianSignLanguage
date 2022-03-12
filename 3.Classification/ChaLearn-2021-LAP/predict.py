@@ -78,6 +78,7 @@ if __name__ == '__main__':
     #print(submission)
     predLabels = []
     groundLabels = []
+    print("END")
 
     with open(args.submission_template) as stf:
         reader = csv.reader(stf)

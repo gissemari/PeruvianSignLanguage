@@ -104,7 +104,7 @@ def saveJson(ids,output_dir, src, dataType):
 
         folderList = os.listdir(src)
         for folder in folderList:
-
+            founded = False
             pklsPath = src + folder
             pklList = os.listdir(pklsPath)
             for pkl in pklList:
@@ -112,13 +112,16 @@ def saveJson(ids,output_dir, src, dataType):
                 if(key == idxpkl):
                     with open(pklsPath + '/' + pkl, 'rb') as f:
                         kp = pickle.load(f)
+                        founded = True
                         break
+            if founded:
+                break
 
+        print(uniqueName)
         for pos, timestep in enumerate(kp):
 
             keys = timestep.keys()
             opd = keypointsFormat(timestep, keys)
-
             jsonName = '%s%s/%s_color.kp/%s_color_%1.12d_keypoints.json'%(output_dir,dataType,uniqueName,uniqueName,pos)
 
             with open(jsonName, 'w') as f:
