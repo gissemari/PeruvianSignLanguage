@@ -1,0 +1,4 @@
+sign/*/*.mp4
+npy3/*/*.npy
+frames/*/*/*.jpg
+features/*/*.pt
