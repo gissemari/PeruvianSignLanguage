@@ -1,6 +1,6 @@
 import numpy as np
 
-parts = {'joint', 'bone2', 'joint_motion', 'bone2_motion'}
+parts = {'joint', 'bone', 'joint_motion', 'bone_motion'}
 
 for part in parts:
     print(part)

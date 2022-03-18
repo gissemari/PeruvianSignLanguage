@@ -19,7 +19,6 @@ import random
 import inspect
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
-
 # class LabelSmoothingCrossEntropy(nn.Module):
 #     def __init__(self):
 #         super(LabelSmoothingCrossEntropy, self).__init__()
@@ -37,7 +36,7 @@ def init_seed(_):
     torch.manual_seed(1)
     np.random.seed(1)
     random.seed(1)
-    # torch.backends.cudnn.enabled = False
+    #torch.backends.cudnn.enabled = False
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
@@ -236,9 +235,9 @@ class Processor():
             worker_init_fn=init_seed)
 
     def load_model(self):
-        output_device = self.arg.device[0] if type(
-            self.arg.device) is list else self.arg.device
-        self.output_device = output_device
+        output_device =  self.arg.device[0] if type(
+             self.arg.device) is list else self.arg.device
+        self.output_device =  output_device
         Model = import_class(self.arg.model)
         shutil.copy2(inspect.getfile(Model), self.arg.work_dir)
         self.model = Model(**self.arg.model_args).cuda(output_device)
@@ -575,7 +574,8 @@ if __name__ == '__main__':
     p = parser.parse_args()
     if p.config is not None:
         with open(p.config, 'r') as f:
-            default_arg = yaml.load(f)
+            #default_arg = yaml.load(f)
+            default_arg = yaml.safe_load(f)
         key = vars(p).keys()
         for k in default_arg.keys():
             if k not in key:
