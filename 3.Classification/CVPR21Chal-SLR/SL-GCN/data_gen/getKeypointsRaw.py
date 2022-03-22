@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import os
 import pandas as pd
+import math
 
 sys.path.extend(['../'])
 
@@ -20,7 +21,26 @@ max_body_true = 1
 max_frame = 150
 num_channels = 3
 
+connections = [(5,7),
+            (6,8), #1
 
+            (7,9),
+            (8,10), #3
+
+            (9,91),#L wrist - L hand
+            (10,112), # R wrist - R hand  #5
+
+            (91, 92), #6 #PALM
+            (92, 93), (91, 96), (91, 100), (91, 104), (91, 108), (112, 113), (113, 114),
+            (112, 114), (112, 117), (112, 121), (112, 125), 
+            (112, 129), #18
+
+            (108, 109), #19
+            (109, 110), (110, 111), (104, 107), (100, 103), (96, 97), (97, 98), (98, 99), (93, 94),
+            (94, 95), (117, 118), (118, 119), (119, 120), (121, 122), (122, 123), (123, 124), (125, 126),
+            (126, 127), (127, 128), (129, 130), (130, 131), (131, 132), (114, 115),
+            (115, 116), #42
+            ]
 
 def gendata(data_paths, label_path, out_path, part='train', config='27'):
     labels = []
@@ -50,12 +70,41 @@ def gendata(data_paths, label_path, out_path, part='train', config='27'):
         skel = skel[:,selected,:]
         kpListOfDict = []
         for timeStep in skel:
+
+            x = timeStep[:,0]
+            y = timeStep[:,1]
+            outlier = False
+
+            for i, (init, final) in enumerate(connections):
+
+                dist = math.dist([x[init],y[init]], [x[final],y[final]])
+
+                # forearm - Error
+                if dist > 110 and i in [2,3]:
+                    outlier = True
+                    break
+
+                # wrist - Error
+                if dist > 35 and i in [4,5]:
+                    outlier = True
+                    break
+
+                # palm - Error
+                if dist > 55 and i in range(6,19):
+                    outlier = True
+                    break
+
+                # fingers - Error
+                if dist > 38   and i in range(19,43): 
+                    outlier = True
+                    break
+
+            print(outlier)
             kpDict = {}
-            kpDict["points"] = {}
-            kpDict["points"]["x"] = timeStep[:,0]
-            kpDict["points"]["y"] = timeStep[:,1]
-            kpDict["points"]["scores"] = timeStep[:,2]
-            kpDict["points"]["pred"] = timeStep
+            kpDict["x"] = timeStep[:,0]
+            kpDict["y"] = timeStep[:,1]
+            kpDict["scores"] = timeStep[:,2]
+            kpDict["outlier"] = outlier
             kpListOfDict.append(kpDict)
 
         basePath = os.sep.join([*out_path.split('/')[:2]])
@@ -66,6 +115,7 @@ def gendata(data_paths, label_path, out_path, part='train', config='27'):
         instanceDict['label'] = npyName.split('/')[-1].split('_')[0]
         instanceDict['id'] = npyName.split('/')[-1].split('_')[1]
         instanceDict['keypoints']= kpListOfDict
+        instanceDict['size'] = len(kpListOfDict)
 
         listInstance.append(instanceDict)
 
