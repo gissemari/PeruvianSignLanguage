@@ -64,6 +64,8 @@ def merge_hm(hms_list):
     return hm
 def main():
 
+    jobType='train'
+
     with torch.no_grad():
         config = 'wholebody_w48_384x288.yaml'
         cfg.merge_from_file(config)
@@ -95,8 +97,8 @@ def main():
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         ])
 
-        #input_path = '../../../ChaLearn-2021-LAP/project/data/mp4/val/'
-        input_path = '../data/sign/train/'
+        input_path = '../../../ChaLearn-2021-LAP/project/data/mp4/'+jobType+'/'
+        #input_path = '../data/sign/train/'
         paths = []
         names = []
         for root, _, fnames in natsorted(os.walk(input_path)):
@@ -121,7 +123,7 @@ def main():
         for i, path in enumerate(paths):
             # if i > 1:
             #     break
-            output_npy = '../data/npy3/train/{}.npy'.format(names[i])
+            output_npy = '../data/npy3/{}/{}.npy'.format(jobType,names[i])
             print(output_npy)
             if os.path.exists(output_npy):
                 continue

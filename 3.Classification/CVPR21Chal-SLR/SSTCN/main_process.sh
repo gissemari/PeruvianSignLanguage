@@ -9,15 +9,15 @@ mv ../../ChaLearn-2021-LAP/project/data/mp4/train/*color* train_videos/
 mv ../../ChaLearn-2021-LAP/project/data/mp4/val/*color* val_videos/
 
 cd data_process
-python wholepose_features_extraction.py --video_path ../train_videos/ --feature_path ../data/train_features --is_train True
-python wholepose_features_extraction.py --video_path ../val_videos/ --feature_path ../data/train_features
+#python wholepose_features_extraction.py --video_path ../train_videos/ --feature_path ../../data-prepare/data/features/train --istrain True
+#python wholepose_features_extraction.py --video_path ../val_videos/ --feature_path ../../data-prepare/data/features/val
 cd ..
 # if you want to delete videos, un common the following command
 #rm -rf train_videos
 #rm -rf val_videos
 
 ####### training #############################
-python train_parallel.py --batch_size 160
+python train_parallel.py --batch_size 160 --dataset_path ../data-prepare/data/features/train/
 ###### testing ###########################
 python test.py
 #python test.py --checkpoint_model model_checkpoints/your model
