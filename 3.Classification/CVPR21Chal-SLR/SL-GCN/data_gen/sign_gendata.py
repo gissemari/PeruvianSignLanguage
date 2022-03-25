@@ -77,12 +77,12 @@ def gendata(data_path, label_path, out_path, part='train', config='27'):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Sign Data Converter.')
-    parser.add_argument('--data_path', default='../../data-prepare/data/npy3/train') #'train_npy/npy', 'va_npy/npy'
-    parser.add_argument('--label_path', default= '../../..//ChaLearn-2021-LAP/data/train_labels.csv') #'../data/sign/27/train_labels.csv') # 'train_labels.csv', 'val_gt.csv', 'test_labels.csv'
+    parser.add_argument('--data_path', default='../../data-prepare/data/npy3/val') #'train_npy/npy', 'va_npy/npy'
+    parser.add_argument('--label_path', default= '../../..//ChaLearn-2021-LAP/data/val_labels.csv') #'../data/sign/27/train_labels.csv') # 'train_labels.csv', 'val_gt.csv', 'test_labels.csv'
     parser.add_argument('--out_folder', default='../data/sign/')
     parser.add_argument('--points', default='27')
 
-    part = 'train' #'test' # 'train', 'val'
+    part = 'val' #'test' # 'train', 'val'
     arg = parser.parse_args()
 
     out_path = os.path.join(arg.out_folder, arg.points)

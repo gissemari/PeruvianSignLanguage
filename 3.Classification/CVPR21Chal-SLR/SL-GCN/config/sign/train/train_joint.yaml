@@ -16,7 +16,7 @@ train_feeder_args:
 
 test_feeder_args:
   data_path: ./data/sign/27_2/val_data_joint.npy
-  label_path: ./data/sign/27_2/val_gt.pkl
+  label_path: ./data/sign/27_2/val_label.pkl
   random_mirror: False
   normalization: True
 
@@ -39,7 +39,7 @@ base_lr: 0.1
 step: [150, 200]
 
 # training
-device: [0,1,2,3]
+device: [0,1]
 keep_rate: 0.9
 only_train_epoch: 1
 batch_size: 64

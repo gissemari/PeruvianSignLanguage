@@ -46,7 +46,7 @@ paris = {
 }
 
 sets = {
-    'train' #, 'val', 'test'
+    'val' #, 'val', 'test'
 }
 
 datasets = {
