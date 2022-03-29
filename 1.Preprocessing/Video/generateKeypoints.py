@@ -133,7 +133,7 @@ for videoFolderName in folder_list:
 
         uniqueVideoName = word + '_' + str(IdCount)
         #video = cv2.VideoWriter(cropVideoPath + word + '_' + str(IdCount)+'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
-        video = cv2.VideoWriter(cropVideoPath+'/' + uniqueVideoName +'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
+        #video = cv2.VideoWriter(cropVideoPath+'/' + uniqueVideoName +'.mp4',cv2.VideoWriter_fourcc(*'mp4v'),fps,(220,220))
 
         idx = 0
 
@@ -238,10 +238,10 @@ for videoFolderName in folder_list:
                 kpDict["face"]["y"] = [1.0 for point in range(0, 468)]
 
             keypointsDict.append(kpDict)
-            video.write(imageBGR)
+            #video.write(imageBGR)
             # Next frame
             ret, frame = cap.read()
-        video.release()
+        #video.release()
 
         height, width, channels = imageBGR.shape
         print("N° frames:",idx, int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))

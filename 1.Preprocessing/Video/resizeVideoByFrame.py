@@ -83,13 +83,16 @@ for videoFolderName in folder_list:
     print()
     videoFolderPath = args.inputPath + videoFolderName
 
-    videoFolderList = [file for file in os.listdir(videoFolderPath)]
+    videoFolderList = os.listdir(videoFolderPath)
+    #print(videoFolderList)
 
     cropVideoPath = args.outputPath + videoFolderName+'/'
     uv.createFolder(cropVideoPath,createFullPath=True)
 
-    for videoFile in videoFolderList:
-
+    for i, videoFile in enumerate(videoFolderList):
+        if not i % 2  == 1:
+            IdCount = IdCount + 1
+            continue
         word = videoFile.split("_")[0]
         #if word not in ["G-R", "bien", "comer", "cuánto", "dos", "porcentaje", "proteína", "sí", "tú", "yo"]:
         #    continue
