@@ -24,7 +24,7 @@ test_feeder_args:
 # model
 model: model.decouple_gcn_attn.Model
 model_args:
-  num_class: 226
+  num_class: 10
   num_point: 27
   num_person: 1
   graph: graph.sign_27.Graph
@@ -41,7 +41,7 @@ step: [50]
 # training
 device: [0,1]
 phase: test
-weights: final_models/27_2/joint_epoch_226_9468.pt
+weights: save_models/sign_joint_final-248.pt
 keep_rate: 0.9
 only_train_epoch: 1
 batch_size: 64
