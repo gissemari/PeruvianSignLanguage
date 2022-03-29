@@ -24,7 +24,7 @@ python obtain_videos.py --train 0 --allfiles ../../Data/PUCP_PSL_DGI156/Videos/c
 echo "counting frames..."
 python count_frames.py --train 0
 echo "extracting keypoints..."
-python extract_keypoint.py --train 0 --src ../../Data/PUCP_PSL_DGI156/Keypoints/pkl/ --keyPath ../../Data/PUCP_PSL_DGI156/Selected/
+python extract_keypoint.py --train 0 --src ../../Data/PUCP_PSL_DGI156/Keypoints/ --keyPath ../../Data/PUCP_PSL_DGI156/Selected/
 echo "extrancting poseflow..."
 sleep 1
 python extract_poseflow.py --train 0
