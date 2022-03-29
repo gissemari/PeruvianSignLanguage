@@ -17,7 +17,7 @@ cd ..
 #rm -rf val_videos
 
 ####### training #############################
-python train_parallel.py --batch_size 160 --dataset_path ../data-prepare/data/features/train/
+python train_parallel.py --batch_size 40 --dataset_path ../data-prepare/data/features/train/
 ###### testing ###########################
 python test.py
 #python test.py --checkpoint_model model_checkpoints/your model

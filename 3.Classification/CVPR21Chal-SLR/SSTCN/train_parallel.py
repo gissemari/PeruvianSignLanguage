@@ -26,6 +26,7 @@ if __name__ == "__main__":
     print("Let's use", torch.cuda.device_count(), "GPUs!")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # Define training set
+
     train_dataset = TorchDataset(istrain=True, fea_dir=opt.dataset_path, isaug = True, repeat=1)
     train_dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=32,pin_memory=True)
 
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     cls_criterion = LabelSmoothingCrossEntropy().cuda()
     # Define network
     model =T_Pose_model(frames_number=60,joints_number=33,
-        n_classes=226
+        n_classes=5
     )
 
     if opt.checkpoint_model:
@@ -46,9 +47,9 @@ if __name__ == "__main__":
     else:
         model.init_weights()
 
-    model = torch.nn.DataParallel(model)
+    #model = torch.nn.DataParallel(model)
     model = model.to(device)
-    
+
     #model = model.module
     optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, weight_decay=opt.wd)
 
@@ -66,7 +67,6 @@ if __name__ == "__main__":
                 predictions = model(fea_sequences)
             # Compute metrics
             acc = 100 * (predictions.detach().argmax(1) == labels).cpu().numpy().mean()
-            
 
             loss = cls_criterion(predictions, labels).item()
             # Keep track of loss and accuracy
@@ -88,14 +88,16 @@ if __name__ == "__main__":
         model.train()
         print("")
         return newacc
+        # end def test()
+
     global_acc = 0
     needsave = False
     for epoch in range(opt.num_epochs):
         epoch_metrics = {"loss": [], "acc": []}
         prev_time = time.time()
         print(f"--- Epoch {epoch} ---")
+        print(train_dataloader)
         for batch_i, (X, y) in enumerate(train_dataloader):
-
             if X.size(0) == 1:
                 continue
             if epoch==50:
@@ -109,10 +111,8 @@ if __name__ == "__main__":
             labels = Variable(y.to(device), requires_grad=False)
 
             optimizer.zero_grad()
-
             # Get sequence predictions
             predictions = model(fea_sequences)
-
             # Compute metrics
             loss = cls_criterion(predictions, labels)
             acc = 100 * (predictions.detach().argmax(1) == labels).cpu().numpy().mean()

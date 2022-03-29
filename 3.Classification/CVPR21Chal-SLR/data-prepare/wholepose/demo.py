@@ -97,8 +97,8 @@ def main():
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         ])
 
-        input_path = '../../../ChaLearn-2021-LAP/project/data/mp4/'+jobType+'/'
-        #input_path = '../data/sign/train/'
+        #input_path = '../../../ChaLearn-2021-LAP/project/data/mp4/'+jobType+'/'
+        input_path = '../data/sign/train/'
         paths = []
         names = []
         for root, _, fnames in natsorted(os.walk(input_path)):
