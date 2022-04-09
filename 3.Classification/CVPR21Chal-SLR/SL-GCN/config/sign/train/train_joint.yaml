@@ -24,7 +24,7 @@ test_feeder_args:
 # 226 (num classes)
 model: model.decouple_gcn_attn.Model
 model_args:
-  num_class: 10
+  num_class: 18 
   num_point: 27
   num_person: 1
   graph: graph.sign_27.Graph

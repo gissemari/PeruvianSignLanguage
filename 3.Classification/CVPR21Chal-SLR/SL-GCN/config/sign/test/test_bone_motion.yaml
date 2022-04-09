@@ -16,7 +16,7 @@ train_feeder_args:
 
 test_feeder_args:
   data_path: ./data/sign/27_2/test_data_bone_motion.npy
-  label_path: ./data/sign/27_2/test_labels_pseudo.pkl
+  label_path: ./data/sign/27_2/test_label.pkl
   random_mirror: False
   normalization: True
   is_vector: True
@@ -25,7 +25,7 @@ test_feeder_args:
 # model
 model: model.decouple_gcn_attn.Model
 model_args:
-  num_class: 226
+  num_class: 7
   num_point: 27
   num_person: 1
   graph: graph.sign_27.Graph
@@ -42,7 +42,7 @@ step: [50]
 # training
 device: [0,1]
 phase: test
-weights: final_models/27_2/bone_motion_217_9249.pt
+weights: save_models/sign_bone_motion_final-240.pt
 keep_rate: 0.9
 only_train_epoch: 1
 batch_size: 64

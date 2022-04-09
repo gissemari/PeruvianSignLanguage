@@ -42,13 +42,12 @@ connections = [(5,7),
             (115, 116), #42
             ]
 
-def gendata(data_paths, label_path, out_path, part='train', config='27'):
+def gendata(data_paths, out_path, part='train', config='27'):
     labels = []
     data=[]
     sample_names = []
     selected = selected_joints[config]
     num_joints = len(selected)
-    #label_file = open(label_path, 'r', encoding='utf-8')
     label_file = os.listdir(data_paths)
 
     for line in label_file:
@@ -61,7 +60,7 @@ def gendata(data_paths, label_path, out_path, part='train', config='27'):
 
     #fp = np.zeros((len(data), max_frame, num_joints, num_channels, max_body_true), dtype=np.float32)
     listInstance = []
-    for i, data_path in enumerate(data):
+    for f, data_path in enumerate(data):
         #print("Here",data_path)
         # print(sample_names[i])
         skel = np.load(data_path)
@@ -99,7 +98,6 @@ def gendata(data_paths, label_path, out_path, part='train', config='27'):
                     outlier = True
                     break
 
-            print(outlier)
             kpDict = {}
             kpDict["x"] = timeStep[:,0]
             kpDict["y"] = timeStep[:,1]
@@ -109,17 +107,20 @@ def gendata(data_paths, label_path, out_path, part='train', config='27'):
 
         basePath = os.sep.join([*out_path.split('/')[:2]])
         npyName = data_path.split('/')[-1]
+
         #fileName = '_'.join(npyName.split('/')[-1].split('_')[:2])
 
         instanceDict = {}
-        instanceDict['label'] = npyName.split('/')[-1].split('_')[0]
-        instanceDict['id'] = npyName.split('/')[-1].split('_')[1]
+
+        instanceDict['label'] = '_'.join(npyName.split('/')[-1].split('_')[:-2])
+        instanceDict['id'] = npyName.split('_')[-2]
         instanceDict['keypoints']= kpListOfDict
         instanceDict['size'] = len(kpListOfDict)
 
         listInstance.append(instanceDict)
 
     df = pd.DataFrame(listInstance)
+    #print(df)
     df.to_json('{}/json/{}.json'.format(basePath, 'allVideosAndPoints'), orient='records')
         #print('{}/json/{}.json'.format(basePath, fileName))
         #df.to_json('{}/json/{}.json'.format(basePath, fileName), orient='records')
@@ -139,7 +140,6 @@ def gendata(data_paths, label_path, out_path, part='train', config='27'):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Sign Data Converter.')
     parser.add_argument('--data_path', default='../../data-prepare/data/npy3/train') #'train_npy/npy', 'va_npy/npy'
-    parser.add_argument('--label_path', default= '../../..//ChaLearn-2021-LAP/data/train_labels.csv') #'../data/sign/27/train_labels.csv') # 'train_labels.csv', 'val_gt.csv', 'test_labels.csv'
     parser.add_argument('--out_folder', default='../data/sign/')
     parser.add_argument('--points', default='1') #'27')
 
@@ -153,7 +153,6 @@ if __name__ == '__main__':
 
     gendata(
         arg.data_path,
-        arg.label_path,
         out_path,
         part=part,
         config=arg.points)

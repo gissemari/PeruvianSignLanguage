@@ -15,7 +15,7 @@ selected_joints = {
 }
 
 max_body_true = 1
-max_frame = 150
+max_frame = 20#150
 num_channels = 3
 
 
@@ -27,15 +27,14 @@ def gendata(data_path, label_path, out_path, part='train', config='27'):
     selected = selected_joints[config]
     num_joints = len(selected)
     label_file = open(label_path, 'r', encoding='utf-8')
-    
 
     for line in label_file.readlines():
         line = line.strip()
         line = line.split(',')
-
+        #print(line[0])
         sample_names.append(line[0])
         data.append(os.path.join(data_path, line[0] + '_color.mp4.npy'))
-        # print(line[1])
+        #print(line[1])
         labels.append(int(line[1]))
         # print(labels[-1])
 
@@ -51,7 +50,7 @@ def gendata(data_path, label_path, out_path, part='train', config='27'):
             L = skel.shape[0]
             print(L)
             fp[i,:L,:,:,0] = skel
-            
+
             rest = max_frame - L
             num = int(np.ceil(rest / L))
             pad = np.concatenate([skel for _ in range(num)], 0)[:rest]
@@ -62,7 +61,7 @@ def gendata(data_path, label_path, out_path, part='train', config='27'):
             print(L)
             fp[i,:,:,:,0] = skel[:max_frame,:,:]
 
-
+    print(sample_names,labels)
     with open('{}/{}_label.pkl'.format(out_path, part), 'wb') as f:
         pickle.dump((sample_names, labels), f)
 
@@ -76,17 +75,21 @@ def gendata(data_path, label_path, out_path, part='train', config='27'):
 
 
 if __name__ == '__main__':
+
+    part = 'train' #'test' # 'train', 'val'
+
     parser = argparse.ArgumentParser(description='Sign Data Converter.')
-    parser.add_argument('--data_path', default='../../data-prepare/data/npy3/val') #'train_npy/npy', 'va_npy/npy'
-    parser.add_argument('--label_path', default= '../../..//ChaLearn-2021-LAP/data/val_labels.csv') #'../data/sign/27/train_labels.csv') # 'train_labels.csv', 'val_gt.csv', 'test_labels.csv'
+    parser.add_argument('--data_path', default=f'../../data-prepare/data/npy3/{part}') #'train_npy/npy', 'va_npy/npy'
+    parser.add_argument('--label_path', default=f'../../..//ChaLearn-2021-LAP/data/{part}_labels.csv') #'../data/sign/27/train_labels.csv') # 'train_labels.csv', 'val_gt.csv', 'test_labels.csv'
     parser.add_argument('--out_folder', default='../data/sign/')
     parser.add_argument('--points', default='27')
 
-    part = 'val' #'test' # 'train', 'val'
     arg = parser.parse_args()
 
     out_path = os.path.join(arg.out_folder, arg.points)
+
     print(out_path)
+
     if not os.path.exists(out_path):
         os.makedirs(out_path)
 
