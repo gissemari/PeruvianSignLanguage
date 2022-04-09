@@ -98,10 +98,11 @@ def main():
         ])
 
         #input_path = '../../../ChaLearn-2021-LAP/project/data/mp4/'+jobType+'/'
-        input_path = '../data/sign/train/'
+        input_path = f'../../../../Data/AEC/Videos/SEGMENTED_SIGN/'
         paths = []
         names = []
         for root, _, fnames in natsorted(os.walk(input_path)):
+            print(fnames)
             for fname in natsorted(fnames):     
                 path1 = os.path.join(root, fname) 
                 if 'depth' in fname:
