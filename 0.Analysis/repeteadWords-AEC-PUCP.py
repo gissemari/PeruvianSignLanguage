@@ -8,8 +8,8 @@ def getWords(dict):
 
     return words
 
-aec = pd.read_json('../Data/AEC/dict.json')
-pucp = pd.read_json('../Data/PUCP_PSL_DGI156/dict.json')
+aec = pd.read_json('../Data/AEC/dict.json', encoding="utf-8")
+pucp = pd.read_json('../Data/PUCP_PSL_DGI156/dict.json', encoding="utf-8")
 
 aecWords = getWords(aec)
 pucpWords = getWords(pucp)
@@ -23,4 +23,4 @@ similarWords = {repeted:{'aec':len(aec[aecPos]["instances"]),
 df = pd.DataFrame(data=similarWords) 
 df= df.T
 
-df.to_csv('repeatedWords.csv')
+df.to_csv('repeatedWords.csv', encoding="utf-8")
