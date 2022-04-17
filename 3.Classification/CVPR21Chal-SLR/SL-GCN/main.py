@@ -7,6 +7,7 @@ import numpy as np
 import yaml
 import pickle
 from collections import OrderedDict
+import csv
 # torch
 import torch
 import torch.nn as nn
@@ -19,6 +20,8 @@ import random
 import inspect
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
+import wandbFunctions as wandbF
+import wandb
 # class LabelSmoothingCrossEntropy(nn.Module):
 #     def __init__(self):
 #         super(LabelSmoothingCrossEntropy, self).__init__()
@@ -30,6 +33,8 @@ import torch.nn.functional as F
 #         smooth_loss = -logprobs.mean(dim=-1)
 #         loss = confidence * nll_loss + smoothing * smooth_loss
 #         return loss.mean()
+
+wandbFlag = True
 
 def init_seed(_):
     torch.cuda.manual_seed_all(1)
@@ -214,6 +219,7 @@ class Processor():
         self.load_data()
         self.lr = self.arg.base_lr
         self.best_acc = 0
+        self.best_tmp_acc = 0
 
     def load_data(self):
         Feeder = import_class(self.arg.feeder)
@@ -242,6 +248,8 @@ class Processor():
         shutil.copy2(inspect.getfile(Model), self.arg.work_dir)
         self.model = Model(**self.arg.model_args).cuda(output_device)
         # print(self.model)
+        if wandbFlag:
+            wandbF.watch(self.model)
         self.loss = nn.CrossEntropyLoss().cuda(output_device)
         # self.loss = LabelSmoothingCrossEntropy().cuda(output_device)
 
@@ -282,6 +290,7 @@ class Processor():
                     output_device=output_device)
 
     def load_optimizer(self):
+
         if self.arg.optimizer == 'SGD':
 
             params_dict = dict(self.model.named_parameters())
@@ -295,7 +304,14 @@ class Processor():
 
                 params += [{'params': value, 'lr': self.arg.base_lr, 'lr_mult': lr_mult,
                             'decay_mult': decay_mult, 'weight_decay': weight_decay}]
-
+            wandb.config = {
+                "learning_rate": self.arg.base_lr,
+                "epochs": self.arg.num_epoch,
+                "batch_size": self.arg.batch_size,
+                "weight_decay":self.arg.weight_decay,
+                "num_class":self.arg.model_args["num_class"],
+                "momentum":0.9
+            }
             self.optimizer = optim.SGD(
                 params,
                 momentum=0.9,
@@ -305,6 +321,13 @@ class Processor():
                 self.model.parameters(),
                 lr=self.arg.base_lr,
                 weight_decay=self.arg.weight_decay)
+            wandb.config = {
+                "learning_rate": self.arg.base_lr,
+                "epochs": self.arg.num_epoch,
+                "batch_size": self.arg.batch_size,
+                "weight_decay":self.arg.weight_decay,
+                "num_class":self.arg.model_args["num_class"]
+            }
         else:
             raise ValueError()
 
@@ -359,12 +382,15 @@ class Processor():
         self.record_time()
         return split_time
 
-    def train(self, epoch, save_model=False):
+    def train(self, epoch, save_model=False): 
         self.model.train()
         self.print_log('Training epoch: {}'.format(epoch + 1))
         loader = self.data_loader['train']
         self.adjust_learning_rate(epoch)
         loss_value = []
+        predict_arr = []
+        target_arr = []
+        meaning = []
         self.record_time()
         timer = dict(dataloader=0.001, model=0.001, statistics=0.001)
         process = tqdm(loader)
@@ -380,8 +406,11 @@ class Processor():
                 if 'DecoupleA' in key:
                     value.requires_grad = False
                     print(key + '-not require grad')
-        for batch_idx, (data, label, index) in enumerate(process):
+        meaning = [0] * self.arg.model_args["num_class"]
+        for batch_idx, (data, label, index, name) in enumerate(process):
             self.global_step += 1
+
+            label_tmp = label.cpu().numpy()
             # get data
             data = Variable(data.float().cuda(
                 self.output_device), requires_grad=False)
@@ -402,14 +431,21 @@ class Processor():
             else:
                 l1 = 0
             loss = self.loss(output, label) + l1
+            
+            for r,s in zip(name,label_tmp):
+                meaning[s]= '_'.join(r.split('_')[:-1])
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            loss_value.append(loss.data)
+            loss_value.append(loss.data.cpu().numpy())
             timer['model'] += self.split_time()
 
             value, predict_label = torch.max(output.data, 1)
+
+            predict_arr.append(predict_label.cpu().numpy())
+            target_arr.append(label.data.cpu().numpy())
+
             acc = torch.mean((predict_label == label.data).float())
 
             self.lr = self.optimizer.param_groups[0]['lr']
@@ -419,7 +455,25 @@ class Processor():
                     '\tBatch({}/{}) done. Loss: {:.4f}  lr:{:.6f}'.format(
                         batch_idx, len(loader), loss.data, self.lr))
             timer['statistics'] += self.split_time()
+        
+        predict_arr = np.concatenate(predict_arr)
+        target_arr = np.concatenate(target_arr)
 
+        accuracy  = torch.mean((predict_label == label.data).float())
+        if accuracy >= self.best_tmp_acc:
+            self.best_tmp_acc = accuracy
+            wandb.log({"TRAIN_conf_mat" : wandb.plot.confusion_matrix(
+                        #probs=score,
+                        #y_true=list(label.values()),
+                        #preds=list(predict_label.values()),
+                        y_true=list(target_arr),
+                        preds=list(predict_arr),
+                        class_names=meaning,
+                        title="TRAIN_conf_mat")})
+
+
+        if wandbFlag:
+            wandbF.wandbTrainLog(np.mean(loss_value), accuracy)
         # statistics of time consumption and loss
         proportion = {
             k: '{:02d}%'.format(int(round(v * 100 / sum(timer.values()))))
@@ -433,15 +487,21 @@ class Processor():
         torch.save(weights, self.arg.model_saved_name +
                    '-' + str(epoch) + '.pt')
 
-    def eval(self, epoch, save_score=False, loader_name=['test'], wrong_file=None, result_file=None):
+    def eval(self, epoch, save_score=False, loader_name=['test'], wrong_file=None, result_file=None, isTest=False):
         if wrong_file is not None:
             f_w = open(wrong_file, 'w')
         if result_file is not None:
             f_r = open(result_file, 'w')
+        #if isTest:
+        submission = dict()
+        trueLabels = dict()
+        
+        meaning = [0] * self.arg.model_args["num_class"]
         self.model.eval()
         with torch.no_grad():
             self.print_log('Eval epoch: {}'.format(epoch + 1))
             for ln in loader_name:
+
                 loss_value = []
                 score_frag = []
                 right_num_total = 0
@@ -450,7 +510,8 @@ class Processor():
                 step = 0
                 process = tqdm(self.data_loader[ln])
 
-                for batch_idx, (data, label, index) in enumerate(process):
+                for batch_idx, (data, label, index, name) in enumerate(process):
+                    label_tmp = label
                     data = Variable(
                         data.float().cuda(self.output_device),
                         requires_grad=False)
@@ -461,16 +522,27 @@ class Processor():
                     with torch.no_grad():
                         output = self.model(data)
 
+                    #if isTest:
+                    for r,s in zip(name,label):
+                        meaning[s]= '_'.join(r.split('_')[:-1])
+
                     if isinstance(output, tuple):
                         output, l1 = output
                         l1 = l1.mean()
                     else:
                         l1 = 0
+
                     loss = self.loss(output, label)
                     score_frag.append(output.data.cpu().numpy())
                     loss_value.append(loss.data.cpu().numpy())
 
-                    _, predict_label = torch.max(output.data, 1)
+                    _, predict_label = torch.max(output.data, 1) 
+
+                    #if isTest:
+                    for j in range(output.size(0)):
+                        submission[name[j]] = predict_label[j].item()
+                        trueLabels[name[j]] = label_tmp[j].item()
+
                     step += 1
 
                     if wrong_file is not None or result_file is not None:
@@ -489,8 +561,17 @@ class Processor():
                         len(score))
 
                 accuracy = self.data_loader[ln].dataset.top_k(score, 1)
+                
                 if accuracy > self.best_acc:
                     self.best_acc = accuracy
+
+                    wandb.log({"VAL_conf_mat" : wandb.plot.confusion_matrix(
+                        #probs=score,
+                        y_true=list(trueLabels.values()),
+                        preds=list(submission.values()),
+                        class_names=meaning,
+                        title="VAL_conf_mat")})
+
                     score_dict = dict(
                         zip(self.data_loader[ln].dataset.sample_name, score))
 
@@ -500,6 +581,8 @@ class Processor():
 
                 print('Eval Accuracy: ', accuracy,
                     ' model: ', self.arg.model_saved_name)
+                if wandbFlag:
+                    wandbF.wandbValLog(np.mean(loss_value), accuracy)
 
                 score_dict = dict(
                     zip(self.data_loader[ln].dataset.sample_name, score))
@@ -512,6 +595,51 @@ class Processor():
                 with open('./work_dir/' + arg.Experiment_name + '/eval_results/epoch_' + str(epoch) + '_' + str(accuracy) + '.pkl'.format(
                         epoch, accuracy), 'wb') as f:
                     pickle.dump(score_dict, f)
+
+        #num_classes = self.arg.model_args["num_class"]
+        #confusion_matrix_test = torch.zeros(num_classes, num_classes)
+        #confusion_matrix_train = torch.zeros(num_classes, num_classes)
+
+        #for t, p in zip(trueLabels.view(-1), submission.view(-1)):
+        #    confusion_matrix_test[t.long(), p.long()] += 1
+
+        #confusion_matrix_test = confusion_matrix_test.to("cpu").numpy()
+        
+        predLabels = []
+        groundLabels = []
+        print("END")
+        if isTest:
+            #print(submission)
+            #print(trueLabels)
+            totalRows = 0
+            with open("submission.csv", 'w') as of:
+                writer = csv.writer(of)
+                accum = 0
+                for trueName, truePred in trueLabels.items():
+
+                    sample = trueName
+                    #print(f'Predicting {sample}', end=' ')
+                    #print(f'as {submission[sample]} - pred {submission[sample]} and real {row[1]}')
+                    match=0
+                    predLabels.append(submission[sample])
+                    groundLabels.append(int(truePred))
+                    if int(truePred) == int(submission[sample]):
+                        match=1
+                        accum+=1
+                    totalRows+=1
+                    
+                    # identifying subject
+                    with open("pucpSubject.csv") as subjectFile:
+                        readerSubject = csv.reader(subjectFile)
+                        idx = int(sample.split('_')[-1])
+                        subjectName = 'NA'
+                        for name, idxStart, idxEnd in readerSubject:
+                            if (int(idxStart) <= idx) and (idx<= int(idxEnd)):
+                                subjectName = name
+                                break
+                    writer.writerow([sample, submission[sample], str(truePred), str(match), subjectName])
+
+
         return np.mean(loss_value)
     def start(self):
         if self.arg.phase == 'train':
@@ -546,7 +674,7 @@ class Processor():
             self.print_log('Model:   {}.'.format(self.arg.model))
             self.print_log('Weights: {}.'.format(self.arg.weights))
             self.eval(epoch=self.arg.start_epoch, save_score=self.arg.save_score,
-                      loader_name=['test'], wrong_file=wf, result_file=rf)
+                      loader_name=['test'], wrong_file=wf, result_file=rf, isTest=True)
             self.print_log('Done.\n')
 
 
@@ -570,6 +698,21 @@ def import_class(name):
 if __name__ == '__main__':
     parser = get_parser()
 
+    hyperparameter_defaults = dict(
+        learning_rate = 0.0005,
+        weight_decay = 0,
+        batch_size = 64,
+        num_epoch = 250
+    )
+
+    wandb.init(project="smileLab-PSL", entity="joenatan30",
+               config=hyperparameter_defaults)
+    config = wandb.config
+
+
+    
+    run = wandb.init()
+
     # load arg form config file
     p = parser.parse_args()
     if p.config is not None:
@@ -582,8 +725,12 @@ if __name__ == '__main__':
                 print('WRONG ARG: {}'.format(k))
                 assert (k in key)
         parser.set_defaults(**default_arg)
-
     arg = parser.parse_args()
+    arg.base_lr = config["base-lr"]
+    arg.batch_size = config["batch-size"]
+    arg.weight_decay = config["weight-decay"]
+    arg.num_epoch = config["num-epoch"]
+    
     init_seed(0)
     processor = Processor(arg)
     processor.start()
