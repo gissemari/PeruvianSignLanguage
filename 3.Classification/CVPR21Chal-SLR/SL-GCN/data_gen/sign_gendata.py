@@ -45,7 +45,7 @@ def gendata(data_path, label_path, out_path, part='train', config='27'):
         # print(sample_names[i])
         skel = np.load(data_path)
         skel = skel[:,selected,:]
-
+        print(skel)
         if skel.shape[0] < max_frame:
             L = skel.shape[0]
             print(L)

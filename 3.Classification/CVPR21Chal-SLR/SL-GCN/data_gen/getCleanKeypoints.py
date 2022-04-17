@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import os
 import pandas as pd
+import time
 from collections import Counter
 
 sys.path.extend(['../'])
@@ -19,7 +20,7 @@ selected_joints = {
 
 max_body_true = 1
 max_frame = 150
-num_channels = 3
+num_channels = 2#3
 
 
 def gendata(data_path, out_path, part='train', config='27'):
@@ -31,15 +32,13 @@ def gendata(data_path, out_path, part='train', config='27'):
     #label_file = open(label_path, 'r', encoding='utf-8')
 
     df = pd.read_pickle(data_path)
-    print()
+
     data, labels_key, names = list(df.keys())
 
     labelIndex = list(Counter(df[labels_key]).keys())
     ind = [value for value in range(len(labelIndex))]
-    print(labelIndex)
-    print(ind)
+
     meaning = {lab:idx for idx,lab in zip(ind,labelIndex)}
-    print(meaning)
 
     listInstance = []
 
@@ -49,8 +48,8 @@ def gendata(data_path, out_path, part='train', config='27'):
 
         xCoords = df[data][pos][0]
         yCoords = df[data][pos][1]
-
-        skel = np.asarray([list(zip(np.append(x,[0.0,0.0,0.0,0.0]),np.append(y,[0.0,0.0,0.0,0.0]),[0.5 for _ in range(27)])) for (x, y) in zip(xCoords,yCoords)])
+        # [0.5 for _ in range(27)]
+        skel = np.asarray([list(zip(x*256,y*256)) for (x, y) in zip(xCoords,yCoords)])
         name = df[names][pos]
         sample_names.append(name)
         label = meaning[df[labels_key][pos]]
@@ -58,7 +57,7 @@ def gendata(data_path, out_path, part='train', config='27'):
         labels.append(int(label))
 
         if skel.shape[0] < max_frame:
-            L = skel.shape[0]
+            L = skel.shape[0] 
             #print(L)
             fp[pos,:L,:,:,0] = skel
 
@@ -71,7 +70,8 @@ def gendata(data_path, out_path, part='train', config='27'):
             L = skel.shape[0]
             #print(L)
             fp[pos,:,:,:,0] = skel[:max_frame,:,:]
-
+        
+        #time.sleep(5)
     # print(sample_names,labels)
     print('{}/{}_label.pkl'.format(out_path, part))
     with open('{}/{}_label.pkl'.format(out_path, part), 'wb') as f:
@@ -98,13 +98,13 @@ if __name__ == '__main__':
         os.makedirs(out_path)
 
     gendata(
-        './../../../../Data/AEC_cleaned/data_10_10_24-train.pk',
+        './../../../../Data/AEC_cleaned/data_10_10_27-train.pk',
         out_path,
         part="train",
         config=arg.points)
 
     gendata(
-        './../../../../Data/AEC_cleaned/data_10_10_24-val.pk',
+        './../../../../Data/AEC_cleaned/data_10_10_27-val.pk',
         out_path,
         part="val",
         config=arg.points)

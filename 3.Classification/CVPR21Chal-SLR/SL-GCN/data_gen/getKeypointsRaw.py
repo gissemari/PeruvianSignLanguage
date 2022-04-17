@@ -112,16 +112,17 @@ def gendata(data_paths, out_path, part='train', config='27'):
 
         instanceDict = {}
 
-        instanceDict['label'] = '_'.join(npyName.split('/')[-1].split('_')[:-2])
-        instanceDict['id'] = npyName.split('_')[-2]
+        instanceDict['label'] = '_'.join(npyName.split('_')[:-1])
+        instanceDict['id'] = npyName.split('_')[-1].split('.')[0]
         instanceDict['keypoints']= kpListOfDict
         instanceDict['size'] = len(kpListOfDict)
 
         listInstance.append(instanceDict)
 
     df = pd.DataFrame(listInstance)
-    #print(df)
-    df.to_json('{}/json/{}.json'.format(basePath, 'allVideosAndPoints'), orient='records')
+    print(df)
+    print('{}/json/{}.json'.format(basePath, 'allVideosAndPoints-PUCP-3684'))
+    df.to_json('{}/json/{}.json'.format(basePath, 'allVideosAndPoints-PUCP-3684'), orient='records')
         #print('{}/json/{}.json'.format(basePath, fileName))
         #df.to_json('{}/json/{}.json'.format(basePath, fileName), orient='records')
 

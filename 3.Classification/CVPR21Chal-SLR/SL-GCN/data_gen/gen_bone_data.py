@@ -64,7 +64,8 @@ for dataset in datasets:
             '../data/{}/{}_data_bone.npy'.format(dataset, set),
             dtype='float32',
             mode='w+',
-            shape=(N, 3, T, V, M))
+            shape=(N, 2, T, V, M))
+            #shape=(N, 3, T, V, M))
 
         fp_sp[:, :C, :, :, :] = data
         for v1, v2 in tqdm(paris[dataset]):

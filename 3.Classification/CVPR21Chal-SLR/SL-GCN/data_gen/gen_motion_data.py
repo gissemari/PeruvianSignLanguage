@@ -3,7 +3,7 @@ import numpy as np
 from numpy.lib.format import open_memmap
 
 sets = {
-    'val' #, 'val', 'test'
+    'train' #, 'val', 'test'
 
 }
 
