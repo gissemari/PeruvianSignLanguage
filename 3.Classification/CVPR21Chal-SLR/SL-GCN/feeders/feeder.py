@@ -79,6 +79,7 @@ class Feeder(Dataset):
     def __getitem__(self, index):
         data_numpy = self.data[index]
         label = self.label[index]
+        name = self.sample_name[index]
         data_numpy = np.array(data_numpy)
 
         if self.random_choose:
@@ -95,7 +96,7 @@ class Feeder(Dataset):
 
         if self.normalization:
             # data_numpy = (data_numpy - self.mean_map) / self.std_map
-            assert data_numpy.shape[0] == 3
+            assert data_numpy.shape[0] == 2
             if self.is_vector:
                 data_numpy[0,:,0,:] = data_numpy[0,:,0,:] - data_numpy[0,:,0,0].mean(axis=0)
                 data_numpy[1,:,0,:] = data_numpy[1,:,0,:] - data_numpy[1,:,0,0].mean(axis=0)
@@ -120,7 +121,7 @@ class Feeder(Dataset):
         if self.random_move:
             data_numpy = tools.random_move(data_numpy)
 
-        return data_numpy, label, index
+        return data_numpy, label, index, name
 
     def top_k(self, score, top_k):
         rank = score.argsort()
