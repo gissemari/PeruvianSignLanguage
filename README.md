@@ -144,9 +144,9 @@ For the AEC dataset:
 }
 
 @InProceedings{jiang2021sign,
-  title={Sign Language Recognition via Skeleton-Aware Multi-Model Ensemble},
-  author={Jiang, Songyao and Sun, Bin and Wang, Lichen and Bai, Yue and Li, Kunpeng and Fu, Yun},
-  journal={arXiv preprint arXiv:2110.06161},
-  year={2021}
+    author    = {Jiang, Songyao and Sun, Bin and Wang, Lichen and Bai, Yue and Li, Kunpeng and Fu, Yun},
+    title     = {Sign Language Recognition via Skeleton-Aware Multi-Model Ensemble},
+    journal   = {arXiv preprint arXiv:2110.06161},
+    year      = {2021}
 }
 ```
