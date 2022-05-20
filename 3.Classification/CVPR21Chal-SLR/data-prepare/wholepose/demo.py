@@ -98,6 +98,7 @@ def main():
         ])
 
         #input_path = '../../../ChaLearn-2021-LAP/project/data/mp4/'+jobType+'/'
+        #input_path = f'../../../../Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/'
         input_path = f'../../../../Data/AEC/Videos/SEGMENTED_SIGN/'
         paths = []
         names = []

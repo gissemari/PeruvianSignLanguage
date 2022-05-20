@@ -48,7 +48,6 @@ def main():
           output_filename = opt.feature_path+'/'+filename[lenstr:-4] + '.pt'
           frames = []
           frames_flip = []
-          print("HERE",filename)
           cap = cv2.VideoCapture(filename)
           length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
           fps = cap.get(cv2.CAP_PROP_FPS)
