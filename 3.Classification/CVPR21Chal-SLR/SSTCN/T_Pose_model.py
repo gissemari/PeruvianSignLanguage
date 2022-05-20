@@ -171,16 +171,22 @@ class T_Pose_model(nn.Module):
         self.swish = swish()
         self.t1downsample = TemporalDownsampleBlock(self.in_channels,frames_number,1,10)
         self.t2downsample = TemporalDownsampleBlock(frames_number,self.final_frames_number,1,10,relu = False)
+        
         self.f1downsample = FrameDownsampleBlock(self.final_frames_number*joints_number,
         self.final_frames_number*joints_number,joints_number,joints_number*10)
+
         self.f2downsample = FrameDownsampleBlock(self.final_frames_number*joints_number,
         self.final_frames_number*joints_number,joints_number,joints_number*10,relu = False)
+
         self.f3downsample = FrameDownsampleBlock(self.final_frames_number*joints_number,
         self.final_frames_number*joints_number,self.final_frames_number,self.final_frames_number*10)
+
         self.f4downsample = FrameDownsampleBlock(self.final_frames_number*joints_number,
         self.final_frames_number*joints_number,self.final_frames_number,self.final_frames_number*10, relu = False)
+
         self.f5downsample = FrameDownsampleBlock(self.final_frames_number*joints_number,
         self.final_frames_number*joints_number,1,10*10)
+        
         self.f6downsample = FrameDownsampleBlock(self.final_frames_number*joints_number,30*joints_number,1,10*10)
         self.dropout = nn.Dropout2d(0.333)
         self.fc1 = nn.Linear(990, n_classes)

@@ -30,21 +30,25 @@ def main():
     opt = parser.parse_args()
     print(opt)
     videopath = opt.video_path+'/*'
+    videopath = '../../../../Data/AEC/Videos/SEGMENTED_SIGN/*/*'
+    #videopath = '../../../../Data/PUCP_PSL_DGI156/Videos/SEGMENTED_SIGN/*/*'
     os.makedirs(opt.feature_path, exist_ok=True)
-    lenstr = len(videopath)-2
+    
     with torch.no_grad():
         config = './wholebody_w48_384x384_adam_lr1e-3.yaml'
         cfg.merge_from_file(config)
-        device = torch.device("cuda")
+        device = torch.device("cuda:1")
         model = get_pose_net(cfg, is_train=False)
         checkpoint = torch.load(
-    './wholebody_hrnet_w48_384x384.pth', map_location="cuda:0")
+    './wholebody_hrnet_w48_384x384.pth', map_location="cuda:1")
         model.load_state_dict(checkpoint)
         model.to(device)
         model.eval()
         print("start extraction!")
         filelist = list(glob.iglob(videopath))
         for filename in tqdm(filelist):
+          lenstr = len(videopath)-3
+          lenstr = lenstr + len(filename[lenstr:-4].split('/')[0]) + 1
           output_filename = opt.feature_path+'/'+filename[lenstr:-4] + '.pt'
           frames = []
           frames_flip = []
@@ -110,7 +114,7 @@ def main():
                 frames_flip.append(image_flip)
 ################## feature extraction ################################################
           data = np.array(frames)
-          input = Variable(torch.from_numpy(data).cuda())
+          input = Variable(torch.from_numpy(data).to(device)) #.cuda())
           out = model(input)
           m = torch.nn.MaxPool2d(3, stride=2,padding=1)
           out = m(out)
@@ -121,7 +125,7 @@ def main():
           torch.save(newout,output_filename)
           if opt.istrain:
               data = np.array(frames_flip)
-              input = Variable(torch.from_numpy(data).cuda())
+              input = Variable(torch.from_numpy(data).to(device)) #.cuda())
               out = model(input)
               out = m(out)
               out = m(out)
