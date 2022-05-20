@@ -11,7 +11,7 @@ def initConfigWandb(num_layers, num_classes, batch_size,
                     nEpoch, lrn_rate, hidden_size, dropout,
                     weight_decay, epsilon):
 
-    wandb.init(project='sign-language', entity='joenatan30')
+    wandb.init(project='demo-psl', entity='joenatan30')
     run = wandb.init()
 
     config = wandb.config

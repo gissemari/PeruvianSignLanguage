@@ -37,6 +37,33 @@ def getData(path):
 
     return X, Y, weight, y_meaning, X_timeSteps
 
+def longTimeStepFormat(fileData, timeStepSize):
+
+    # if it has the desired size
+    if len(fileData) == timeStepSize:
+        return fileData
+    
+    # To complete the number of timesteps if it is less than requiered
+    elif len(fileData) < timeStepSize:
+
+        rest = timeStepSize - len(fileData)
+        num = int(np.ceil(rest / len(fileData)))
+        fileData = np.concatenate([fileData for _ in range(num+1)], 0)[:timeStepSize]
+
+        return fileData
+    # More than the number of timesteps
+    else:
+
+        toSkip = len(fileData) - timeStepSize
+        interval = len(fileData) // toSkip
+
+        # Generate an interval of index
+        a = [val for val in range(0, len(fileData)) if val % interval == 0]
+
+        # from the list of index, we erase only the number of index we want to skip
+        fileData = np.delete(fileData, a[-toSkip:], axis=0)
+
+        return fileData
 
 def timeStepFormat(fileData, timeStepSize):
 
@@ -101,7 +128,8 @@ def keypointsFormat(fileData, bodyPart):
                 data = data + extratXYFromBodyPart(fileData[pos],"right_hand")
 
             elif(bodyName == "face"):
-
+                '''
+                #There are 97 points
                 nose_points = [1,5,6,218,438]
                 mouth_points = [78,191,80,81,82,13,312,311,310,415,308,
                                 95,88,178,87,14,317,402,318,324,
@@ -119,18 +147,41 @@ def keypointsFormat(fileData, bodyPart):
                                      249,373,374,380,381,382,390]
                 right_eyebrow_points = [293,296,300,334,336]
                                         #276,282,283,285,295]
-  
-                #There are 97 points
+                '''
+                # 33 points here
+                nose_points = [1,5,6,218,438]
+                mouth_points = [61,291, 0,17, 13,14, 40,91, 270,321]
+                left_eyes_points = [33,133, 159,145]
+                left_eyebrow_points = [63,66,70,105,107]
+                right_eyes_points = [263,362,386,374]
+                right_eyebrow_points = [293,296,300,334,336]
+
                 exclusivePoints = nose_points
                 exclusivePoints = exclusivePoints + mouth_points
                 exclusivePoints = exclusivePoints + left_eyes_points
                 exclusivePoints = exclusivePoints + left_eyebrow_points
                 exclusivePoints = exclusivePoints + right_eyes_points
                 exclusivePoints = exclusivePoints + right_eyebrow_points
-                
+
                 data = data + extratXYFromBodyPart(fileData[pos],"face",exclusivePoints)
         dataList.append(np.asarray(data))
     return np.asarray(dataList)
+
+def getKeypointsfromPathList(pathList, bodyPart=["pose","face","hands"] , timeStepSize=-1):
+    
+    data = []
+
+    for path in pathList:
+        
+        fileData = pd.read_pickle(path)
+
+        fileData = keypointsFormat(fileData, bodyPart)
+
+        if timeStepSize != -1:
+            fileData = longTimeStepFormat(fileData, timeStepSize)
+        data.append(fileData)
+
+    return np.asarray(data)
 
 def getKeypointsfromIdList(src, idList, bodyPart=["pose","face","hands"] , timeStepSize=-1):
     

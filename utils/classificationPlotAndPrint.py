@@ -72,9 +72,14 @@ def plotConfusionMatrixTest(plt, dataXY, pltSavePath, confusion_matrix_test, num
               'hidden size: %d' % (hidden_size))
     plt.imshow(confusion_matrix_test, interpolation='nearest', cmap=cmap)
     # Specify the tick marks and axis text
+    if type(dataXY.y_labels) != dict:
+        meaning = dict(dataXY.y_labels[0])
+        meaning = [key for (key, value) in meaning.items()]
+    else:
+        meaning = dataXY.y_labels.values()
     tick_marks = np.arange(num_classes)
-    plt.xticks(tick_marks, dataXY.y_labels.values(), rotation=90)
-    plt.yticks(tick_marks, dataXY.y_labels.values())
+    plt.xticks(tick_marks, meaning, rotation=90)
+    plt.yticks(tick_marks, meaning)
 
     # The data formatting
     fmt = '.2f' if normalize else '.2f'
