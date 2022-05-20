@@ -36,6 +36,8 @@ import wandb
 
 wandbFlag = True
 
+model_name = ''
+
 def init_seed(_):
     torch.cuda.manual_seed_all(1)
     torch.manual_seed(1)
@@ -336,6 +338,7 @@ class Processor():
                                               threshold=1e-4, threshold_mode='rel',
                                               cooldown=0)
 
+
     def save_arg(self):
         # save arg
         arg_dict = vars(self.arg)
@@ -343,9 +346,11 @@ class Processor():
         if not os.path.exists(self.arg.work_dir):
             os.makedirs(self.arg.work_dir)
             os.makedirs(self.arg.work_dir + '/eval_results')
+        os.makedirs(self.arg.work_dir + '/eval_results/'+ model_name, exist_ok = True)
 
         with open('{}/config.yaml'.format(self.arg.work_dir), 'w') as f:
             yaml.dump(arg_dict, f)
+
 
     def adjust_learning_rate(self, epoch):
         if self.arg.optimizer == 'SGD' or self.arg.optimizer == 'Adam':
@@ -360,9 +365,11 @@ class Processor():
         else:
             raise ValueError()
 
+
     def print_time(self):
         localtime = time.asctime(time.localtime(time.time()))
         self.print_log("Local current time :  " + localtime)
+
 
     def print_log(self, str, print_time=True):
         if print_time:
@@ -373,14 +380,17 @@ class Processor():
             with open('{}/log.txt'.format(self.arg.work_dir), 'a') as f:
                 print(str, file=f)
 
+
     def record_time(self):
         self.cur_time = time.time()
         return self.cur_time
+
 
     def split_time(self):
         split_time = time.time() - self.cur_time
         self.record_time()
         return split_time
+
 
     def train(self, epoch, save_model=False): 
         self.model.train()
@@ -389,6 +399,7 @@ class Processor():
         self.adjust_learning_rate(epoch)
         loss_value = []
         predict_arr = []
+        proba_arr = []
         target_arr = []
         meaning = []
         self.record_time()
@@ -406,7 +417,7 @@ class Processor():
                 if 'DecoupleA' in key:
                     value.requires_grad = False
                     print(key + '-not require grad')
-        meaning = [0] * self.arg.model_args["num_class"]
+        meaning = [""] * self.arg.model_args["num_class"]
         for batch_idx, (data, label, index, name) in enumerate(process):
             self.global_step += 1
 
@@ -445,6 +456,7 @@ class Processor():
 
             predict_arr.append(predict_label.cpu().numpy())
             target_arr.append(label.data.cpu().numpy())
+            proba_arr.append(output.data.cpu().numpy())
 
             acc = torch.mean((predict_label == label.data).float())
 
@@ -458,10 +470,13 @@ class Processor():
         
         predict_arr = np.concatenate(predict_arr)
         target_arr = np.concatenate(target_arr)
-
+        proba_arr = np.concatenate(proba_arr)
         accuracy  = torch.mean((predict_label == label.data).float())
         if accuracy >= self.best_tmp_acc:
             self.best_tmp_acc = accuracy
+
+        if epoch+1 == arg.num_epoch:
+
             wandb.log({"TRAIN_conf_mat" : wandb.plot.confusion_matrix(
                         #probs=score,
                         #y_true=list(label.values()),
@@ -470,7 +485,6 @@ class Processor():
                         preds=list(predict_arr),
                         class_names=meaning,
                         title="TRAIN_conf_mat")})
-
 
         if wandbFlag:
             wandbF.wandbTrainLog(np.mean(loss_value), accuracy)
@@ -487,6 +501,7 @@ class Processor():
         torch.save(weights, self.arg.model_saved_name +
                    '-' + str(epoch) + '.pt')
 
+
     def eval(self, epoch, save_score=False, loader_name=['test'], wrong_file=None, result_file=None, isTest=False):
         if wrong_file is not None:
             f_w = open(wrong_file, 'w')
@@ -496,7 +511,7 @@ class Processor():
         submission = dict()
         trueLabels = dict()
         
-        meaning = [0] * self.arg.model_args["num_class"]
+        meaning = ["0"] * self.arg.model_args["num_class"]
         self.model.eval()
         with torch.no_grad():
             self.print_log('Eval epoch: {}'.format(epoch + 1))
@@ -518,6 +533,8 @@ class Processor():
                     label = Variable(
                         label.long().cuda(self.output_device),
                         requires_grad=False)
+
+                    print("NANIIIIIIIIIIIIIIIIIII!",data.shape)
 
                     with torch.no_grad():
                         output = self.model(data)
@@ -565,19 +582,31 @@ class Processor():
                 if accuracy > self.best_acc:
                     self.best_acc = accuracy
 
+                    score_dict = dict(
+                        zip(self.data_loader[ln].dataset.sample_name, score))
+
+                    with open('./work_dir/' + arg.Experiment_name + '/eval_results/'+ model_name+ '/best_acc' + '.pkl'.format(
+                            epoch, accuracy), 'wb') as f:
+                        pickle.dump(score_dict, f)
+                
+                if epoch+1 == arg.num_epoch:
+                    
+                    wandb.log({"roc" : wandb.plot.roc_curve( list(trueLabels.values()), score, \
+                            labels=meaning, classes_to_plot=None)})
+            
+                    wandb.log({"pr" : wandb.plot.pr_curve(list(trueLabels.values()), score,
+                            labels=meaning, classes_to_plot=None)})
+
+                    wandb.log({"val_sklearn_conf_mat": wandb.sklearn.plot_confusion_matrix(list(trueLabels.values()), 
+                            list(submission.values()), meaning)})
+                    '''
                     wandb.log({"VAL_conf_mat" : wandb.plot.confusion_matrix(
                         #probs=score,
                         y_true=list(trueLabels.values()),
                         preds=list(submission.values()),
                         class_names=meaning,
                         title="VAL_conf_mat")})
-
-                    score_dict = dict(
-                        zip(self.data_loader[ln].dataset.sample_name, score))
-
-                    with open('./work_dir/' + arg.Experiment_name + '/eval_results/best_acc' + '.pkl'.format(
-                            epoch, accuracy), 'wb') as f:
-                        pickle.dump(score_dict, f)
+                    '''
 
                 print('Eval Accuracy: ', accuracy,
                     ' model: ', self.arg.model_saved_name)
@@ -591,11 +620,11 @@ class Processor():
                 for k in self.arg.show_topk:
                     self.print_log('\tTop{}: {:.2f}%'.format(
                         k, 100 * self.data_loader[ln].dataset.top_k(score, k)))
-
+                '''
                 with open('./work_dir/' + arg.Experiment_name + '/eval_results/epoch_' + str(epoch) + '_' + str(accuracy) + '.pkl'.format(
                         epoch, accuracy), 'wb') as f:
                     pickle.dump(score_dict, f)
-
+                '''
         #num_classes = self.arg.model_args["num_class"]
         #confusion_matrix_test = torch.zeros(num_classes, num_classes)
         #confusion_matrix_train = torch.zeros(num_classes, num_classes)
@@ -641,6 +670,8 @@ class Processor():
 
 
         return np.mean(loss_value)
+
+
     def start(self):
         if self.arg.phase == 'train':
             self.print_log('Parameters:\n{}\n'.format(str(vars(self.arg))))
@@ -698,20 +729,14 @@ def import_class(name):
 if __name__ == '__main__':
     parser = get_parser()
 
-    hyperparameter_defaults = dict(
-        learning_rate = 0.0005,
-        weight_decay = 0,
-        batch_size = 64,
-        num_epoch = 250
-    )
+    wandb.init(project="smileLab-PSL", 
+               entity="joenatan30",
+               config={"num-epoch": 250,
+                       "weight-decay": 0.0001,
+                       "batch-size":64,
+                       "base-lr": 0.07})
 
-    wandb.init(project="smileLab-PSL", entity="joenatan30",
-               config=hyperparameter_defaults)
     config = wandb.config
-
-
-    
-    run = wandb.init()
 
     # load arg form config file
     p = parser.parse_args()
@@ -730,7 +755,13 @@ if __name__ == '__main__':
     arg.batch_size = config["batch-size"]
     arg.weight_decay = config["weight-decay"]
     arg.num_epoch = config["num-epoch"]
-    
+
+    runAndModelName = "LrnRate" + str(arg.base_lr)+ "-NClases" + str(arg.model_args["num_class"]) + "-WDecay" + str(arg.weight_decay) + "-Batch" + str(arg.batch_size)
+
+    model_name = runAndModelName
+    wandb.run.name = runAndModelName
+    wandb.run.save()
+
     init_seed(0)
     processor = Processor(arg)
     processor.start()
