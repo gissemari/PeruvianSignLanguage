@@ -1,42 +1,35 @@
-program: wandb_rnn_classifier.py
+program: ./3.Classification/ourModel/rnn_classifier_mergedData.py
 method: grid
+metric:
+  name: Test accuracy
+  goal: maximize
 parameters:
   hidden_size:
     values:
-    - 100
-    - 400
-    - 700
+    - 1000
+    - 2000
   lrn_rate:
-    values:
-    - 0.00004
-    - 0.0004
-    - 0.004
+    distribution: constant
+    value: 0.0000001
   batch_size:
     values:
     - 32
     - 64
-  bodyParts:
-    values:
-    - ["pose"]
-    - ["pose", "hands"]
-    - ["pose", "hands", "face"]
-    - ["pose", "face"]
-    - ["hands", "face"]
-    - ["hands"]
-    - ["face"]
   num_layers:
-    distribution: constant
-    value: 1
+    values: 
+    - 1
+    - 2
   dropout:
-    distribution: constant
-    value: 0
-  weight_decay:
-    distribution: constant
-    value: 0
-  epsilon:
-    distribution: constant
-    value: 0.00000008
-  epoch:
-    distribution: constant
-    value: 1000
+    values:
+    - 0.0
+    - 0.5
+command:
+  - ${env}
+  - python
+  - ${program}
+  - "--pose"
+  - "--hands"
+  - "--face"
+  - "--wandb"
+  - ${args}
 
