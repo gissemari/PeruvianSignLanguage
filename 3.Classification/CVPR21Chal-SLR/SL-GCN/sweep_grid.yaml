@@ -1,0 +1,27 @@
+program: main.py
+method: grid
+name: CleanedData-moreEpoch
+parameters:
+  base-lr:
+    values:
+    - 0.00001
+    - 0.001
+  batch-size:
+    values:
+    - 32
+    - 16
+  weight-decay:
+    values:
+    - 0.00001
+  num-epoch:
+    values:
+    - 500
+    - 750
+    - 1000
+command:
+  - ${env}
+  - python
+  - ${program}
+  - "--config"
+  - "config/sign/train/train_joint.yaml"
+  - ${args}
