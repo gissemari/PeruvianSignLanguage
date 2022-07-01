@@ -48,7 +48,7 @@ def gendata(data_path, label_path, out_path, part='train', config='27'):
         for key, value in char_to_replace.items():
             sample = sample.replace(key, value)
 
-        word = sample.split('_')[0]
+        word = "".join(sample.split('_')[:-1])
 
         sample_names.append(sample)
 
@@ -87,7 +87,7 @@ def gendata(data_path, label_path, out_path, part='train', config='27'):
 
 if __name__ == '__main__':
 
-    part = 'val' #'test' # 'train', 'val'
+    part = 'train' #'test' # 'train', 'val'
 
     parser = argparse.ArgumentParser(description='Sign Data Converter.')
     parser.add_argument('--data_path', default=f'../../data-prepare/data/npy3/{part}') #'train_npy/npy', 'va_npy/npy'
