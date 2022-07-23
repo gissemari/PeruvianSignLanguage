@@ -1,4 +1,4 @@
-The Peruvian Sign Language Interpretation dataset is shared in this drive link [AEC](https://drive.google.com/file/d/1fwfbheNn_a-HlmWE0lSgofTnmnUupsv3/view?usp=sharing)
+The Peruvian Sign Language Interpretation dataset is shared in this drive link [AEC](https://datos.pucp.edu.pe/dataverse/LSP-AEC)
 
 
 
