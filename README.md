@@ -71,7 +71,7 @@ Code:
 ./PeruvianSignLanguaje/2.Segmentation/cropInterpreterBySRT.py (prev: segmentPerSRT.py)
 
 
-## SEGMENT SIGN SENTENCES (aligned to interpreter##
+## SEGMENT SIGN SENTENCES (aligned to interpreter)##
 
 Input:
 - SRT with annotations in ELAN by sign sentence
@@ -84,6 +84,18 @@ Output:
 Code:
 ./PeruvianSignLanguaje/2.Segmentation/cropInterpreterBySRT.py (prev:segmentPerSRT.py)
 
+## (Optional) Resize and crop video according to person size ##
+
+Input:
+- videos obtained after process cropInterpreterBySRT.py in case you have 
+(./PeruvianSignLanguaje/Data/Videos/Segmented_gesture_sentence)
+
+Output:
+- Do an additional crop to the video to have the interpreter box
+(./PeruvianSignLanguaje/Data/Videos/Segmented_gesture_sentence)
+
+Code:
+1.Preprocessing\Video\resizeVideoByFrame.py
 
 ## VIDEO TO KEYPOINTS (aligned to interpreter) ##
 
