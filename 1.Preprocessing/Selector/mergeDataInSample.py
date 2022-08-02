@@ -104,20 +104,30 @@ finalNames = []
 finalTimestepsLen = []
 
 instanceLimit = 35
-
 LabelKey = 0
 
+#bannedList = ["???"]
 bannedList = ["???", "","YA","QUÉ","QUÉ?","BIEN","DOS","","AHÍ","LUEGO","YO","ÉL","TÚ"]
 #bannedList2 = ["???", "","ESE","QUÉ","QUÉ?","BIEN","DOS",]
 #whiteList = ["ESE","QUÉ","QUÉ?","BIEN","DOS"]
-whiteList = ["PENSAR","VER","SENTIR","DECIR","HACER"]
+#whiteList = ["CAMINAR","CASA","COMER","CÓMO","CUÁNTO","ESE","HOMBRE","MAMÁ","MUJER","NO","PENSAR","PORCENTAJE","PROTEÍNA","SÍ","UNO"]
 
 finalWordDict = dict()
+
+toSeeDetails = ["YA","ESE"]
+keypointsDetail = dict()
+
 
 for path, word, label, name ,timestepLen in zip(paths, words, labels, names, timestepsLen):
     
     if counter[word] < instanceLimit:
         continue
+
+    if word in toSeeDetails:
+        if word not in keypointsDetail.keys():
+            keypointsDetail[word] = [timestepLen]
+        else:
+            keypointsDetail[word].append(timestepLen)
     #print(word)
     if word in bannedList:
         continue
@@ -165,7 +175,12 @@ df.to_pickle(dirPath+"/merged.pkl")
 merged = pd.read_pickle(dirPath+"/merged.pkl")
 print(merged.T)
 
-print(df_meaning)
+print(*list(df_meaning.T.columns))
+print(len(df_meaning.T.columns))
 
 hist = Counter(list(merged.T["words"]))
-print(hist)
+#print(hist)
+
+print("\n to see some details in")
+for key, val in keypointsDetail.items():
+    print(key,val, sum(val)/len(val))

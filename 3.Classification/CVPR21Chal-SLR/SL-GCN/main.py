@@ -18,6 +18,10 @@ import shutil
 from torch.optim.lr_scheduler import ReduceLROnPlateau, MultiStepLR
 import random
 import inspect
+import torchmetrics
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 import wandbFunctions as wandbF
@@ -403,6 +407,23 @@ class Processor():
         target_arr = []
         meaning = []
         self.record_time()
+
+        meaning_2 = {'CAMINAR':'caminar (to walk)','caminar':'caminar (to walk)',
+                    'CASA':'casa (house)', 'casa':'casa (house)',
+                    'HOMBRE':'hombre (man)', 'hombre':'hombre (man)',
+                    'MAMÁ':'mamá (mother)', 'mamá':'mamá (mother)', 'MAMA':'mamá (mother)',
+                    'MUJER':'mujer (woman)', 'mujer':'mujer (woman)',
+                    'SÍ':'sí (yes)','sí':'sí (yes)', 'SI':'sí (yes)',
+                    'UNO':'uno (one)', 'uno':'uno (one)',
+                    'COMER':'comer (to eat)', 'comer':'comer (to eat)',
+                    'CUÁNTO':'cuánto (how much)', 'cuánto':'cuánto (how much)', 'CUANTO':'cuánto (how much)',
+                    'CÓMO':'cómo (how)', 'cómo':'cómo (how)', 'COMO':'cómo (how)',
+                    'ESE':'ese (this)', 'ese':'ese (this)',
+                    'NO':'no (no)', 'no':'no (no)',
+                    'PENSAR':'pensar (to think)', 'pensar':'pensar (to think)',
+                    'PORCENTAJE':'porcentaje (percentage)', 'porcentaje':'porcentaje (percentage)',
+                    'PROTEÍNA':'proteína (protein)', 'proteína':'proteína (protein)','PROTEINA':'proteína (protein)'}
+
         timer = dict(dataloader=0.001, model=0.001, statistics=0.001)
         process = tqdm(loader)
         if epoch >= self.arg.only_train_epoch:
@@ -476,14 +497,14 @@ class Processor():
             self.best_tmp_acc = accuracy
 
         if epoch+1 == arg.num_epoch:
-
+            meaning_3 = [meaning_2[word] for word in meaning]
             wandb.log({"TRAIN_conf_mat" : wandb.plot.confusion_matrix(
                         #probs=score,
                         #y_true=list(label.values()),
                         #preds=list(predict_label.values()),
                         y_true=list(target_arr),
                         preds=list(predict_arr),
-                        class_names=meaning,
+                        class_names=meaning_3,
                         title="TRAIN_conf_mat")})
 
         if wandbFlag:
@@ -511,6 +532,22 @@ class Processor():
         submission = dict()
         trueLabels = dict()
         
+        meaning_2 = {'CAMINAR':'caminar (to walk)','caminar':'caminar (to walk)',
+                    'CASA':'casa (house)', 'casa':'casa (house)',
+                    'HOMBRE':'hombre (man)', 'hombre':'hombre (man)',
+                    'MAMÁ':'mamá (mother)', 'mamá':'mamá (mother)', 'MAMA':'mamá (mother)',
+                    'MUJER':'mujer (woman)', 'mujer':'mujer (woman)',
+                    'SÍ':'sí (yes)','sí':'sí (yes)', 'SI':'sí (yes)',
+                    'UNO':'uno (one)', 'uno':'uno (one)',
+                    'COMER':'comer (to eat)', 'comer':'comer (to eat)',
+                    'CUÁNTO':'cuánto (how much)', 'cuánto':'cuánto (how much)', 'CUANTO':'cuánto (how much)',
+                    'CÓMO':'cómo (how)', 'cómo':'cómo (how)', 'COMO':'cómo (how)',
+                    'ESE':'ese (this)', 'ese':'ese (this)',
+                    'NO':'no (no)', 'no':'no (no)',
+                    'PENSAR':'pensar (to think)', 'pensar':'pensar (to think)',
+                    'PORCENTAJE':'porcentaje (percentage)', 'porcentaje':'porcentaje (percentage)',
+                    'PROTEÍNA':'proteína (protein)', 'proteína':'proteína (protein)','PROTEINA':'proteína (protein)'}
+
         meaning = ["0"] * self.arg.model_args["num_class"]
         self.model.eval()
         with torch.no_grad():
@@ -533,8 +570,6 @@ class Processor():
                     label = Variable(
                         label.long().cuda(self.output_device),
                         requires_grad=False)
-
-                    print("NANIIIIIIIIIIIIIIIIIII!",data.shape)
 
                     with torch.no_grad():
                         output = self.model(data)
@@ -578,6 +613,7 @@ class Processor():
                         len(score))
 
                 accuracy = self.data_loader[ln].dataset.top_k(score, 1)
+                top5 = self.data_loader[ln].dataset.top_k(score, 5)
                 
                 if accuracy > self.best_acc:
                     self.best_acc = accuracy
@@ -585,33 +621,56 @@ class Processor():
                     score_dict = dict(
                         zip(self.data_loader[ln].dataset.sample_name, score))
 
+                    conf_mat = torchmetrics.ConfusionMatrix(num_classes=self.arg.model_args["num_class"])
+                    confusion_matrix = conf_mat(torch.tensor(list(submission.values())).cpu(), torch.tensor(list(trueLabels.values())).cpu())
+                    confusion_matrix = confusion_matrix.detach().cpu().numpy()
+                    df_cm = pd.DataFrame(confusion_matrix, index = meaning, columns=meaning)
+                    plt.figure(figsize = (10,7))
+        
+                    group_counts  = ["{0:0.0f}".format(value) for value in confusion_matrix.flatten()]
+                    confusion_matrix = np.asarray([line/np.sum(line) for line in confusion_matrix])
+                    confusion_matrix = np.nan_to_num(confusion_matrix)
+
+                    group_percentages = ["{0:.1%}".format(value) for value in confusion_matrix.flatten()]
+                    
+                    annot = ["{0}\n{1}".format(v1, v2) for v1, v2 in zip(group_counts, group_percentages)]
+                    annot = np.asarray(annot).reshape(self.arg.model_args["num_class"], self.arg.model_args["num_class"])
+                    fig_ = sns.heatmap(df_cm, annot=annot, annot_kws={"size": 7} ,fmt='', cmap='Blues').get_figure()
+                    plt.ylabel('True label')
+                    plt.xlabel('Predicted label' )
+                    print(df_cm)
+                    plt.close(fig_)
+                    wandb.log({"Confusion matrix": wandb.Image(fig_, caption="VAL_conf_mat")})
+
                     with open('./work_dir/' + arg.Experiment_name + '/eval_results/'+ model_name+ '/best_acc' + '.pkl'.format(
                             epoch, accuracy), 'wb') as f:
                         pickle.dump(score_dict, f)
                 
-                if epoch+1 == arg.num_epoch:
-                    
+                if epoch + 1 == arg.num_epoch:
+
+                    meaning_3 = [meaning_2[word] for word in meaning]
+
                     wandb.log({"roc" : wandb.plot.roc_curve( list(trueLabels.values()), score, \
-                            labels=meaning, classes_to_plot=None)})
+                            labels=meaning_3, classes_to_plot=None)})
             
                     wandb.log({"pr" : wandb.plot.pr_curve(list(trueLabels.values()), score,
-                            labels=meaning, classes_to_plot=None)})
+                            labels=meaning_3, classes_to_plot=None)})
 
-                    wandb.log({"val_sklearn_conf_mat": wandb.sklearn.plot_confusion_matrix(list(trueLabels.values()), 
-                            list(submission.values()), meaning)})
+                    #wandb.log({"val_sklearn_conf_mat": wandb.sklearn.plot_confusion_matrix(, 
+                    #        , meaning_3)})
                     '''
                     wandb.log({"VAL_conf_mat" : wandb.plot.confusion_matrix(
                         #probs=score,
                         y_true=list(trueLabels.values()),
                         preds=list(submission.values()),
-                        class_names=meaning,
+                        class_names=meaning_3,
                         title="VAL_conf_mat")})
                     '''
 
                 print('Eval Accuracy: ', accuracy,
                     ' model: ', self.arg.model_saved_name)
                 if wandbFlag:
-                    wandbF.wandbValLog(np.mean(loss_value), accuracy)
+                    wandbF.wandbValLog(np.mean(loss_value), accuracy, top5)
 
                 score_dict = dict(
                     zip(self.data_loader[ln].dataset.sample_name, score))
@@ -734,7 +793,7 @@ if __name__ == '__main__':
                config={"num-epoch": 250,
                        "weight-decay": 0.0001,
                        "batch-size":64,
-                       "base-lr": 0.07})
+                       "base-lr": 0.7})
 
     config = wandb.config
 

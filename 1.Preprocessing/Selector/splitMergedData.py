@@ -26,10 +26,10 @@ def keypointsFormat(fileData):
     for pos in range(len(fileData)):
         data = []
 
-        exclusivePoints = [0,2,5,11,12,13,14,15,16,21,22]
+        exclusivePoints = [0,11,12,13,14,15,16]
         data = data + extratXYFromBodyPart(fileData[pos],"pose", exclusivePoints)
 
-        exclusivePoints = [5,8,9,12,13,16,17,20]
+        exclusivePoints = [0,4,5,8,9,12,13,16,17,20]
         data = data + extratXYFromBodyPart(fileData[pos],"left_hand",exclusivePoints)
 
         data = data + extratXYFromBodyPart(fileData[pos],"right_hand",exclusivePoints)
@@ -38,7 +38,7 @@ def keypointsFormat(fileData):
         data = data.astype(int)
         dataList.append(data)
     dataList = np.asarray(dataList)
-    dataList = np.moveaxis(dataList, 2, 0)
+    #dataList = np.moveaxis(dataList, 2, 0)
 
     return dataList
 
@@ -66,6 +66,8 @@ def getDictData(x_pos, df, jobType):
         newLabelList.append(labelList[pos])
         newNameList.append(nameList[pos])
 
+        #print(pathList[pos].split('/')[-1].split('.')[0], nameList[pos])
+
     dictData = {
         "data":instanceList,
         "labels":newLabelList,
@@ -82,19 +84,21 @@ def getDictData(x_pos, df, jobType):
 
     return dictData
 
-basePath = 'Data/merged/AEC-PUCP_PSL_DGI156/merged.pkl'
 
-df = pd.read_pickle(basePath)
-df = df.T
+if __name__ == '__main__':
+    basePath = 'Data/merged/AEC-PUCP_PSL_DGI156/merged.pkl'
 
-pathList = df["paths"]
-labelList = df["labels"]
+    df = pd.read_pickle(basePath)
+    df = df.T
 
-x_pos = range(len(pathList))
-X_train, X_test, y_train, y_test = train_test_split(x_pos, labelList, train_size=0.8 , random_state=42, stratify=labelList)
+    pathList = df["paths"]
+    labelList = df["labels"]
 
-trainData = getDictData(X_train, df, "train")
-testData = getDictData(X_test, df, "val")
+    x_pos = range(len(pathList))
+    X_train, X_test, y_train, y_test = train_test_split(x_pos, labelList, train_size=0.8 , random_state=22, stratify=labelList)
 
-trainPd = pd.DataFrame(trainData)
-valPd = pd.DataFrame(testData)
+    trainData = getDictData(X_train, df, "train")
+    testData = getDictData(X_test, df, "val")
+
+    trainPd = pd.DataFrame(trainData)
+    valPd = pd.DataFrame(testData)

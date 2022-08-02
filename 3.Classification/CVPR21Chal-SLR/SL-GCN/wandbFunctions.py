@@ -32,10 +32,10 @@ def wandbTrainLog(trainLoss, TrainAcc):
                "Train accuracy": TrainAcc
                })
 
-def wandbValLog(testLoss, TestAcc):
+def wandbValLog(testLoss, TestAcc, top5):
     wandb.log({"Val Loss": testLoss,
-               "Val accuracy": TestAcc
-               })
+               "Val accuracy": TestAcc,
+               "Val Top5 acc": top5})
 
 def watch(model):
     wandb.watch(model)

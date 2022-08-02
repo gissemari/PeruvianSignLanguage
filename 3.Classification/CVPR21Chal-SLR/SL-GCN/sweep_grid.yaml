@@ -1,11 +1,13 @@
 program: main.py
 method: grid
-name: CleanedData-moreEpoch
+name: MergeData-Seed-22
 parameters:
   base-lr:
     values:
-    - 0.00001
-    - 0.001
+    - 1
+    - 0.7
+    - 0.3
+    - 0.07
   batch-size:
     values:
     - 32
@@ -15,9 +17,7 @@ parameters:
     - 0.00001
   num-epoch:
     values:
-    - 500
-    - 750
-    - 1000
+    - 250
 command:
   - ${env}
   - python
