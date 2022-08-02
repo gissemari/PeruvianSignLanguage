@@ -10,6 +10,7 @@ from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.callbacks import ModelSummary
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.loggers import WandbLogger
 
 from models import module
 
@@ -39,7 +40,13 @@ if __name__ == '__main__':
     # Trainer specific
     parser = pl.Trainer.add_argparse_args(parser)
 
+    
+
     args = parser.parse_args()
+
+    name = f"seq_len:{args.sequence_length}-lrn_rate:{args.learning_rate}-resnet:{args.cnn}-stride:{args.temporal_stride}"
+
+    wandb_logger = WandbLogger(project="m-decoster", entity="joenatan30", name=name)
 
     # -------------------------------- #
     # SETUP
@@ -47,11 +54,12 @@ if __name__ == '__main__':
     pl.seed_everything(args.seed)
 
     trainer = pl.Trainer(callbacks=[
-        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=100),
+        EarlyStopping(monitor='val_accuracy', mode='max', verbose=True, patience=50),
         LearningRateMonitor(logging_interval='epoch'),
         ModelCheckpoint(filename='bestLoggedModel'),
         ModelSummary(max_depth=2)
-    ], logger=TensorBoardLogger(args.log_dir, name=args.model, version=args.version),
+    ], logger = wandb_logger,
+    #logger=TensorBoardLogger(args.log_dir, name=args.model, version=args.version),
         fast_dev_run=args.fast_dev_run,
         track_grad_norm=args.track_grad_norm,
         gradient_clip_val=args.gradient_clip_val,
@@ -71,6 +79,7 @@ if __name__ == '__main__':
     dict_args = vars(args)
 
     model = module.get_model(**dict_args)
+    wandb_logger.watch(model)
     dm = data_module.get_datamodule(**dict_args)
 
     train_results = trainer.fit(model, dm)

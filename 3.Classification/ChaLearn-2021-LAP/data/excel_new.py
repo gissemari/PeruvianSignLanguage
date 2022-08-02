@@ -5,33 +5,11 @@ Created on Thu Nov 18 01:53:31 2021
 @author: Joe
 """
 import pandas as pd
-import pickle
 import numpy as np
-from sklearn.model_selection  import train_test_split
 import argparse
-from collections import Counter
 
 
-def getData(path):
-
-    with open(path+'X.data', 'rb') as f:
-        X = pickle.load(f)
-
-    with open(path+'X_timeSteps.data', 'rb') as f:
-        X_timeSteps = pickle.load(f)
-
-    with open(path+'Y.data', 'rb') as f:
-        Y = pickle.load(f)
-
-    with open(path+'weight.data', 'rb') as f:
-        weight = pickle.load(f)
-
-    with open(path+'Y_meaning.data', 'rb') as f:
-        y_meaning = pickle.load(f)
-
-    return X, Y, weight, y_meaning, X_timeSteps
-
-def getLabelsDataFrame(X_train, y_train, dataDict, y_labels):
+def getLabelsDataFrame(X_train, y_train, names, y_labels):
 
     prevNameID = []
     label = []
@@ -39,24 +17,13 @@ def getLabelsDataFrame(X_train, y_train, dataDict, y_labels):
     nFrames = []
 
     # for a key in X_train
-    for idx, dataId in enumerate(X_train):
+    for idx, kp in enumerate(X_train):
 
-        # find in dataDict his respective gloss
-        for pos, gloss in enumerate(dataDict):
+        newNameUniqueID.append(names[idx])
+        prevNameID.append(names[idx])
+        nFrames.append(len(kp))
+        label.append(y_train[idx])
 
-            if(dataDict[pos]["gloss"].upper() == y_labels[y_train[idx]].upper()):
-
-                for instances in dataDict[pos]["instances"]:
-
-                    if(instances["instance_id"] == dataId):
-
-                        #print(instances['timestep_vide_name'])
-                        #print(instances['unique_name'])
-                        newNameUniqueID.append(instances['unique_name'].upper())
-                        prevNameID.append(instances['timestep_vide_name'].upper())
-                        nFrames.append(instances['frame_end'])
-                        label.append(y_train[idx])
-                        #inst_id.append(dataId)
 
     # Used to get videos from mp4, and other ids. The only prev not unique ID is in file ids.csv
     nVidFrames = np.stack((newNameUniqueID, nFrames), axis=1)
@@ -71,7 +38,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='Classification')
 
-    parser.add_argument('--dictPath', type=str, default='./../../../Data/Dataset/dict/dict.json', help='...')
+    parser.add_argument('--dictPath', type=str, default='./../../../Data/AEC/dict.json', help='...')
     parser.add_argument('--keyPath', type=str, default='./../../../Data/Dataset/readyToRun/', help='...')
     parser.add_argument('--splitRate', type=float, default=0.8, help='Percentage for training')
 
@@ -81,23 +48,35 @@ def main():
     #keyPath = './../../../Data/Dataset/readyToRun/'
     
     dataDict = pd.read_json(args.dictPath)
-    
-    x, y, weight, y_labels, x_timeSteps = getData(args.keyPath)
-    
+
+    y_labels = pd.read_json('../../../Data/merged/AEC-PUCP_PSL_DGI156/meaning.json')
+    y_labels = {v:k for k, v in y_labels[0].items()}
+
+    names_train = pd.read_json("../../../Data/merged/AEC-PUCP_PSL_DGI156/names-train.json")[0]
+    names_test = pd.read_json("../../../Data/merged/AEC-PUCP_PSL_DGI156/names-val.json")[0]
+    #x, y, weight, y_labels, x_timeSteps = getData(args.keyPath)
+
     #if creating split for train set, and val
     
     print("Split rate ", args.splitRate)
     
     if args.splitRate<1.0:
-    
-        X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=args.splitRate , random_state=42, stratify=y)
-        
+
+        train_data = pd.read_pickle("../../../Data/merged/AEC-PUCP_PSL_DGI156/merge-train.pk")
+        val_data = pd.read_pickle("../../../Data/merged/AEC-PUCP_PSL_DGI156/merge-val.pk")
+
+        X_train = train_data['data']
+        y_train = train_data['labels']
+
+        X_test = val_data['data']
+        y_test = val_data['labels']
+
         print("Train size:", len(y_train))
         print("Test size: ", len(y_test))
-        
-        trainDf, trainId, trainNFrames = getLabelsDataFrame(X_train, y_train, dataDict, y_labels)
+
+        trainDf, trainId, trainNFrames = getLabelsDataFrame(X_train, y_train, names_train, y_labels)
         print()
-        testDf, testId, testNFrames = getLabelsDataFrame(X_test, y_test, dataDict, y_labels)
+        testDf, testId, testNFrames = getLabelsDataFrame(X_test, y_test, names_test, y_labels)
         
         trainDf.to_csv('train_labels.csv',index=False, header=False)
         testDf.to_csv('val_labels.csv',index=False, header=False)

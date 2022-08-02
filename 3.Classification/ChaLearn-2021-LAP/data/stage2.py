@@ -16,7 +16,7 @@ if sys.argv[1] == '1':
 
     stage = train_stage + val_stage
     df = pd.DataFrame(stage)
-    df.to_csv('train_val_labels_STAGE2.csv',index=False, header=False)
+    df.to_csv('../project/train_val_labels_STAGE2.csv',index=False, header=False)
 
     # To check if there are some reapetead names
     train_name = [name for name, label in train_reader.values.tolist()]
@@ -26,9 +26,11 @@ if sys.argv[1] == '1':
     valRepeated = Counter(val_name)
 
     print("Train")
-    print(trainRepeated)
+    assert len(Counter(trainRepeated.values()).values())==1
+    print("ok - no repeated words")
     print("Val")
-    print(valRepeated)
+    assert len(Counter(valRepeated.values()).values())==1
+    print("ok - no repeated words")
 
 
 else:

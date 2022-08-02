@@ -28,7 +28,7 @@ class VTNHCPF(nn.Module):
         self.feature_extractor = FeatureExtractor(cnn, embed_size, freeze_layers)
         num_attn_features = 2 * embed_size
         self.norm = MMTensorNorm(-1)
-        self.bottle_mm = nn.Linear(66 + num_attn_features, num_attn_features)
+        self.bottle_mm = nn.Linear(14 + num_attn_features, num_attn_features)
 
         self.self_attention_decoder = SelfAttention(num_attn_features, num_attn_features,
                                                     [num_heads] * num_layers,

@@ -36,7 +36,12 @@ def main():
             file = VAL_FILE
         if dataset == 'test':
             file = TEST_FILE
-            
+        
+
+        print(dataset)
+
+        jobCount = 0
+
         nFrames = []
         videoName = []
 
@@ -55,21 +60,25 @@ def main():
             else:
                 nameVideo = video_file.split('\\')[-1]
             # next comment - gissella
-            count = 0
-            word =  "_".join(nameVideo.split('_')[0:2])
+
+
+            word =  "_".join(nameVideo.split('_')[0:-1])
             #word =  video_file.split('/')[-1][:-4]
 
-            print(word)
             for pos, name in enumerate(videoName):
+ 
                 if name == word:
+                    
                     count = nFrames[pos]
-                    print(count)
+                    jobCount += 1
+                    #print(word, count)
             #end next comment - gissella
             
             #frames, _, _ = torchvision.io.read_video(video_file, pts_unit='sec')
             
             with open(video_file.replace('color.mp4', 'nframes'), 'w') as of:
                 of.write(f'{count}\n')
+        print(jobCount)
 
 
 if __name__ == '__main__':

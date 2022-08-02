@@ -14,21 +14,22 @@ import argparse
 
 #
 parser = argparse.ArgumentParser(description='Classification')
-parser.add_argument('--allfiles', type=str, default='./../../Data/Videos/Segmented_gestures/', help='...')
 parser.add_argument('--train', type=int, default=1, help='Create files for train or not, for test')
 
 args = parser.parse_args()
-    
-pathAllFiles = args.allfiles
-all_files = glob.glob(pathAllFiles + '*/*.mp4')
+
+AEC_path = './../../Data/AEC/Videos/SEGMENTED_SIGN/'
+pucp_PATH = './../../Data/PUCP_PSL_DGI156/Videos/cropped/'
+
+AEC_files = glob.glob(AEC_path + '*/*.mp4')
+PUCP_files = glob.glob(pucp_PATH + '*/*.mp4')
+
+all_files = AEC_files + PUCP_files
 
 if args.train:
-    stage = pd.read_scv("./project/train_val_labels_STAGE2.csv", encoding='utf-8',header=None)
-    train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8',header=None)
-    val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8',header=None)
-    
-    print(stage)
-    #print(train_ids)
+    stage = pd.read_csv("./project/train_val_labels_STAGE2.csv",encoding='utf-8', header=None)
+    train_ids = pd.read_csv("./data/train_ids.csv", encoding='utf-8', header=None)
+    val_ids = pd.read_csv("./data/val_ids.csv", encoding='utf-8', header=None)
 
     trainCount = 0
     valCount = 0
@@ -40,11 +41,13 @@ if args.train:
         else:
             name = filePath.split('\\')[-1]
 
-        name = name.split('.')[0].upper()
+        name = name.split('.')[0]
 
         isVal = False
         for newUniqueName, prevName in val_ids.values.tolist():
-            if name == prevName:
+            #print(name, prevName)
+            if name == newUniqueName:
+
                 isVal = True
                 #print(f'{name} -> {newUniqueName}')
                 target = './project/data/mp4/val/'+newUniqueName+'_color.mp4'

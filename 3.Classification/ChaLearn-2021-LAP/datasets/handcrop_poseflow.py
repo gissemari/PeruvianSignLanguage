@@ -48,7 +48,6 @@ class ChaLearnDataModule(pl.LightningDataModule):
         nameFile = os.path.join(self.data_dir, '..', '..', 'train_val_labels_STAGE2.csv')
         # in Windows the go up folder does not work '..'
         #nameFile = os.path.join(self.data_dir, 'train_val_labels_STAGE2.csv')
-        print(nameFile)
         self.train_set = ChaLearnDataset(self.data_dir, 'train', 'train',
                                          nameFile,
                                          transform, self.sequence_length, self.temporal_stride)
@@ -139,17 +138,17 @@ class ChaLearnDataset(Dataset):
                 poseflow[:, 0] /= math.pi
                 # Magnitude is already normalized from the pre-processing done before calculating the flow
             else:
-                poseflow = np.zeros((33, 2))
+                poseflow = np.zeros((7, 2))
 
             try:
                 frame = frames[frame_index]
             except:
                 print("ERROR",frame_index,sample['path'])
                 continue
-            left_wrist_index = 15
-            left_elbow_index = 13
-            right_wrist_index = 16
-            right_elbow_index = 14
+            left_wrist_index = 5
+            left_elbow_index = 3
+            right_wrist_index = 6
+            right_elbow_index = 4
 
             # Crop out both wrists and apply transform
             left_wrist = keypoints[0:2, left_wrist_index]
@@ -157,7 +156,7 @@ class ChaLearnDataset(Dataset):
             left_hand_center = left_wrist + WRIST_DELTA * (left_wrist - left_elbow)
             left_hand_center_x = left_hand_center[0]
             left_hand_center_y = left_hand_center[1]
-            shoulder_dist = np.linalg.norm(keypoints[0:2, 11] - keypoints[0:2, 12]) * SHOULDER_DIST_EPSILON
+            shoulder_dist = np.linalg.norm(keypoints[0:2, 1] - keypoints[0:2, 2]) * SHOULDER_DIST_EPSILON
             left_hand_xmin = max(0, int(left_hand_center_x - shoulder_dist // 2))
             left_hand_xmax = min(frame.size(1), int(left_hand_center_x + shoulder_dist // 2))
             left_hand_ymin = max(0, int(left_hand_center_y - shoulder_dist // 2))
@@ -195,7 +194,6 @@ class ChaLearnDataset(Dataset):
 
             clip.append(crops)
             pose_transform = Compose(ToFloatTensor())
-
             poseflow = pose_transform(poseflow).view(-1)
             poseflow_clip.append(poseflow)
 

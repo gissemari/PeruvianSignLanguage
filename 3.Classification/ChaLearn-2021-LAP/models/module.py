@@ -9,10 +9,13 @@ from torch.optim.lr_scheduler import StepLR
 from .vtn_hcpf import VTNHCPF
 from .vtn_hcpf_d import VTNHCPFD
 import torchmetrics
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 import numpy as np
 import pandas as pd
 import os.path
+import wandb
 
 def get_model_def():
     return Module
@@ -49,25 +52,31 @@ class Module(pl.LightningModule):
         # https://www.exxactcorp.com/blog/Deep-Learning/advanced-pytorch-lightning-using-torchmetrics-and-lightning-flash
 
         self.train_acc = torchmetrics.Accuracy()
-        self.train_f1_micro = torchmetrics.F1(num_classes=NUM_CLASSES, average="micro")
-        self.train_f1_macro = torchmetrics.F1(num_classes=NUM_CLASSES, average="macro")
+
+        #self.train_f1_micro = torchmetrics.F1(num_classes=NUM_CLASSES, average="micro")
+        #self.train_f1_macro = torchmetrics.F1(num_classes=NUM_CLASSES, average="macro")
         #self.train_auroc = torchmetrics.AUROC(num_classes=NUM_CLASSES, average="micro")
         self.val_acc = torchmetrics.Accuracy()
-        self.val_f1_micro = torchmetrics.F1(num_classes=NUM_CLASSES, average="micro")
-        self.val_f1_macro = torchmetrics.F1(num_classes=NUM_CLASSES, average="macro")
+        self.val_top5_acc = torchmetrics.Accuracy(top_k=5)
+        #self.val_f1_micro = torchmetrics.F1(num_classes=NUM_CLASSES, average="micro")
+        #self.val_f1_macro = torchmetrics.F1(num_classes=NUM_CLASSES, average="macro")
         #self.val_auroc = torchmetrics.AUROC(num_classes=NUM_CLASSES, average="micro")
-
+        self.conf_mat = torchmetrics.ConfusionMatrix(num_classes=NUM_CLASSES)
         self.epochCount = 0
 
         self.best_val_acc = np.NINF
-        self.best_val_f1_micro = np.NINF
-        self.best_val_f1_macro = np.NINF
+        #self.best_val_f1_micro = np.NINF
+        #self.best_val_f1_macro = np.NINF
         self.best_val_loss = np.inf
 
         self.best_train_acc = np.NINF
-        self.best_train_f1_micro = np.NINF
-        self.best_train_f1_macro = np.NINF
+        #self.best_train_f1_micro = np.NINF
+        #self.best_train_f1_macro = np.NINF
         self.best_train_loss = np.inf
+
+        self.numClass = NUM_CLASSES
+
+        self.meaning = pd.read_json("./../../Data/merged/AEC-PUCP_PSL_DGI156/meaning.json")
 
 
     def forward(self, x):
@@ -96,15 +105,17 @@ class Module(pl.LightningModule):
         loss = self.criterion(z, y)
         # accumulate and return metrics for logging
         acc = self.train_acc(z, y)
-        f1_micro = self.train_f1_micro(z, y)
-        f1_macro = self.train_f1_macro(z, y)
+
+        #f1_micro = self.train_f1_micro(z, y)
+        #f1_macro = self.train_f1_macro(z, y)
         #print("TRAIN",z,y)
         # just accumulate
         #self.train_auroc.update(z, y)
         self.log("train_loss", loss)
         self.log("train_accuracy", acc)
-        self.log("train_f1_micro", f1_micro)
-        self.log("train_f1_macro", f1_macro)
+
+        #self.log("train_f1_micro", f1_micro)
+        #self.log("train_f1_macro", f1_macro)
         #acc = self.accuracy(z, y)
         #print("Train Loss:",loss,"Train Acc:",acc)
         #self.log('train_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
@@ -113,18 +124,20 @@ class Module(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        z = self.forward(x)
-        loss = self.criterion(z, y)
+        preds = self.forward(x)
+        loss = self.criterion(preds, y)
         #print("VAL",z,y)
-        self.val_acc.update(z, y)
-        self.val_f1_micro.update(z, y)
-        self.val_f1_macro.update(z, y)
+        self.val_acc.update(preds, y)
+        self.val_top5_acc.update(preds, y)
+        #self.val_f1_micro.update(z, y)
+        #self.val_f1_macro.update(z, y)
         #self.val_auroc.update(z, y)
         #acc = self.accuracy(z, y)
         #print("Val Loss:",loss, "Val Acc:", acc)
         #self.log('val_loss', loss,on_step=False, on_epoch=True, prog_bar=True, logger=True)
         #self.log('val_accuracy',acc ,on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        return loss
+        return { 'loss': loss, 'preds': preds, 'target': y}
+
 
     def training_epoch_end(self, training_step_outputs):
         #print('training steps', training_step_outputs)
@@ -141,21 +154,24 @@ class Module(pl.LightningModule):
 
         # compute metrics
         train_accuracy = self.train_acc.compute()
-        train_f1_micro = self.train_f1_micro.compute()
-        train_f1_macro = self.train_f1_macro.compute()
+
+        #train_f1_micro = self.train_f1_micro.compute()
+        #train_f1_macro = self.train_f1_macro.compute()
         #train_auroc = self.train_auroc.compute()
         #print("TRAIN_E_E:",train_auroc)
         # log metrics
         self.log("train_accuracy", train_accuracy)
-        self.log("train_f1_micro", train_f1_micro)
-        self.log("train_f1_macro", train_f1_macro)
+
+        #self.log("train_f1_micro", train_f1_micro)
+        #self.log("train_f1_macro", train_f1_macro)
         # reset all metrics
         self.train_acc.reset()
-        self.train_f1_micro.reset()
-        self.train_f1_macro.reset()
-        print(f"\ntraining accuracy: {train_accuracy:.4}, "\
-        f"f1_micro: {train_f1_micro:.4}, "\
-        f"f1_macro: {train_f1_macro:.4}") #\
+
+        #self.train_f1_micro.reset()
+        #self.train_f1_macro.reset()
+        print(f"\ntraining accuracy: {train_accuracy:.4}, ")
+        #f"f1_micro: {train_f1_micro:.4}, "\
+        #f"f1_macro: {train_f1_macro:.4}") #\
         #f"auroc: {train_auroc:.4}")
         #result = pl.EvalResult(checkpoint_on=avg_loss)
         print("Train Lss AVR:",avg_loss)
@@ -164,65 +180,99 @@ class Module(pl.LightningModule):
 
         if self.best_train_acc < train_accuracy:
             self.best_train_acc = train_accuracy
-        if self.best_train_f1_micro < train_f1_micro:
-            self.best_train_f1_micro = train_f1_micro
-        if self.best_train_f1_macro < train_f1_macro:
-            self.best_train_f1_macro = train_f1_macro
+        #if self.best_train_f1_micro < train_f1_micro:
+        #    self.best_train_f1_micro = train_f1_micro
+        #if self.best_train_f1_macro < train_f1_macro:
+        #    self.best_train_f1_macro = train_f1_macro
         if self.best_train_loss > avg_loss:
             self.best_train_loss = avg_loss
 
     def validation_epoch_end(self, validation_step_outputs):
 
-        loss_acum = []
+        loss_acum = [tmp['loss'] for tmp in validation_step_outputs]
+        preds = torch.cat([tmp['preds'] for tmp in validation_step_outputs])
+        targets = torch.cat([tmp['target'] for tmp in validation_step_outputs])
 
-        for value in validation_step_outputs:
-            loss = value
-            loss_acum.append(loss)
+        confusion_matrix = self.conf_mat(preds, targets)
+        confusion_matrix = confusion_matrix.detach().cpu().numpy()
 
+        meaning = [key for key, value in self.meaning[0].items()]
+
+        df_cm = pd.DataFrame(confusion_matrix, index = meaning, columns=meaning)
+        plt.figure(figsize = (10,7))
+        
+        group_counts  = ["{0:0.0f}".format(value) for value in confusion_matrix.flatten()]
+
+        confusion_matrix = np.asarray([line/np.sum(line) for line in confusion_matrix])
+        confusion_matrix = np.nan_to_num(confusion_matrix)
+
+        group_percentages = ["{0:.1%}".format(value) for value in confusion_matrix.flatten()]
+        
+        annot = ["{0}\n{1}".format(v1, v2) for v1, v2 in zip(group_counts, group_percentages)]
+        annot = np.asarray(annot).reshape(self.numClass, self.numClass)
+
+        fig_ = sns.heatmap(df_cm, annot=annot, annot_kws={"size": 7} ,fmt='', cmap='Blues').get_figure()
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label' )
+        plt.close(fig_)
+        self.logger.experiment.log({"Confusion matrix": [wandb.Image(fig_, caption="VAL_conf_mat")]})
+
+        '''
+        self.logger.experiment.log({"TRAIN_conf_mat" : wandb.plot.confusion_matrix(
+                        #probs=score,
+                        #y_true=list(label.values()),
+                        #preds=list(predict_label.values()),
+                        y_true=list(targets),
+                        preds=list(preds),
+                        title="TRAIN_conf_mat")})
+        '''
         avg_loss = sum(loss_acum)/len(loss_acum)
         print("Epoch:", self.epochCount)
         print("Test Lss AVR:",avg_loss)
 
         # compute metrics
         val_accuracy = self.val_acc.compute()
-        val_f1_micro = self.val_f1_micro.compute()
-        val_f1_macro = self.val_f1_macro.compute()
+        val_acc_top5 = self.val_top5_acc.compute()
+        #val_f1_micro = self.val_f1_micro.compute()
+        #val_f1_macro = self.val_f1_macro.compute()
         #val_auroc = self.val_auroc.compute()
         #print("VAL_E_END",val_auroc)
         # log metrics 
         self.log("val_accuracy", torch.tensor([val_accuracy]))
-        self.log("val_f1_micro", val_f1_micro)
-        self.log("val_f1_macro", val_f1_macro)
+        self.log("val_acc_top5", torch.tensor([val_acc_top5]))
+        self.log("val_loss", torch.tensor([avg_loss]))
+        #self.log("val_f1_micro", val_f1_micro)
+        #self.log("val_f1_macro", val_f1_macro)
         #self.log("val_auroc", val_auroc)
         # reset all metrics
         self.val_acc.reset()
-        self.val_f1_micro.reset()
-        self.val_f1_macro.reset()
+        #self.val_f1_micro.reset()
+        #self.val_f1_macro.reset()
         #self.val_auroc.reset()
-        print(f"\ntraining accuracy: {val_accuracy:.4}, "\
-        f"f1_micro: {val_f1_micro:.4}, "\
-        f"f1_macro: {val_f1_macro:.4}") #\
+        print(f"\ntraining accuracy: {val_accuracy:.4}, top5: {val_acc_top5:.4}")
+        #f"f1_micro: {val_f1_micro:.4}, "\
+        #f"f1_macro: {val_f1_macro:.4}") #\
         #f"f1: {val_f1:.4}, auroc: {val_auroc:.4}")
 
         if self.best_val_acc < val_accuracy:
             self.best_val_acc = val_accuracy
-        if self.best_val_f1_micro < val_f1_micro:
-            self.best_val_f1_micro = val_f1_micro
-        if self.best_val_f1_macro < val_f1_macro:
-            self.best_val_f1_macro = val_f1_macro
+        #if self.best_val_f1_micro < val_f1_micro:
+        #    self.best_val_f1_micro = val_f1_micro
+        #if self.best_val_f1_macro < val_f1_macro:
+        #    self.best_val_f1_macro = val_f1_macro
         if self.best_val_loss > avg_loss:
             self.best_val_loss = avg_loss
 
     def on_train_end(self):
          print(f"\nbest val acc: {self.best_val_acc:.4}")
-         print(f"\nbest val f1 micro: {self.best_val_f1_micro:.4}")
-         print(f"\nbest val f1 macro: {self.best_val_f1_macro:.4}")
+         #print(f"\nbest val f1 micro: {self.best_val_f1_micro:.4}")
+         #print(f"\nbest val f1 macro: {self.best_val_f1_macro:.4}")
          print(f"\nbest val loss: {self.best_val_loss:.4}")
          print(f"\nbest train acc: {self.best_train_acc:.4}")
-         print(f"\nbest train f1 micro: {self.best_train_f1_micro:.4}")
-         print(f"\nbest train f1 macro: {self.best_train_f1_macro:.4}")
+         #print(f"\nbest train f1 micro: {self.best_train_f1_micro:.4}")
+         #print(f"\nbest train f1 macro: {self.best_train_f1_macro:.4}")
          print(f"\nbest train loss: {self.best_train_loss:.4}")
-
+         '''
          dfData = pd.DataFrame({
              "version": [self.hparams.version],
              "ListWords": [str(self.hparams.num_classes) + " words"],
@@ -233,16 +283,16 @@ class Module(pl.LightningModule):
              "accumulated_batch_size":[self.hparams.accumulate_grad_batches],
              "DropOut":[self.hparams.dropout],
              "BestValAcc": [self.best_val_acc.cpu().data.numpy()],
-             "BestValF1-Micro": [self.best_val_f1_micro.cpu().data.numpy()],
-             "BestValF1-Macro": [self.best_val_f1_macro.cpu().data.numpy()],
+             #"BestValF1-Micro": [self.best_val_f1_micro.cpu().data.numpy()],
+             #"BestValF1-Macro": [self.best_val_f1_macro.cpu().data.numpy()],
              "BestValLoss": [self.best_val_loss.cpu().data.numpy()],
              "BestTrainAcc": [self.best_train_acc.cpu().data.numpy()],
-             "BestTrainF1-Micro": [self.best_train_f1_micro.cpu().data.numpy()],
-             "BestTrainF1-Macro": [self.best_train_f1_macro.cpu().data.numpy()],
+             #"BestTrainF1-Micro": [self.best_train_f1_micro.cpu().data.numpy()],
+             #"BestTrainF1-Macro": [self.best_train_f1_macro.cpu().data.numpy()],
              "BestTrainLoss": [self.best_train_loss.cpu().data.numpy()],
              "TestAcc":[np.NINF],
-             "F1-micro":[np.NINF],
-             "F1-macro":[np.NINF],
+             #"F1-micro":[np.NINF],
+             #"F1-macro":[np.NINF],
              "seed":[self.hparams.seed],
              "experiment-name":[self.hparams.csv_name]})
 
@@ -256,7 +306,7 @@ class Module(pl.LightningModule):
              df = df.append(dfData)
              df.to_csv(self.hparams.csv_name)
              print ("File not exist - %s created"%(self.hparams.csv_name))
-
+         '''
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate,
                                      weight_decay=self.hparams.weight_decay)
