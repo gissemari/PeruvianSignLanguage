@@ -117,7 +117,6 @@ finalWordDict = dict()
 toSeeDetails = ["YA","ESE"]
 keypointsDetail = dict()
 
-
 for path, word, label, name ,timestepLen in zip(paths, words, labels, names, timestepsLen):
     
     if counter[word] < instanceLimit:

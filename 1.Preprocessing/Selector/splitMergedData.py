@@ -1,5 +1,6 @@
 import pandas as pd 
 import numpy as np
+import pickle
 from sklearn.model_selection  import train_test_split
 
 def extratXYFromBodyPart(fileData, bodyName, exclusivePoints=[]):
@@ -11,12 +12,7 @@ def extratXYFromBodyPart(fileData, bodyName, exclusivePoints=[]):
         
         x = fileData[bodyName]["x"]
         y = fileData[bodyName]["y"]
-    '''
-    zero = np.all((np.asarray(x) == 0))
-    if zero:
-        x = [0.5 for _ in x]
-        y = [0.5 for _ in y]
-    '''
+
     return [[_x ,_y] for _x, _y in zip(x, y)]
 
 def keypointsFormat(fileData):
@@ -80,6 +76,7 @@ def getDictData(x_pos, df, jobType):
 
     dictData = pd.DataFrame(dictData)
     print(dictData)
+    #pickle.dump(dictData,)
     dictData.to_pickle(f"Data/merged/AEC-PUCP_PSL_DGI156/merge-{jobType}.pk")
 
     return dictData
@@ -95,7 +92,7 @@ if __name__ == '__main__':
     labelList = df["labels"]
 
     x_pos = range(len(pathList))
-    X_train, X_test, y_train, y_test = train_test_split(x_pos, labelList, train_size=0.8 , random_state=22, stratify=labelList)
+    X_train, X_test, y_train, y_test = train_test_split(x_pos, labelList, train_size=0.8 , random_state=32, stratify=labelList)
 
     trainData = getDictData(X_train, df, "train")
     testData = getDictData(X_test, df, "val")

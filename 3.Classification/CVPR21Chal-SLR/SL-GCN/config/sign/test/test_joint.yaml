@@ -24,7 +24,7 @@ test_feeder_args:
 # model
 model: model.decouple_gcn_attn.Model
 model_args:
-  num_class: 18
+  num_class: 15
   num_point: 27
   num_person: 1
   graph: graph.sign_27.Graph
@@ -35,13 +35,13 @@ model_args:
 
 #optim
 weight_decay: 0.0001
-base_lr: 0.01
+base_lr: 0.07
 step: [50]
 
 # training
 device: [0,1]
 phase: test
-weights: save_models/sign_joint_final-246.pt
+weights: save_models/sign_joint_final-248.pt
 keep_rate: 0.9
 only_train_epoch: 1
 batch_size: 64

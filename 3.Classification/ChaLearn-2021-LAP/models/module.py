@@ -198,20 +198,23 @@ class Module(pl.LightningModule):
 
         meaning = [key for key, value in self.meaning[0].items()]
 
-        df_cm = pd.DataFrame(confusion_matrix, index = meaning, columns=meaning)
+        #df_cm = pd.DataFrame(confusion_matrix, index = meaning, columns=meaning)
         plt.figure(figsize = (10,7))
         
         group_counts  = ["{0:0.0f}".format(value) for value in confusion_matrix.flatten()]
 
         confusion_matrix = np.asarray([line/np.sum(line) for line in confusion_matrix])
         confusion_matrix = np.nan_to_num(confusion_matrix)
+        df_cm = pd.DataFrame(confusion_matrix * 100, index = meaning, columns=meaning)
+        #size_arr = df_cm.sum(axis = 1)
+        #maxi = max(size_arr)
 
         group_percentages = ["{0:.1%}".format(value) for value in confusion_matrix.flatten()]
         
-        annot = ["{0}\n{1}".format(v1, v2) for v1, v2 in zip(group_counts, group_percentages)]
+        annot = ["{0}\n{1}".format(v2, v1) for v1, v2 in zip(group_counts, group_percentages)]
         annot = np.asarray(annot).reshape(self.numClass, self.numClass)
 
-        fig_ = sns.heatmap(df_cm, annot=annot, annot_kws={"size": 7} ,fmt='', cmap='Blues').get_figure()
+        fig_ = sns.heatmap(df_cm, vmax=100, vmin=0, annot=annot, annot_kws={"size": 7}, cbar_kws={'format': '%.0f%%', 'ticks':[0, 25, 50, 75, 100]},fmt='', cmap='Blues').get_figure()
         plt.ylabel('True label')
         plt.xlabel('Predicted label' )
         plt.close(fig_)

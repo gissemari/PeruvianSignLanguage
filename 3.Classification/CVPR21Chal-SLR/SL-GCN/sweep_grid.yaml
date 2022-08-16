@@ -1,6 +1,6 @@
 program: main.py
 method: grid
-name: MergeData-Seed-22
+name: MergeData-Seed-12
 parameters:
   base-lr:
     values:
