@@ -9,7 +9,7 @@ import pysrt
 from scenedetect.frame_timecode import FrameTimecode
 
 # Local imports
-sys.path.append(os.getcwd())
+sys.path.append('../../')
 import utils.video as uv
 
 # import nltk
@@ -24,8 +24,6 @@ parser.add_argument('--rawVideoPath', type=str,
 parser.add_argument('--srtPath', type=str,
                     default='./Data/SRT/SRT_gestures/',
                     help='Path where per-line files are located')
-parser.add_argument('--inputName', type=str, default='',
-                    help='Input File Name')
 parser.add_argument('--outputVideoPath', type=str,
                     default='./Data/Videos/Segmented_gestures/',
                     help='Path where per-line files are located')
@@ -40,10 +38,9 @@ parser.add_argument('--y1', type=int, default=-1, metavar='Y1', help='Beginning 
 
 args = parser.parse_args()
 
-srtPath = args.srtPath
-rawVideoPath = args.rawVideoPath
-inputName = args.inputName
-outputVideoPath = args.outputVideoPath
+srtPath = os.path.normpath(args.srtPath) 
+rawVideoPath = os.path.normpath(args.rawVideoPath)
+outputVideoPath = os.path.normpath(args.outputVideoPath)
 # fpsOutput = args.fpsOutput
 flgGesture = args.flgGesture
 
@@ -71,29 +68,28 @@ count = 0
 # Set begining of reading
 # cap.set(cv2.CAP_PROP_POS_MSEC,1000)
 
+# get list of SRT paths 
+df_srt_path = uv.get_list_data(args.srtPath, ['srt'])
 
-if inputName == '':
-    listFile = [file for file in os.listdir(srtPath)
-                if os.path.isfile(srtPath+file)]
-else:
-    listFile = [inputName]
-
-print(srtPath, inputName, listFile)
-
-for filePath in listFile:
-
+print(df_srt_path,'\n')
+for srtPath in df_srt_path['path']:
+    
     # to get only the name without the path
-    inputName = os.path.basename(filePath)
+    inputName = os.path.basename(srtPath)    
     inputName = os.path.splitext(inputName)[0]
-    outputFolder = outputVideoPath+'/'+inputName
+
+    
+    outputFolder = os.sep.join([outputVideoPath, inputName])
     outputFolder = outputFolder.replace(' ','_').replace('(','').replace(')','')
     if uv.createFolder(outputFolder, createFullPath=True):
         print('Created folder :', outputFolder)
     else:
         print('Folder existed :', outputFolder)
+   
+    video_path = os.sep.join([rawVideoPath, inputName])+'.mp4'
 
     # Create a VideoCapture object
-    cap = cv2.VideoCapture(rawVideoPath+inputName+'.mp4')
+    cap = cv2.VideoCapture(video_path)
 
     # Check if camera opened successfully
     if(cap.isOpened() is False):
@@ -115,7 +111,7 @@ for filePath in listFile:
 
     # Read SRT
     #                                                  encoding='iso-8859-1'
-    srtOriginal = pysrt.open(srtPath+inputName+'.srt', encoding='utf-8')
+    srtOriginal = pysrt.open(srtPath, encoding='utf-8')
 
     # ## Iterate over the SRT
 
@@ -151,6 +147,7 @@ for filePath in listFile:
             #foldName = outputVideoPath+inputName+'/'+inputName+'_'+str(sentence)+'.mp4'
             #print(foldName)
             outSegment = cv2.VideoWriter(outputVideoPath+'/'+inputName+'/'+str(sentence+1)+'.mp4', fcc, fpsOutput, (videoWidth, videoHeight))
+        
         print(flgGesture,outputVideoPath+'/'+inputName+'/'+str(sentence)+'.mp4')
         # Doc: CV_CAP_PROP_POS_MSEC Current position of the video file in milliseconds or video capture timestamp.
         # cap.set(cv2.CAP_PROP_POS_MSEC,line.start.to_time())
