@@ -3,7 +3,6 @@
 The Peruvian Sign Language Interpretation dataset is available for download through this AEC link.
 
 
-
 # 1.PREPROCESSING #
 
 Every step counts with their own readme file for more details. This readme file is an overview and map of all the different scripts and functions that you can find and do with the data. You can generate the most-heay data with the generateDataset.sh script or find it in this link:
@@ -98,48 +97,10 @@ Parameters:
 --input_path
 
 
-# 2.SEGMENTATION #
-
-Here we will place all the models to perform automatic segmentations (identification of sign units or sign sentence units).
-
-
-
-
-# 3.CLASSIFICATION #
-
-To run the ChaLearn Model go to ./PeruvianSignLanguaje/3.Classification
-It works with a different data folder where it creates only the classes that the model is working with.
-
-
-
-# 4.TRANSLATION #
-
-Here we will place all the models to perform the end-to-end translation.
-
-
-
 #### PIPELINE USED FOR LREC ####
 For the AEC dataset:
 1. cropInterpreterBySRT.py
 2. convertVideoToDict.py
 3. Classification\ChaLearn
 
-# REPOSITORIES USED FOR THE CLASSIFICATION
 
-```
-@InProceedings{De_Coster_2021_CVPR,
-    author    = {De Coster, Mathieu and Van Herreweghe, Mieke and Dambre, Joni},
-    title     = {Isolated Sign Recognition From RGB Video Using Pose Flow and Self-Attention},
-    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops},
-    month     = {June},
-    year      = {2021},
-    pages     = {3441-3450}
-}
-
-@InProceedings{jiang2021sign,
-    author    = {Jiang, Songyao and Sun, Bin and Wang, Lichen and Bai, Yue and Li, Kunpeng and Fu, Yun},
-    title     = {Sign Language Recognition via Skeleton-Aware Multi-Model Ensemble},
-    journal   = {arXiv preprint arXiv:2110.06161},
-    year      = {2021}
-}
-```
