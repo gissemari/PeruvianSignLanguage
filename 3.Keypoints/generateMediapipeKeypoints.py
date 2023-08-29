@@ -11,9 +11,10 @@ import numpy as np
 import h5py
 import mediapipe as mp
 import pickle as pkl
+from tqdm import tqdm
 
 # Local imports
-sys.path.append('../../')
+sys.path.append('../')
 import utils.video as uv
 import utils.mediapipe_functions as mpf
 
@@ -21,41 +22,44 @@ import utils.mediapipe_functions as mpf
 parser = argparse.ArgumentParser(description='Use of Holistic Mediapipe model to generate a Dict')
 
 # File paths
-parser.add_argument('--inputPath', type=str, default="../../Data/AEC/Videos/SEGMENTED_SIGN/",
-                    help='relative path of images input.' + ' Default: ./Data/AEC/Videos/SEGMENTED_SIGN/')
-parser.add_argument('--dict_output', type=str, default="../../Data/AEC/",
-                    help='relative path of scv output set of landmarks.' +' Default: ./Data/Dataset/dict/')
-parser.add_argument('--keypoints_output', type=str, default="../../Data/AEC/AEC_mediapipe.hdf5",
-                    help='relative path of csv output set of landmarks.' + ' Default: ./Data/Dataset/keypoints/')
-parser.add_argument('--new_flow', type=bool, default=False)
+parser.add_argument('--inputPath', type=str, help='relative path of images input.')
+parser.add_argument('--dict_output', type=str, help='relative path of scv output set of landmarks.')
+parser.add_argument('--dict_path', type=str)
+parser.add_argument('--keypoints_output', type=str, help='relative patdict_pathh of csv output set of landmarks.')
+parser.add_argument('--load_h5', type=str, default='')
+parser.add_argument('--old_flow', action='store_true',)
 
 args = parser.parse_args()
 
-if args.new_flow:
+if args.old_flow == False:
 
     args.inputPath = os.path.normpath(args.inputPath)
-    args.dict_output = os.path.normpath(os.sep.join([args.dict_output,"dict.json"]))
+    
 
-    df_video_paths = uv.get_list_data(args.inputPath, ['mp4', 'mov'])
-    assert 1 == 2
+    df_video_paths = uv.get_list_from_json_dataset(args.dict_path)
+    print(df_video_paths)
     holistic = mpf.model_init()
 
+    if args.load_h5 != '':
+        prev_h5_file = h5py.File(args.load_h5, 'r')
+    
     h5_file = h5py.File(args.keypoints_output, 'w')
+
     LSP = []
 
-    video_errors = []
+    for _num, videoPath in tqdm(zip(df_video_paths['instance_id'], df_video_paths['path']), desc="Processing"):
 
-    for _num, videoPath in enumerate(df_video_paths['path']):
-        print(videoPath)
+        if prev_h5_file.get(f"{_num}") is not None and args.load_h5 != '':
+            h5_file.copy(f"{_num}", prev_h5_file.get(f"{_num}"))
+            continue
 
-        cap = cv2.VideoCapture(videoPath)
+        cap = cv2.VideoCapture(os.path.normpath(os.sep.join([args.dict_output, videoPath])))
         fps = cap.get(cv2.CAP_PROP_FPS)
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         if (cap.isOpened() is False):
-            print("Unable to read camera feed", videoPath)
-            video_errors.append(videoPath)
+            print("Unable to read camera feed", os.path.normpath(os.sep.join([args.dict_output, videoPath])))
             continue
 
         # Read video and collect results
@@ -83,45 +87,8 @@ if args.new_flow:
         h5_file[grupo_name]['label'] = label
         h5_file[grupo_name]['data'] = results
 
-        print(f"Video processed: {_num}")
-
-        glossInst = {
-            "image_dimention": {
-                "height": frame_height,
-                "witdh": frame_width
-            },
-            #"keypoints_iD": f"{num}",
-            #"image_path": pklImagePath,
-            "frame_end": results.shape[0],
-            "frame_start": 1,
-            "instance_id": _num,
-            "signer_id": -1,
-            "unique_name": unique_name,
-            "source": "LSP",
-            "split": "",
-            "variation_id": -1,
-            "source_video_name": os.sep.join(videoPath.split(os.sep)[-2:-1]),
-            "timestep_vide_name": os.path.splitext(os.path.basename(videoPath))[0]
-        }
-
-        # check if there is a gloss asigned with "word"
-        glossPos = -1
-
-        for indG, gloss in enumerate(LSP):
-            if(gloss["gloss"] == label):
-                glossPos = indG
-
-        # in the case word is in the dict
-        if glossPos != -1:
-            LSP[glossPos]["instances"].append(glossInst)
-        else:
-            glossDict = {"gloss": str(label),
-                        "instances": [glossInst]}
-            LSP.append(glossDict)
-
-        df = pd.DataFrame(LSP)
-        df.to_json(args.dict_output, orient='index', indent=2)
-
+    if args.load_h5 != '':
+        prev_h5_file.close()
     h5_file.close()
     mpf.close_model(holistic)
 
