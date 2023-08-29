@@ -132,4 +132,3 @@ def frame_process(holistic, frame):
     data = format_model_output(kpDict)
 
     return data
-
