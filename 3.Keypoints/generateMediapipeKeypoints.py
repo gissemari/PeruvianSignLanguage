@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(description='Use of Holistic Mediapipe model to
 parser.add_argument('--inputPath', type=str, help='relative path of images input.')
 parser.add_argument('--dict_output', type=str, help='relative path of scv output set of landmarks.')
 parser.add_argument('--dict_path', type=str)
-parser.add_argument('--keypoints_output', type=str, help='relative patdict_pathh of csv output set of landmarks.')
+parser.add_argument('--h5_output', type=str, help='relative patdict_pathh of csv output set of landmarks.')
 parser.add_argument('--load_h5', type=str, default='')
 parser.add_argument('--old_flow', action='store_true',)
 
@@ -33,9 +33,8 @@ args = parser.parse_args()
 
 if args.old_flow == False:
 
-    args.inputPath = os.path.normpath(args.inputPath)
+    args.dict_path = os.path.normpath(args.dict_path)
     
-
     df_video_paths = uv.get_list_from_json_dataset(args.dict_path)
     print(df_video_paths)
     holistic = mpf.model_init()
@@ -43,15 +42,17 @@ if args.old_flow == False:
     if args.load_h5 != '':
         prev_h5_file = h5py.File(args.load_h5, 'r')
     
-    h5_file = h5py.File(args.keypoints_output, 'w')
+    h5_file = h5py.File(args.h5_output, 'w')
 
     LSP = []
 
-    for _num, videoPath in tqdm(zip(df_video_paths['instance_id'], df_video_paths['path']), desc="Processing"):
-
-        if prev_h5_file.get(f"{_num}") is not None and args.load_h5 != '':
-            h5_file.copy(f"{_num}", prev_h5_file.get(f"{_num}"))
-            continue
+    for _num, _label, videoPath in tqdm(zip(df_video_paths['instance_id'], df_video_paths['label'], df_video_paths['path']), desc="Processing"):
+ 
+        if args.load_h5 != '':
+            if prev_h5_file.get(f"{_num}") is not None:
+                prev_h5_file.copy(f"{_num}", h5_file)
+                print("copied num: ", _num)
+                continue
 
         cap = cv2.VideoCapture(os.path.normpath(os.sep.join([args.dict_output, videoPath])))
         fps = cap.get(cv2.CAP_PROP_FPS)
@@ -76,7 +77,7 @@ if args.old_flow == False:
 
         results = np.array(results)
         # get the file name -> split the ext -> split by "_" -> upper
-        label = os.path.splitext(os.path.basename(videoPath))[0].split('_')[0].upper()
+        #label = os.path.splitext(os.path.basename(videoPath))[0].split('_')[0].upper()
         unique_name = os.sep.join(videoPath.split(os.sep)[-2:])
         
         # accumulate data
@@ -84,7 +85,7 @@ if args.old_flow == False:
         h5_file.create_group(grupo_name)
     
         h5_file[grupo_name]['video_name'] = unique_name
-        h5_file[grupo_name]['label'] = label
+        h5_file[grupo_name]['label'] = _label
         h5_file[grupo_name]['data'] = results
 
     if args.load_h5 != '':
@@ -132,10 +133,10 @@ else:
         print("Folder List:\n")
         print(folder_list)
 
-    #print(args.keypoints_output)
+    #print(args.h5_output)
     #uv.createFolder(args.img_output)
     uv.createFolder(args.dict_output)
-    uv.createFolder(args.keypoints_output) #,createFullPath=True)
+    uv.createFolder(args.h5_output) #,createFullPath=True)
 
     IdCount = 1
     LSP = []
@@ -152,7 +153,7 @@ else:
 
         cropVideoPath = videoFolderPath + videoFolderName
         uv.createFolder(cropVideoPath, createFullPath=True)
-        uv.createFolder(args.keypoints_output+'/'+videoFolderName, createFullPath=True)
+        uv.createFolder(args.h5_output+'/'+videoFolderName, createFullPath=True)
 
         for videoFile in videoFolderList:
             
@@ -166,7 +167,7 @@ else:
             videoSegFolderName = videoSegFolderName.split('/')
             videoSegFolderName = os.sep.join([*videoSegFolderName])
 
-            pklInitPath = os.sep.join([*args.keypoints_output.split('/')])
+            pklInitPath = os.sep.join([*args.h5_output.split('/')])
 
             pklKeypointsCompletePath = os.sep.join([pklInitPath,videoFolderName,word+'_'+str(IdCount)+'.pkl'])
 
