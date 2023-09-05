@@ -17,26 +17,42 @@ parser = argparse.ArgumentParser(description='To split the H5 in train/Val')
 
 parser.add_argument('--split', required=True, choices=['LSA64', 'AUTSL'], help='Elija una opción entre Random, LSA64 y AUTSL')
 parser.add_argument('--dataset_path', required=True, type=str)
-parser.add_argument('--word_list', required=True, type=str)
+parser.add_argument('--word_list', type=str)
 parser.add_argument('--dict_name', required=True, type=str)
 parser.add_argument('--h5_file', required=True, type=str)
+
+parser.add_argument('--no_word_list', action='store_true',)
+parser.add_argument('--use_version', action='store_true',)
 
 args = parser.parse_args()
 
 args.dataset_path = os.path.normpath(args.dataset_path)
 
-word_list = pd.read_csv(os.sep.join([args.dataset_path, args.word_list]), header=None)
-version = int(os.path.splitext(os.path.basename(args.word_list))[0].split('_')[-1][1:])
-print("Version:",version)
-
 dict_json = os.sep.join([args.dataset_path, args.dict_name])
-
 df_video_paths = uv.get_list_from_json_dataset(dict_json)
 classes = df_video_paths['label'].unique()
 
+if args.no_word_list:
+    word_list = pd.DataFrame(classes)
+    version_file = args.dict_name
+else:
+    word_list = pd.read_csv(os.sep.join([args.dataset_path, args.word_list]), header=None)
+    version_file = args.word_list
+
+if args.use_version:
+    version = int(os.path.splitext(os.path.basename(version_file))[0].split('_')[-1][1:])
+    print("Version:",version)
+
+
+
 ori_h5_file = h5py.File(os.sep.join([args.dataset_path, args.h5_file]), 'r')
-train_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe--V{version}-train.hdf5']), 'w')
-val_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe--V{version}-val.hdf5']), 'w')
+
+if args.use_version:
+    train_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe--V{version}-train.hdf5']), 'w')
+    val_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe--V{version}-val.hdf5']), 'w')
+else:
+    train_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe-train.hdf5']), 'w')
+    val_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe-val.hdf5']), 'w')
 
 if args.split =="AUTSL":
 
@@ -52,12 +68,15 @@ if args.split =="AUTSL":
     test_label["class"] = test_label[1].map(meaning)
 
     meaning = {v:k for (k,v) in enumerate(word_list[0])}
-
+    print(meaning)
     train_set = set(train_label[0])
     val_set = set(val_label[0])
     test_set = set(test_label[0])
 
-    assert not (set(word_list[0]) - set(classes)), "the word list not correspond with the dictionary json"
+    if args.no_word_list:
+        pass
+    else:
+        assert not (set(word_list[0]) - set(classes)), "the word list not correspond with the dictionary json"
 
     print(df_video_paths)
     for index, row in tqdm(df_video_paths.iterrows()):

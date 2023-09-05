@@ -2,6 +2,7 @@
 import argparse
 import os
 import sys
+import random
 
 # Third party imports
 import pandas as pd
@@ -18,6 +19,8 @@ parser.add_argument('--dict_output', type=str,  required=True, help='relative pa
 parser.add_argument('--json_name', type=str,  required=True,)
 
 parser.add_argument('--top', type=int, default=-1)
+parser.add_argument('--random', type=int, default=-1)
+parser.add_argument('--random_seed', type=int, default=1)
 parser.add_argument('--min_instances', type=int, default=-1)
 parser.add_argument('--max_instances', type=int, default=-1)
 parser.add_argument('--banned_words', action='store_true',)
@@ -37,11 +40,19 @@ dict_output = os.path.normpath(os.sep.join([args.dict_output,"dict.json"]))
 
 filtered_df = uv.get_list_from_json_dataset(dict_output)
 
+
+
 # Filter: Get the top # most frecuent labels
-if args.top >0:
+if args.top > 0:
     label_counts = filtered_df['label'].value_counts()
     top_labels = label_counts.head(args.top).index.tolist()
     filtered_df = filtered_df[filtered_df['label'].isin(top_labels)]
+# Filter: Get all the instances of a randomly # labels 
+elif args.random > 0:
+    unique_labels = filtered_df['label'].unique()
+    random.seed(args.random_seed)
+    random_labels = random.sample(list(unique_labels), 100)
+    filtered_df = filtered_df[filtered_df['label'].isin(random_labels)]
 
 # Filter: Keep labels with more than # instances
 if args.min_instances >= 0:
