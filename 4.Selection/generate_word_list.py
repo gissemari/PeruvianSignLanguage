@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser(description='generate a csv list of words in di
 parser.add_argument('--dict_input', type=str,  required=True, help='relative path of scv output set of landmarks.')
 parser.add_argument('--seed', type=int, default=42)
 #parser.add_argument('--csv_name', type=str, required=True)
+
 args = parser.parse_args()
 
 random_seed = args.seed
@@ -37,3 +38,4 @@ csv_output_path = os.sep.join([csv_dirname, csv_name])
 randomized_df.to_csv(csv_output_path, index=False, header=False)
 
 print(randomized_df)
+

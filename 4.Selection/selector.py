@@ -28,13 +28,11 @@ parser.add_argument('--selected_words', action='store_true',)
 
 args = parser.parse_args()
 
-
 def limit_instances(group, max_instances_numb):
     if len(group) > max_instances_numb:
         return group.head(max_instances_numb)
     else:
         return group
-
 
 dict_output = os.path.normpath(os.sep.join([args.dict_output,"dict.json"]))
 
