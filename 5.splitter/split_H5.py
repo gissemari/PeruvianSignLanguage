@@ -51,9 +51,7 @@ def generate_h5_metadata(h5_file, group_name):
 
 args.dataset_path = os.path.normpath(args.dataset_path)
 
-dict_json = os.sep.join([args.dataset_path, args.dict_name])
-df_video_paths = uv.get_list_from_json_dataset(dict_json)
-classes = df_video_paths['label'].unique()
+
 
 if args.no_word_list:
     word_list = pd.DataFrame(classes)
@@ -71,8 +69,8 @@ if args.use_version:
 ori_h5_file = h5py.File(os.sep.join([args.dataset_path, args.h5_file]), 'r')
 
 if args.use_version:
-    train_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe--V{version}-train.hdf5']), 'w')
-    val_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe--V{version}-val.hdf5']), 'w')
+    train_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(word_list)}--mediapipe--V{version}-train.hdf5']), 'w')
+    val_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(word_list)}--mediapipe--V{version}-val.hdf5']), 'w')
 else:
     train_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe-train.hdf5']), 'w')
     val_h5_file = h5py.File(os.sep.join([args.dataset_path, f'{args.split}--{len(classes)}--mediapipe-val.hdf5']), 'w')
@@ -91,6 +89,11 @@ idx_keypoints = sorted(df_keypoints['mp_indexInArray'].astype(int).values)
 
 
 if args.split =="AUTSL":
+    
+    dict_json = os.sep.join([args.dataset_path, args.dict_name])
+    df_video_paths = uv.get_list_from_json_dataset(dict_json)
+    classes = df_video_paths['label'].unique()
+
 
     train_label = pd.read_csv(os.sep.join([args.dataset_path, 'train_labels.csv']), header=None)
     val_label = pd.read_csv(os.sep.join([args.dataset_path, 'validation_labels.csv']), header=None)
