@@ -47,7 +47,7 @@ def generate_h5_metadata(h5_file, group_name):
     videoName = group.create_dataset('video_name', shape=(0,), maxshape=(None,), dtype=h5py.special_dtype(vlen=str))
     shape = group.create_dataset('shape', shape=(2,), maxshape=(None,), dtype='int')
 
-    return data, length, label, class_number, videoName, shape
+    return group
 
 args.dataset_path = os.path.normpath(args.dataset_path)
 
@@ -140,8 +140,8 @@ if args.split == "LSA64":
 
     new_meaning = {v: k for (k, v) in enumerate(word_list[0])}
     
-    train_data, train_length, train_label, train_class_number, train_videoName, train_shape = generate_h5_metadata(train_h5_file, 'LSA64')
-    val_data, val_length, val_label, val_class_number, val_videoName, val_shape = generate_h5_metadata(val_h5_file, 'LSA64')
+    train_group = generate_h5_metadata(train_h5_file, 'LSA64')
+    val_group = generate_h5_metadata(val_h5_file, 'LSA64')
     
     _shape = ()
     
@@ -157,20 +157,20 @@ if args.split == "LSA64":
         resized_data = resized_data.flatten()
 
         if numb == '005':
-            resize_dataset(val_data, resized_data)
-            resize_dataset(val_length, data.shape[0])
-            resize_dataset(val_label, label)
-            resize_dataset(val_class_number,new_meaning[label] )
-            resize_dataset(val_videoName, videoName)
+            resize_dataset(val_group['data'], resized_data)
+            resize_dataset(val_group['length'], data.shape[0])
+            resize_dataset(val_group['label'], label)
+            resize_dataset(val_group['class_number'],new_meaning[label] )
+            resize_dataset(val_group['videoName'], videoName)
         else:
-            resize_dataset(train_data, resized_data)
-            resize_dataset(train_length, data.shape[0])
-            resize_dataset(train_label, label )
-            resize_dataset(train_class_number, new_meaning[label])
-            resize_dataset(train_videoName, videoName)
+            resize_dataset(train_group['data'], resized_data)
+            resize_dataset(train_group['length'], data.shape[0])
+            resize_dataset(train_group['label'], label )
+            resize_dataset(train_group['class_number'], new_meaning[label])
+            resize_dataset(train_group['videoName'], videoName)
     
-    val_shape[:] = _shape
-    train_shape[:] = _shape
+    val_group['shape'][:] = _shape
+    train_group['shape'][:] = _shape
     
 
 
