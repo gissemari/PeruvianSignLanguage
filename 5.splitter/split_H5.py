@@ -150,7 +150,6 @@ if args.split == "LSA64":
         numb = os.path.basename(ori_h5_file[f"{instance_id}"]['video_name'][...].item().decode('utf-8')).split('.')[0].split('_')[-1] 
         label = ori_meaning[int(ori_h5_file[f"{instance_id}"]['label'][...])]
         videoName = ori_h5_file[f"{instance_id}"]['video_name'][...].item().decode('utf-8')
-        
         data = ori_h5_file[f"{instance_id}"]['data'][...]
         resized_data = data[:, :, idx_keypoints]
         _shape = resized_data.shape[1:]
@@ -161,13 +160,13 @@ if args.split == "LSA64":
             resize_dataset(val_group['length'], data.shape[0])
             resize_dataset(val_group['label'], label)
             resize_dataset(val_group['class_number'],new_meaning[label] )
-            resize_dataset(val_group['videoName'], videoName)
+            resize_dataset(val_group['video_name'], videoName)
         else:
             resize_dataset(train_group['data'], resized_data)
             resize_dataset(train_group['length'], data.shape[0])
             resize_dataset(train_group['label'], label )
             resize_dataset(train_group['class_number'], new_meaning[label])
-            resize_dataset(train_group['videoName'], videoName)
+            resize_dataset(train_group['video_name'], videoName)
     
     val_group['shape'][:] = _shape
     train_group['shape'][:] = _shape
